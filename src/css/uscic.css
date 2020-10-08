@@ -1,0 +1,1405 @@
+/*
+  ------------------------------------------------------------------------
+  Copyright (C) 2014 Bart Orriens, Albert Weerman
+
+  This library/program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+  ------------------------------------------------------------------------
+*/
+
+html,
+body {
+    height: 100%;
+    /* The html and body elements cannot have any padding or margin. */
+}
+
+
+.uscic-header {
+    height: 100px;
+    max-height: 100px;
+}
+
+
+/* Wrapper for page content to push down footer */
+.uscic-wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    /* Negative indent footer by its height */
+    margin: 0 auto -30px;
+    /* Pad bottom by footer height */
+}
+
+.uscic-wrap-with-sms {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    /* Negative indent footer by its height */
+    margin: 0 auto -30px;
+    /* Pad bottom by footer height */
+}
+
+.uscic-wrap-with-sms > .container {    
+    padding: 60px 15px 0;
+}
+
+.uscic-footer {
+    background-color: #FDB515;
+    color: white;
+    height: 30px;
+    max-height: 30px;
+    margin-bottom: 0px;
+}
+
+.uscic-formgroup {
+    margin-bottom: 0px;
+}
+
+.uscic-formgroup-inline {
+    margin-bottom: 0px;    
+}
+
+.uscic-formgroup-inline label {
+    display: table-cell;    
+}
+
+.uscic-formgroup-dkrfna-inline {
+    padding-left: 10px;
+    /*display: inline;
+    float:none;    */
+}
+
+.uscic-formgroup-dkrfna {
+    margin-bottom: 0px;
+    /*display: inline-block;
+    padding-left: 10px;*/ 
+    padding-top: 1px;
+}
+
+/* disabled elements display */
+.uscic-form-control[disabled] {
+    background-color: #ffffff;
+    cursor: default;
+}
+
+.uscic-form-control[readonly] {
+    background-color: #ffffff;
+    cursor: default;
+}
+
+/* active elements display */
+
+.uscic-inputgroup-pretext {
+    width: 100px; /* for placing it right in front of the input field */
+}
+
+.uscic-form-control {
+    min-width: 100px; /* min-width of input element */
+}
+
+.uscic-form-control-inline {
+    display: inline;
+    z-index: 99999;
+}
+
+.uscic-inputgroup-posttext {
+    white-space: nowrap;    
+    width: 1px; /* for placing it right behind the input field */
+    text-align: left;
+    float: none;
+    clear: both;
+}
+
+.uscic-inputaddon-pretext {
+    width: auto;
+}
+
+.uscic-inputaddon-posttext {    
+    white-space: nowrap;
+    text-align: left;
+    padding-top: 0px;
+    padding-bottom: 0px;   
+    /*display: inline; /* not for IE */
+}
+
+.uscic-inputaddon-posttext label {
+    margin-bottom: 0px;
+}
+
+/* uscic survey screen elements */
+
+.uscic-section-headers {
+
+}
+
+.uscic-section-footers {
+
+}
+
+.uscic-progressbar {
+
+}
+
+.uscic-question-first {
+    padding-bottom: 5px;
+}
+
+.uscic-question {
+    padding-top: 20px;
+    padding-bottom: 5px;
+}
+
+.uscic-question-table-row {
+
+}
+
+.uscic-question-table-single-row {
+
+}
+
+.uscic-answer {
+
+}
+
+.uscic-answer-inline {
+    display: inline;
+    float: left;
+    clear: both;
+}
+
+.uscic-mainpanel {
+
+}
+
+
+.uscic-buttonpanel {
+    margin-top: 30px;
+}
+
+/* error display */
+.uscic-help-block {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #c09853;
+    font-weight: bold;
+}
+
+/* USCIC INPUT ELEMENTS */
+
+.uscic-horizontal-slider {
+    margin-top: 20px;
+    margin-bottom: 20px;    
+}
+
+.uscic-vertical-slider {
+
+}
+
+.uscic-horizontal-slider-textbox {
+
+}
+
+.uscic-vertical-slider-textbox {
+
+}
+
+.uscic-vertical-slider-textbox input {
+    min-width: 100px;
+    width: 100px;
+    max-width: 150px;
+}
+
+.uscic-horizontal-slider-textbox input {
+    min-width: 100px;
+    width: 100px;
+    max-width: 150px;
+}
+
+.uscic-slider-horizontal {
+
+}
+
+.uscic-slider-vertical {
+
+}
+
+.uscic-range input {
+    min-width: 100px; 
+    width: 100px; 
+    max-width: 100px;
+}
+
+.uscic-string input {
+    min-width: 300px;
+    width: 300px; 
+    max-width: 300px;
+}
+
+.uscic-integer input {
+    min-width: 100px;
+    width: 100px; 
+    max-width: 100px;
+}
+
+.uscic-double input {
+    min-width: 100px;
+    width: 100px; 
+    max-width: 100px;
+}
+
+.uscic-calendar {
+
+}
+
+.uscic-radio {
+    /*max-width: 150px;*/
+    /*cursor: pointer;*/
+}
+
+.uscic-radiobutton {
+    /*max-width: 150px;*/
+}
+
+.uscic-radiobutton label {
+    /*max-width: 150px;*/
+    display: inline-block;
+}
+
+.uscic-radio-custom {
+    max-width: 600px;
+    cursor: pointer;
+}
+
+.uscic-radio-vertical-textbox {
+
+}
+
+.uscic-radio-horizontal-textbox {
+
+}
+
+.uscic-radio-custom-textbox {
+
+}
+
+.uscic-radio-textbox {
+
+}
+
+.uscic-radio-textbox input {
+    min-width: 100px;
+    width: 100px;
+    max-width: 150px;
+}
+
+.uscic-singledropdown {
+    margin-bottom: 10px;
+}
+
+.uscic-checkbox {
+
+}
+
+.uscic-checkbox-box {
+    /*max-width: 150px;*/
+}
+
+.uscic-checkbox-box label {
+    /*max-width: 150px;*/
+    display: inline-block;
+    /*vertical-align: middle;*/
+}
+
+.uscic-checkbox-custom {
+    /*max-width: 150px;*/
+    cursor: pointer;
+}
+
+.uscic-checkbox-vertical-textbox {
+    margin-top: 20px;
+}
+
+.uscic-checkbox-horizontal-textbox {
+    margin-top: 20px;
+}
+
+.uscic-checkbox-custom-textbox {
+    margin-top: 20px;
+}
+
+.uscic-checkbox-textbox {
+
+}
+
+.uscic-checkbox-textbox input {
+    min-width: 100px;
+    width: 100px;
+    max-width: 150px;
+}
+
+.uscic-multidropdown {
+    margin-bottom: 10px;
+}
+
+.uscic-date {
+
+}
+
+.uscic-time {
+
+}
+
+.uscic-datetime {
+
+}
+
+.uscic-time input {
+    min-width: 100px;     
+}
+
+.uscic-date input {
+    min-width: 100px;
+}
+
+.uscic-datetime input {
+    min-width: 200px;
+}
+
+.uscic-open {
+    min-width: 600px;
+    width: 600px;
+    max-width: 600px;
+    height: 100px;
+}
+
+.uscic-open textarea {
+    //min-width: 100%;
+    width: 600px;
+    //max-width: auto;
+    height: 100px;
+}
+
+.uscic-remarkarea textarea {
+    min-width: 400px;
+    width: 400px;
+    max-width: auto;
+    height: 200px;
+}
+
+/* uscic inline input elements */
+
+.uscic-horizontal-slider-inline {
+    margin-top: 20px;
+    margin-bottom: 20px;    
+}
+
+.uscic-vertical-slider-inline {
+
+}
+
+.uscic-buttonpanel-inline {
+
+}
+
+.uscic-range-inline {
+
+}
+
+.uscic-string-inline {
+    display: inline;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.428571429;
+    color: #555555;
+    vertical-align: middle;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;    
+}
+
+.uscic-integer-inline {
+    display: inline;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.428571429;
+    color: #555555;
+    vertical-align: middle;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.uscic-double-inline {
+
+}
+
+.uscic-calendar-inline {
+
+}
+
+.uscic-radiobutton-inline {
+
+}
+
+.uscic-radio-table {
+    cursor: pointer;
+}
+
+.uscic-singledropdown-inline {
+    height: 24px;
+}
+
+.uscic-checkbox-inline {
+
+}
+
+.uscic-checkbox-table {
+    cursor: pointer;
+    padding: 0px;
+}
+
+.uscic-multipledropdown-inline {
+    height: 24px;
+}
+
+.uscic-date-inline {
+
+}
+
+.uscic-time-inline {
+
+}
+
+.uscic-datetime-inline {
+
+}
+
+.uscic-open-inline {
+    display: inline;
+}
+
+
+/* USCIC BUTTONS */
+
+#uscic-backbutton {
+
+}
+
+#uscic-nextbutton {
+
+}
+
+#uscic-updatebutton {
+
+}
+
+#uscic-dkbutton {
+
+}
+
+.uscic-dkbutton-active {
+    background-color: #428BCA;
+}
+
+.btn.btn-default.uscic-dkbutton-active {
+    background-color: #428BCA;
+}
+
+#uscic-rfbutton {
+
+}
+
+.uscic-rfbutton-active {
+    background-color: #428BCA;
+}
+
+.btn.btn-default.uscic-rfbutton-active {
+    background-color: #428BCA;
+}
+
+#uscic-nabutton {
+
+}
+
+#uscic-nabutton-active {
+    background-color: #428BCA;
+}
+
+.btn.btn-default.uscic-nabutton-active {
+    background-color: #428BCA;
+}
+
+.uscic-remarkbutton-active {
+    background-color: #428BCA;
+}
+
+#uscic-remarkbutton {
+
+}
+
+.btn.btn-default.uscic-remarkbutton-active {
+    background-color: #428BCA;
+}
+
+/* TABLE STYLES */
+
+/* CUSTOM */
+
+.uscic-table-custom-label {
+    margin-bottom: 0px;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+/* DISABLED RADIO BUTTON LABELS */
+.uscic-radio-label.disabled {
+    cursor: not-allowed;
+}
+
+.uscic-radio-label-first-label.disabled {
+    cursor: not-allowed;
+}
+
+.uscic-table-enumerated-label.disabled {
+    cursor: not-allowed;
+}
+
+.uscic-table-row-cell-enumerated-horizontal.disabled {
+    cursor: not-allowed;
+}
+
+.uscic-table-row-cell-enumerated.disabled {
+    cursor: not-allowed;
+}
+
+.radio.uscic-radio-label-first-radio.disabled input {
+    cursor: not-allowed;
+}
+
+.uscic-table-row-cell-setofenumerated-horizontal.disabled {
+    cursor: not-allowed;
+}
+
+.uscic-table-setofenumerated-label.disabled {
+    cursor: not-allowed;
+}
+
+.uscic-checkbox-label.disabled {
+    cursor: not-allowed;
+}
+
+.uscic-checkbox-label-first-label.disabled {
+    cursor: not-allowed;
+}
+
+.checkbox.uscic-checkbox-label-first-checkbox.disabled input {
+    cursor: not-allowed;
+}
+
+.uscic-radio-horizontal-table {
+    cursor: pointer;
+}
+
+.uscic-table-enumerated-label {
+    cursor: pointer;
+}
+
+/* ENUMERATED VERTICAL LABEL FIRST */
+
+.uscic-radio-label-first-radio {
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
+.uscic-radio-label-first-label {
+    display: inline;
+    font-weight: normal;
+    cursor: pointer;
+    margin-bottom: 0px;
+    font-size: 14px;
+    line-height: 1.42857;
+    padding-right: 10px;
+}
+
+.uscic-radiobutton label {
+    font-weight: normal;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.uscic-checkbox label {
+    font-weight: normal;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.uscic-radio-label-first-radio input[type="radio"] {
+    cursor: pointer;
+    margin-top: 1px;
+}
+
+.uscic-enumerated-column-padding {
+    min-width: 30px;
+    width: 30px;
+    max-width: 30px;
+}
+
+.uscic-table-row-cell-enumerated .radio {
+    margin-bottom: 0px;
+    margin-top: 5px;
+}
+
+.uscic-checkbox-box input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.uscic-table-row-cell-enumerated .checkbox {
+    margin-bottom: 0px;
+    margin-top: 5px;
+}
+
+/* SET OF ENUMERATED VERTICAL LABEL FIRST */
+
+.uscic-checkbox-label-first-checkbox {
+    /*margin-bottom: 2px;*/
+    cursor: pointer;
+    margin-top: 2px;
+}
+.uscic-checkbox-label-first-label {
+    display: inline;
+    font-weight: normal;
+    cursor: pointer;
+    margin-bottom: 0px;
+    font-size: 14px;
+    line-height: 1.42857;
+    padding-right: 10px;
+}
+
+.uscic-checkbox-label-first-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    margin-top: 1px;
+}
+
+/* ENUMERATED HORIZONTAL DISPLAY OF SINGLE QUESTION */
+.uscic-table-enumerated-horizontal {
+    width: 100%;
+}
+
+.uscic-table-row-enumerated {
+
+}
+
+.uscic-table-row-header-enumerated {
+
+}
+
+.uscic-table-row-footer-enumerated {
+
+}
+
+.uscic-table-row-enumerated-horizontal {
+    height: 60px;
+}
+
+.uscic-enumerated-horizontal {
+    display: block;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    padding-left: 20px;
+    vertical-align: middle;
+}
+
+.uscic-table-row-cell-enumerated-horizontal {
+    padding: 0px;
+    cursor: pointer;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-enumerated-horizontal div {
+    height: 100%;
+    vertical-align: middle;
+}
+
+/* SET OF ENUMERATED HORIZONTAL DISPLAY OF SINGLE QUESTION */
+.uscic-table-setofenumerated-horizontal {
+    
+}
+
+.uscic-setofenumerated-horizontal {
+    display: block;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    padding-left: 20px;
+    vertical-align: middle;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.uscic-table-row-enumerated-horizontal {
+    height: 60px;
+}
+
+.uscic-table-row-cell-setofenumerated-horizontal {
+    padding: 0px;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+.uscic-table-row-cell-setofenumerated div {
+    height: 100%;
+    vertical-align: middle;
+}
+
+.uscic-table-row-header-setofenumerated {
+
+}
+
+.uscic-table-row-footer-setofenumerated {
+
+}
+
+/* ENUMERATED TABLE */
+.uscic-table-enumerated {
+    padding-top: 25px;
+    margin-bottom: 0.000001px;
+    width: 100%;
+}
+
+.uscic-table-enumerated-label {
+    margin-bottom: 0px;
+    vertical-align: top; /* for safari vertical alignment in 'middle' */
+}
+
+.uscic-table-setofenumerated-label {
+    margin-bottom: 0px;
+    vertical-align: top; /* for safari vertical alignment in 'middle' */
+}
+
+.uscic-table-row-cell-enumerated {
+    padding: 0px;
+    cursor: pointer;
+}
+
+.uscic-table-row-cell-enumerated div {
+    height: 100%;
+    vertical-align: middle;
+}
+
+.uscic-table-row-cell-setofenumerated {
+    padding: 0px;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+.uscic-table-row-cell-setofenumerated div {
+    height: 100%;
+    vertical-align: middle;
+}
+
+.uscic-table-row-header-enumerated{
+
+}
+
+.uscic-table-row-enumerated{
+
+}
+
+.uscic-table-row-cell-header-enumerated {
+
+}
+
+.uscic-table-row-question-cell-enumerated {
+    padding: 0px;
+    cursor: default;
+}
+
+/* use this to override bootstrap */
+.table tbody > tr > td.uscic-table-row-cell-enumerated {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-enumerated div {
+    height: 100%;
+    vertical-align: middle;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-setofenumerated {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-setofenumerated div {
+    height: 100%;
+    vertical-align: middle;
+}
+
+/* use this to override bootstrap */
+.table tbody > tr > td.uscic-table-row-question-cell-enumerated {
+    cursor: default;
+    vertical-align: middle;
+}
+
+/* use this to override bootstrap */
+.table thead > tr > th.uscic-table-row-cell-header-enumerated {
+    font-size: 14px;
+    vertical-align: top;
+}
+
+
+
+/* other */
+.uscic-table-row {
+
+}
+.uscic-table-row-cell {
+    padding: 0px;
+}
+
+
+/* SIMPLE TABLE */
+.uscic-table-simpletable {
+
+}
+
+.uscic-table-row-simpletable{
+
+}
+
+.uscic-table-row-question-cell-simpletable {
+
+}
+
+.uscic-table-row-cell-simpletable {
+
+}
+
+/* use this to override bootstrap */
+.table tbody > tr > td.uscic-table-row-cell-simpletable {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* use this to override bootstrap */
+.table tbody > tr > td.uscic-table-row-question-cell-simpletable {
+
+}
+
+
+/* SINGLE COLUMN */
+.uscic-table-singlecolumn {
+
+}
+
+.uscic-table-row-singlecolumn{
+
+}
+
+.uscic-table-row-cell-singlecolumn {
+
+}
+
+/* use this to override bootstrap */
+.table tbody > tr > td.uscic-table-row-cell-singlecolumn {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+
+/* MULTI COLUMN */
+.uscic-table-multicolumn {
+
+}
+
+.uscic-table-row-multicolumn{
+
+}
+
+.uscic-table-row-cell-multicolumn {
+
+}
+
+/* use this to override bootstrap */
+.table tbody > tr > th.uscic-table-row-cell-multicolumn {
+    vertical-align: top;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-multicolumn {
+    cursor: default;
+    vertical-align: middle;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-multicolumn div.form-group {
+    margin-bottom: 7px;
+    margin-top: 7px;
+    margin-left: 25%;
+}
+
+
+/* SINGLE ROW */
+.uscic-table-singlerow {
+
+}
+
+.uscic-table-row-singlerow{
+
+}
+
+.uscic-table-row-question-cell-singlerow {
+
+}
+
+.uscic-table-row-cell-singlerow {
+    vertical-align: top;
+}
+
+/* use this to override bootstrap */
+.table tbody > tr > th.uscic-table-row-cell-singlecolumn {
+    vertical-align: top;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-singlecolumn {
+    cursor: default;
+    vertical-align: top;
+}
+
+/* generic */
+
+/* use this to override bootstrap */
+.table thead > tr > th.uscic-table-row-cell-header {
+    font-size: 14px;
+    vertical-align: top;
+}
+
+.uscic-table-row-cell-form-group {
+    margin-bottom: 0px;
+    height: 0px;
+}
+
+/* fix for input text box width */
+.input-group .form-control {
+
+    width: 0;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .input-group .form-control {
+        width: 100%; 
+    }
+}
+
+
+/* ERROR PLACEMENT */
+.uscic-errors {
+
+}
+
+
+/* display in other language */
+.outershield {
+    position: relative;
+}
+
+.shield {
+
+    display: block;
+
+    /* Display it on the layer with index 1001.
+       Make sure this is the highest z-index value
+       used by layers on that page */
+    z-index:1001;
+
+    /* make it cover the whole screen */
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+
+    /* make it white but fully transparent */
+    background-color: white;
+    opacity:.10;
+    filter: alpha(opacity=10);
+}
+
+
+/* test mode */
+.uscic-inline-editable-icon {    
+    cursor: pointer;    
+    /*position: absolute;
+    top: 0px;
+    right: 0px;*/
+}
+
+.uscic-inline-editable {
+    cursor: url(../images/pencil.png), auto;    /* TODO: PROVIDING SOMETHING LIKE 2 2 AUTO TO CENTER CURSOR IS NOT WORKING */
+}
+
+th.uscic-table-row-cell-footer-enumerated {
+    font-weight: normal;
+}
+
+th.uscic-table-row-cell-header-enumerated {
+    font-weight: normal;
+}
+
+/* responsive tables fix first column in place */
+.table-responsive tr td:first-child {
+    position: absolute;
+}
+
+.table-responsive tr th:first-child {
+    position: absolute;
+}
+
+/* slider and textarea on mobile and tablet */
+@media all and (max-width: 29.9999em) {
+    
+    .table tbody > tr > td.uscic-table-row-question-cell-enumerated {
+        font-weight: bold;
+    }
+    
+    .table tbody > tr > td.uscic-table-row-cell-enumerated {
+        padding-top: 15px;
+        padding-bottom: 0px;
+    }
+    
+    .tablesaw-cell-label {
+        font-weight: normal;
+        padding-top: 15px;
+        padding-bottom: 0px;
+    }
+    
+    .table tbody > tr:not(:first-child) > td.uscic-table-row-question-cell-enumerated {
+        /*padding-top: 30px;*/
+    }
+    
+    .table tbody > tr:not(:first-child) > td.uscic-table-row-cell-question-multicolumn {
+        /*padding-top: 30px;*/
+    }
+    
+    .slider.slider-horizontal {
+        max-width: 200px;
+        margin-left: 10px;
+    }
+    
+    .sliderlabels {
+        min-width: 230px;
+        width: 230px;
+        max-width: 230px;
+    }
+    
+    .slider-tick-label-container {
+        min-width: 260px;
+        width: 260px;
+        max-width: 260px;
+    }
+    
+    .slider-tick {
+        max-width: 10px;
+    }
+    
+    .slider-tick-label {
+        max-width: 30px;
+        font-size: 11px;
+    }
+    
+    .uscic-open {
+        min-width: 200px;
+        width: 200px;
+        max-width: 200px;
+        height: 100px;
+    }
+    
+    .uscic-open textarea {
+        //min-width: 200px;
+        width: 200px;
+        //max-width: 200px;
+        height: 100px;
+    }
+    
+    .uscic-remarkarea textarea  {
+        min-width: 100%;
+        width: 200px;
+        max-width: 100%;
+        height: 100px;
+    }
+    
+    .uscic-string input {
+        min-width: 100px;
+        width: 150px; 
+        max-width: 150px;
+    }
+    
+    .uscic-string input.uscic-form-control-inline {
+        min-width: 100px;
+        width: 150px; 
+        max-width: 150px;
+    }
+    
+    .uscic-formgroup-inline textarea {
+        min-width: 100px;
+        width: 150px; 
+        max-width: 150px;
+    }
+    
+    #progressspan {
+        background-color: #d9edf7;
+        color: #3a87ad;
+        vertical-align: middle;
+        padding: 6px;
+        font-size: 12px;
+        height: 30px;
+    }
+    
+    .uscic-button {
+        font-size: 12px;
+    }    
+}
+
+@media all and (min-width: 30.0000em) and (max-width: 39.9375em) {
+    
+    .table tbody > tr > td.uscic-table-row-question-cell-enumerated {
+        font-weight: bold;
+    }
+    
+    .table tbody > tr > td.uscic-table-row-cell-enumerated {
+        padding-top: 15px;
+        padding-bottom: 0px;
+    }
+    
+    .tablesaw-cell-label {
+        font-weight: normal;
+        padding-top: 15px;
+        padding-bottom: 0px;
+    }
+    
+    .table tbody > tr:not(:first-child) > td.uscic-table-row-question-cell-enumerated {
+        padding-top: 30px;
+    }
+    
+    .table tbody > tr:not(:first-child) > td.uscic-table-row-cell-question-multicolumn {
+        padding-top: 30px;
+    }
+    
+    .slider.slider-horizontal {
+        max-width: 350px;
+        margin-left: 10px;
+    }
+    
+    .sliderlabels {
+        min-width: 370px;
+        width: 370px;
+        max-width: 370px;
+    }
+    
+    .slider-tick-label-container {
+        min-width: 370px;
+        width: 370px;
+        max-width: 370px;
+    }
+    
+    .slider-tick {
+        max-width: 15px;
+    }
+    
+    .slider-tick-label {
+        max-width: 35px;
+    }
+    
+    .uscic-open {
+        min-width: 400px;
+        width: 400px;
+        max-width: 400px;
+        height: 100px;
+    }
+    
+    .uscic-open textarea {
+        /*min-width: 100%;*/
+        width: 400px;
+        /*max-width: 100%;*/
+        height: 100px;
+    }
+    
+    .uscic-remarkarea textarea  {
+        min-width: 100%;
+        width: 400px;
+        max-width: 100%;
+        height: 100px;
+    }  
+    
+    #progressspan {
+        background-color: #d9edf7;
+        color: #3a87ad;
+        vertical-align: middle;
+        padding: 5px;
+        font-size: 14px;
+        height: 30px;
+    }
+    
+    .uscic-button {
+        font-size: 14px;
+    } 
+}
+
+@media all and (min-width: 39.9375em) {
+    
+    .table thead > tr > th.uscic-table-row-cell-header-enumerated {
+        font-weight: bold;
+    }
+    
+    .slider.slider-horizontal {
+        max-width: 396px;
+        margin-left: 10px;
+    }
+    
+    .sliderlabels {
+        min-width: 416px;
+        width: 416px;
+        max-width: 416px;
+    }
+    
+    .slider-tick-label-container {
+        min-width: 416px;
+        width: 416px;
+        max-width: 416px;
+    }
+    
+    .slider-tick {
+        max-width: 20px;
+    }
+    
+    .slider-tick-label {
+        max-width: 39.6px;
+    }
+    
+    .uscic-open {
+        min-width: 600px;
+        width: 600px;
+        max-width: 600px;
+        height: 100px;
+    }
+    
+    .uscic-open textarea {
+        /*min-width: 100%;*/
+        width: 600px;
+        /*max-width: 100%;*/
+        height: 100px;
+    }
+    
+    .uscic-remarkarea textarea  {
+        min-width: 100%;
+        width: 550px;
+        max-width: 100%;
+        height: 100px;
+    }  
+    
+    #progressspan {
+        background-color: #d9edf7;
+        color: #3a87ad;
+        vertical-align: middle;
+        padding: 5px;
+        font-size: 14px;
+        height: 30px;
+    }
+    
+    .uscic-button {
+        font-size: 14px;
+    } 
+}
+
+.slider-horizontal {
+  background-color: white;
+  border: 0px solid white;
+}
+
+.uscic-horizontal-slider {
+  background-color: white;
+  border: 0px solid white;
+}
+
+.uscic-horizontal-slider label {
+  background-color: white;
+  border: 0px solid white;    
+}
+
+/* fix for inline horizontal display in table to ensure horizontal centering in table cell */
+.uscic-table-row-cell-enumerated-horizontal label {
+    display: block;    
+}
+
+/* table saw */
+
+@media (max-width: 39.9375em) {
+
+    /* margin on top */
+    .tablesaw-stack tbody tr:not(:first-child) td:first-child {
+        margin-top: 30px;
+    }
+
+    /* question color text */
+    .tablesaw-stack tbody tr td:first-child, .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-question-cell-enumerated,
+    .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-cell-question-multicolumn {
+        background-color: #c7e1fb;
+    }
+    
+    .tablesaw-stack tbody tr td {
+        min-width: 100%;
+    }
+    
+    .tablesaw-stack tbody tr td.uscic-table-row-cell-enumerated {
+        min-width: 100%;
+    }
+    
+    .table tbody > tr > td.uscic-table-row-cell-multicolumn div.form-group {
+        margin-bottom: 7px;
+        margin-top: 7px;
+        margin-left: 0%;
+    }
+}
+
+
+/* formatting */
+.uscic-bold {
+    font-weight: bold;
+}
+
+.uscic-italic {
+    font-style: italic;
+}
+
+.uscic-underline {
+    text-decoration: underline;
+}
+
+/* drop down headers */
+ul.dropdown-menu li.dropdown-header {
+   
+    font-weight: bold;
+    font-size: 14px;
+    color: black;
+
+}
+
+.table tbody > tr > td.uscic-table-row-cell-enumerated.disabled {
+    cursor: not-allowed;
+}
+
+.table tbody > tr > td.uscic-table-row-cell-setofenumerated.disabled {
+    cursor: not-allowed;
+}
+

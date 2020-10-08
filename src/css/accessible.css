@@ -1,0 +1,22 @@
+.nubis-accessible-hidden {
+    position:absolute;
+    left:-10000px;
+    top:auto;
+    width:1px;
+    height:1px;
+    overflow:hidden;}
+
+.nubis-accessible-fieldset { 
+    border: none;
+}
+
+.nubis-accessible-legend {
+    margin-top: 15px;
+    padding: 0;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.nubis-accessible-legend-hidden {
+    display: none;
+}

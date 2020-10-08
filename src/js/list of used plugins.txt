@@ -1,0 +1,297 @@
+/* JAVASCRIPT BASED */
+
+Bootstrap-slider:
+
+License: Apache License, Version 2.0
+Location: https://github.com/seiyria/bootstrap-slider
+Version: 1.0.1
+
+
+Codemirror:
+
+License: Custom (no restrictions on usage)
+Location: http://codemirror.net/
+Version: 3.19
+
+
+Bootstrap-colorpicker:
+
+License: Apache License, Version 2.0
+Location: http://mjolnic.github.io/bootstrap-colorpicker/
+
+
+Jquery.cookie:
+
+License: MIT license
+Location: https://github.com/carhartl/jquery-cookie
+Version: 1.4.1
+
+
+Jquery.appendgrid:
+
+License: Dual licensed under the LGPL (http://www.gnu.org/licenses/lgpl.html) and MIT (http://www.opensource.org/licenses/mit-license.php) licenses.
+Location: https://appendgrid.apphb.com/
+Version: 1.5.0
+
+
+Datatables:
+
+License: MIT license (http://datatables.net/license)
+Location: http://www.datatables.net
+Version: 1.10.2
+
+
+Datatables bootstrap:
+
+License: MIT license (http://datatables.net/license)
+Location: http://www.datatables.net
+Version: 1.10.2
+
+
+Bootstrap-datetimepicker:
+
+License: MIT license
+Location: https://github.com/Eonasdan/bootstrap-datetimepicker
+Version: 4.14.30
+
+
+Moment.js:
+
+License: MIT license
+Location: momentjs.com
+Version : 2.8.1
+
+
+Jquery.dirtyform:
+
+License: MIT license
+Location: https://github.com/snikch/jquery.dirtyforms
+Version: 1.2.0
+
+
+Jquery.dirtyforms.helpers.tinymce (bundled with Jquery.dirtyform for TinyMCE integration):
+
+License: Custom, no restrictions
+Location: https://github.com/snikch/jquery.dirtyforms
+Version: 1.2.0
+
+
+Bootstrap-formhelpers:
+
+License: Apache 2.0
+Location: http://bootstrapformhelpers.com
+Version: 2.3.0
+
+
+Highcharts:
+
+License: www.highcharts.com/license. Free for academic/non-profit usage.
+Location: www.highcharts.com
+Version: 4.0.3
+
+
+Highchart Exporting:
+
+License: www.highcharts.com/license. Free for academic/non-profit usage.
+Location: www.highcharts.com
+Version: 4.0.3
+
+
+Highchart Export-csv:
+
+License: MIT license
+Location: https://github.com/highcharts/export-csv
+Version: not provided
+
+
+Jquery-inputmask:
+
+License: MIT license
+Location: http://github.com/RobinHerbots/jquery.inputmask
+Version: Not provided
+
+
+Jquery.textcomplete:
+
+License: MIT license (https://github.com/yuku-t/jquery-textcomplete/blob/master/LICENSE)
+Location: https://github.com/yuku-t/jquery-textcomplete
+Version: Not provided
+
+
+JqueryUI:
+
+License: MIT license
+Location: http://jqueryui.com
+Version: 1.10.4
+
+
+Bootstrap-session-timeout:
+
+License: MIT license
+Location: www.orangehilldev.com
+Version: Not provided
+
+
+Jquery.sidr:
+
+License: MIT license
+Location: https://github.com/artberri/sidr
+Version: Not provided
+
+
+Bootstrap-switch:
+
+License: Apache License, Version 2.0
+Location: http://www.bootstrap-switch.org
+Version: 3.2.2
+
+
+TinyMCE:
+
+License: GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1
+Location: https://www.tinymce.com/
+Version: 4.2.1
+
+
+Jquery.validate:
+
+License: MIT license
+Location: http://bassistance.de/jquery-plugins/jquery-plugin-validation/
+Version: 1.11.1
+
+
+Bootstrap-wysiwyg:
+
+License: MIT license
+Location: http://github.com/mindmup/bootstrap-wysiwyg
+Version: Not provided
+
+
+Jquery-hotkeys (standalone and bundled with Bootstrap-wysiwyg):
+
+License: Dual licensed under the MIT or GPL Version 2 licenses
+Location: https://github.com/jeresig/jquery.hotkeys
+Version: Not provided
+
+
+LZ-string:
+
+License: WTFPL, Version 2
+Location: http://pieroxy.net/blog/pages/lz-string/testing.html
+Version: 1.4.4
+
+
+Javascript Only Barcode_Reader:
+
+License: MIT license
+Location: https://github.com/EddieLa/BarcodeReader
+Version: 1.0
+
+
+TabWindowVisibilityManager:
+
+License: Custom, no restrictions
+Location: http://greensock.com/forums/topic/9059-cross-browser-to-detect-tab-or-window-is-active-so-animations-stay-in-sync-using-html5-visibility-api/
+Version: 1.0
+
+
+Bootstrap:
+
+License: Apache License, Version 2.0
+Location: http://getbootstrap.com/
+Version: 3.0.0
+Additional scripts: affix.js, alert.js, button.js, carousel.js, collapse.js, dropdown.js, modal.js, popover.js, scrollspy.js, tab.js, tooltip.js, transition.js
+
+
+Bootstrap-select:
+
+License: MIT license
+Location: http://silviomoreto.github.io/bootstrap-select
+Version: 1.6.3
+
+
+Hover-dropdown:
+
+License: MIT license
+Location: https://github.com/CWSpear/bootstrap-hover-dropdown
+Version: not provided
+
+
+Jquery.calc:
+
+License: Not provided
+Location: https://github.com/zoul0813/jquery-calc
+Version: 2.0.0
+
+
+jsTimezoneDetect:
+
+License: MIT license
+Location: http://pellepim.bitbucket.org/jstz/
+Version: 1.0.5
+
+
+Modernizr:
+
+License: Available under the BSD and MIT licenses: www.modernizr.com/license/
+Location: www.modernizr.com
+Version: 2.6.2
+
+
+Mootools:
+
+License: MIT license
+Location: http://mootools.net/
+Version: 1.4.5
+
+
+Underscore:
+
+License: Custom, no restrictions (https://github.com/jashkenas/underscore/blob/master/LICENSE)
+Location: https://github.com/jashkenas/underscore
+Version: Not provided
+
+
+Bootstrap-calendar:
+
+License: MIT license (https://github.com/Serhioromano/bootstrap-calendar/blob/master/LICENSE)
+Location: https://github.com/Serhioromano/bootstrap-calendar
+Version: 0.1
+Additional scripts: app.js, appsurvey.js
+
+
+JQuery fileupload:
+
+License: MIT license
+Location: https://blueimp.github.io/jQuery-File-Upload/
+Version: 5.42.2
+
+
+Calculator.js:
+
+License: Not provided
+Location: http://codepen.io/GianNipitella/pen/vNjqyE
+Version: Not provided
+
+
+/* PHP BASED */
+
+PHPParser:
+
+License: Custom, no restrictions
+Location: https://github.com/nikic/PHP-Parser
+Version: Not provided
+
+
+BrowserDetect:
+
+License: MIT license
+Location: https://github.com/sinergi/php-browser-detector
+Version: Not provided
+
+
+MobileDetecT:
+
+License: MIT license with some custom add-on text
+Location: https://github.com/serbanghita/Mobile-Detect
+Version: 2.8.17
