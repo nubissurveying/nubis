@@ -117,7 +117,7 @@ if (loadvar(POST_PARAM_SMS_AJAX) != SMS_AJAX_CALL) { // not sms ajax call
             $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = 1;
         }
         else {
-            //echo 'hhhmmm';
+
             $_SESSION['REQUEST_IN_PROGRESS'] = 1;
             $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = null;
             unset($_SESSION['PREVIOUS_REQUEST_IN_PROGRESS']);

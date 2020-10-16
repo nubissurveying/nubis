@@ -399,15 +399,13 @@ class DisplaySysAdmin extends Display {
 
         $survey = new Survey($_SESSION['SUID']);
         $returnStr = $this->showSysAdminHeader(Language::messageSMSTitle());
-//echo "----";
         $returnStr .= '<div id="wrap">';
         $returnStr .= $this->showNavBar();
         $returnStr .= '<div class="container">';
-//echo "----";
         $returnStr .= '<ol class="breadcrumb">';
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.surveys'), Language::headerSurveys()) . '</li>';
         $returnStr .= '<li>' . $survey->getName() . '</li>';
-//echo "----";
+        
         if ($_SESSION['VRFILTERMODE_SURVEY'] == 0) {
             $returnStr .= '<li class="active">' . Language::headerSections() . '</li>';
         } else if ($_SESSION['VRFILTERMODE_SURVEY'] == 1) {
@@ -449,7 +447,7 @@ class DisplaySysAdmin extends Display {
 
         $returnStr .= '</div></div></div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
-//echo "ddd";
+
         $returnStr .= $this->showFooter(false);
         return $returnStr;
     }
@@ -1119,7 +1117,6 @@ Q1
             $returnStr .= $this->displayComboBox();
             $selected = array(DEFAULT_SURVEY_YES => '', DEFAULT_SURVEY_NO => '');
             $selected[$survey->getDefaultSurvey()] = " SELECTED ";
-            //echo $survey->getDefaultSurvey() . '---';
             $returnStr .= '<tr><td align=top>' . Language::editSurveyDefault() . '</td><td>
                                 <select class="selectpicker show-tick" name="' . SETTING_DEFAULT_SURVEY . '">
                                     <option ' . $selected[DEFAULT_SURVEY_NO] . ' value=' . DEFAULT_SURVEY_NO . ' />' . Language::optionsDefaultSurveyNo() . '</option>
@@ -6196,7 +6193,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditSettingsLanguage($message = "") {
-        //echo 'ghghghgh' . $survey->getChangeLanguage(getSurveyMode()) . '====';
+
         $survey = new Survey($_SESSION['SUID']);
         $returnStr = $this->showSettingsHeader($survey, Language::headerEditSettingsLanguage());
         $returnStr .= $this->getSurveyTopTab($_SESSION['VRFILTERMODE_SURVEY']);

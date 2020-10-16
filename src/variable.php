@@ -40,9 +40,7 @@ class Variable {
         global $db, $engine, $language;
         $this->completevariablename = $variablename;
         $this->variablename = getBasicName($this->completevariablename);
-        //echo 'herE:' . $this->variablename . "--<hr>";
         $variabledescriptive = $engine->getVariableDescriptive($this->variablename);
-        //echo 'got variable' . $this->variablename . '---<hr>';
         $this->array = $variabledescriptive->isArray();
         $this->answertype = $variabledescriptive->getAnswerType();
         $this->language = $language;
@@ -145,20 +143,20 @@ class Variable {
                     }
                     // not a set of enumerated question
                     else {
-                        //echo 'retrieving ' . $this->completevariablename . '||||';
+
                         $ans = $this->retrieveAnswer($primkey, $this->completevariablename);
 
                         // try to see if it is an array itself
                         $data = @gzuncompress($ans);
                         if ($data !== false) {
-                            //echo $this->completevariablename . '-----array answer!!!<hr>';
+
                             $t = unserialize($data);
                             if (is_array($t) && sizeof($t) == 0) {
                                 $t = null;
                             }
                             $this->variable["answer"] = $t;
                         } else {
-                            //echo $this->completevariablename . '-----not an array answer!!!<hr>';                            
+
                             $this->variable["answer"] = $ans;
                         }
                     }
@@ -173,7 +171,7 @@ class Variable {
     function retrieveDirty($primkey, $dataname) {
         global $db;
         $query = "select dirty from " . Config::dbSurveyData() . "_data where suid=" . prepareDatabaseString(getSurvey()) . " and primkey='" . prepareDatabaseString($primkey) . "' and variablename='" . prepareDatabaseString($dataname) . "'";
-        //echo $query;
+
         if ($res = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($res) > 0) {
                 $row = $db->getRow($res);
@@ -191,7 +189,7 @@ class Variable {
             $answer = "aes_decrypt(answer, '" . $key . "') as answer";
         }
         $query = "select $answer, dirty from " . Config::dbSurveyData() . "_data where suid=" . prepareDatabaseString(getSurvey()) . " and primkey='" . prepareDatabaseString($primkey) . "' and variablename='" . prepareDatabaseString($dataname) . "'";
-        //echo $query . "<br/>";
+
         if ($res = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($res) > 0) {
                 $row = $db->getRow($res);
@@ -236,7 +234,7 @@ class Variable {
 
                     // set to response
                     else {
-                        //echo 'fgfgfgf';
+
                         if (strtoupper($answer) == ANSWER_RESPONSE) {
                             if (inArray($bracketvalue, $values)) {
                                 $values[array_search($bracketvalue, $values)] = $bracketvalue;
@@ -255,8 +253,7 @@ class Variable {
                     }
 
                     sort($final); // sort ascending
-                    //echo "<hr>" . $real . "---" . implode(SEPARATOR_SETOFENUMERATED, $final) .  "}}}}";
-                    //print_r($final);                    
+
                     return $engine->setAnswer($real, implode(SEPARATOR_SETOFENUMERATED, $final), $this->getDirty());
                 }
 
@@ -281,7 +278,6 @@ class Variable {
                 // get current array
                 $currentarray = $engine->getAnswer($this->completevariablename);
 
-                //echo $this->completevariablename;
                 // answer is not an array, then make it one
                 if (!is_array($answer)) {
 
@@ -337,7 +333,6 @@ class Variable {
                 $index = substr($this->completevariablename, strrpos($this->completevariablename, "[") + 1);
                 $index = trim(substr($index, 0, strlen($index) - 1));
 
-                //echo "<br/>" . $this->completevariablename . '---' . $index . '----' . $answer;
                 // get entire answer
                 $ans = $engine->getAnswer($varname);
                 if ($ans == "" || is_null($ans)) {
@@ -407,7 +402,7 @@ class Variable {
 
                 // flatten array
                 $arr = flatten($arr); // flatten array
-                //print_r($arr);
+
                 // store updated array first, so the last call sets the in-memory answer properly
                 //$engine->setAnswer($varname, gzcompress(serialize($arr)));
                 // store complete array answer, don't strip any tags!
@@ -418,7 +413,6 @@ class Variable {
                     if (sizeof($answer) > 0) {
                         $temparray[$index] = $answer;
                         $temparray = flatten($temparray); // flatten array
-                        //print_r($temparray);
                         foreach ($temparray as $key => $value) {
                             if (!$engine->setAnswer($varname . "[" . $key . "]", $value, $this->getDirty())) {
                                 $bool = false;
@@ -427,12 +421,10 @@ class Variable {
                     }
                 }
 
-                //print_r($answer);
-                //echo "<hr><hr><hr><br/>";
                 // store the separate value under the specified name (e.g. Q1[1,1])
                 // answer itself is an array
                 if (is_array($answer)) {
-                    //echo 'STORING: ' .                 $this->completevariablename;
+
                     // store array answer, don't strip any tags!
                     $this->storeAnswer($primkey, $engine->prefixVariableName($this->completevariablename), gzcompress(serialize($answer)), false);
                 }
@@ -440,7 +432,7 @@ class Variable {
                 else {
                     $this->storeAnswer($primkey, $engine->prefixVariableName($this->completevariablename), $answer);
                 }
-                //echo "<hr>in memory value for " . $this->completevariablename . " is: " . $this->variable["answer"];
+
                 // return result
                 return true;
             }

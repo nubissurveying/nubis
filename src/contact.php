@@ -25,7 +25,6 @@ class Contact {
     }
 
     function getProxy() {
-//      echo '<br/><br/><br/>' . $this->contact['proxy'] . 'PP';
         return $this->contact['proxy'];
     }
 

@@ -12,7 +12,6 @@
   ------------------------------------------------------------------------
  */
 
-
 class Track {
     
     private $suid;
@@ -59,7 +58,6 @@ class Track {
         }
         $arr = array();
         $query = "select * from " . Config::dbSurvey() . "_tracks where suid=" . prepareDatabaseString($this->suid) . " and object=" . prepareDatabaseString($this->object) . " and objecttype=" . prepareDatabaseString($this->objecttype) . " and setting='" . prepareDatabaseString($setting) . "' and language=" . prepareDatabaseString($language) . " and mode=" . prepareDatabaseString($mode) . " and version=" . prepareDatabaseString($version) . " order by ts desc";
-        //echo $query;
         $res = $db->selectQuery($query);
         if ($res) {
             if ($db->getNumberOfRows($res) > 0) {

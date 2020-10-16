@@ -28,7 +28,6 @@ class ProxyPermission {
     function checkProxyCode($startcode, $permissioncode) {
         global $db;
         $query = 'select count(*) as cnt from ' . Config::dbSurvey() . '_proxypermission where startcode=\'' . prepareDatabaseString($startcode) . '\' and permissioncode = \'' . prepareDatabaseString($permissioncode) . '\'';
-        //echo '<br/><br/><br/>' . $query;
         $result = $db->selectQuery($query);
         $row = $db->getRow($result);
         return $row['cnt'] > 0;

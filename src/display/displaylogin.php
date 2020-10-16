@@ -20,7 +20,6 @@ class DisplayLogin extends Display {
     
     public function showSurveyClosed() {        
         global $survey, $engine;        
-        //echo $survey->getTemplate();
         require_once("display/templates/displayquestion_" .  $survey->getTemplate() . ".php");
         $engine = loadEngine($survey->getSuid(), '', "", getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));
         $do = $engine->getDisplayObject();
@@ -36,7 +35,6 @@ class DisplayLogin extends Display {
     public function showLoginCode($message) {
         
         global $survey, $engine;
-        //echo $survey->getTemplate();
         require_once("display/templates/displayquestion_" .  $survey->getTemplate() . ".php");
         $engine = loadEngine($survey->getSuid(), '', "", getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));
         $do = $engine->getDisplayObject();
@@ -66,7 +64,6 @@ class DisplayLogin extends Display {
 
     public function showLoginAnonymous($randomId) {
         global $survey, $engine;
-        //echo $survey->getTemplate();
         require_once("display/templates/displayquestion_" .  $survey->getTemplate() . ".php");
         $engine = loadEngine($survey->getSuid(), $randomId, "", getSurveyVersion(), getBaseSectionSeid($survey->getSuid()));        
         $do = $engine->getDisplayObject();

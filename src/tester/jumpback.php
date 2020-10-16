@@ -45,7 +45,6 @@ class JumpBack {
         $res = $db->selectQuery($query);
         $array = array();
         if ($res) {
-            //echo $query;
             if ($db->getNumberOfRows($res) > 0) {
                 while ($row = $db->getRow($res)) {
                     $array[$row["stateid"]] = $row["displayed"];
@@ -120,7 +119,6 @@ class JumpBack {
         $suid = getFromSessionParams('jumpsuid');
         $prim = getFromSessionParams('jumpprimkey');
         $jumpto = loadvar("jumpto");
-        //echo $suid . '----' . $prim . '----' . $jumpto;
         $query = "delete from " . Config::dbSurveyData() . "_states where suid=" . $suid . " and primkey='" . $prim . "' and stateid > " . $jumpto;
         $db->executeQuery($query);        
 

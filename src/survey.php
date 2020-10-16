@@ -270,7 +270,6 @@ class Survey extends Component {
         }
 
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()) . $order);
-        //echo 'select * from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()) . $order;
         while ($row = $db->getRow($result)) {
             $sections[] = new Section($row);
         }
@@ -478,10 +477,10 @@ class Survey extends Component {
         foreach ($types as $type) {
             $old = $type->getTyd();
             $type->copy($this->getSuid(), 1); // no suffix
+            
             // update variables with type!
             $query = "update " . Config::dbSurvey() . "_variables set tyd=" . $type->getTyd() . " where suid=" . $this->getSuid() . " and tyd=" . $old;
             $db->executeQuery($query);
-            //echo $query . "<hr>";
         }
 
         /* copy groups */
@@ -2413,7 +2412,7 @@ class Survey extends Component {
 
             return $this->getSettingValue(SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED, $default);
         }
-//echo 'hhhh';
+
         return $this->getDefaultValue(SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED);
     }
 
@@ -3879,7 +3878,6 @@ class Survey extends Component {
     }
 
     function setDefaultSurvey($value) {
-        //echo $this->getSuid() . '----' . $value;
         $this->setSettingDirectly($this->getSuid(), OBJECT_SURVEY, SETTING_DEFAULT_SURVEY, $value);
     }
 

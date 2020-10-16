@@ -77,7 +77,6 @@ class Respondent {
                     $this->lastQuery = 'UPDATE ' . Config::dbSurvey() . '_respondents SET ';
                     $this->lastQuery .= 'firstname = AES_ENCRYPT(\'' . prepareDatabaseString($this->getFirstName()) . '\', \'' . Config::smsPersonalInfoKey() . '\') ';
                     $this->lastQuery .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
-                    //echo '<br/><br/><br/>' . $this->lastQuery;
                 }
             }
         }
@@ -694,8 +693,6 @@ class Respondent {
 
 
         $query .= 'WHERE primkey = \'' . prepareDatabaseString($this->getPrimkey()) . '\'';
-
-        //echo '<br/><br/><br/>' . $query . '<br/>';
 
         $db->executeQuery($query);
 

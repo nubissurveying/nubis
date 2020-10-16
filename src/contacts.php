@@ -70,8 +70,7 @@ class Contacts {
             }
             $query .= $urid . ')';
             $this->lastQuery = $query;
-            //echo $query;
-            //exit;
+
             $db->executeQuery($query);
             if (isset($this->contactsArray[$primkey])) {
                 myUnset($this->contactsArray[$primkey]);
@@ -100,7 +99,6 @@ class Contacts {
         } else {
             $contacts = array();
             $query = 'select *, aes_decrypt(remark, "' . Config::smsContactRemarkKey() . '") as remark_dec, aes_decrypt(proxyname, "' . Config::smsContactNameKey() . '") as proxyname_dec from ' . Config::dbSurvey() . '_contacts as t1 left join ' . Config::dbSurvey() . '_users as t2 on t1.urid = t2.urid where ' . getTextmodeStr() . ' primkey = "' . prepareDatabaseString($primkey) . '" order by t1.contactts desc';
-//                    echo '<br/><br/><br/>' . $query;
             $result = $db->selectQuery($query);
             while ($row = $db->getRow($result)) {
                 $contacts[] = new Contact($row);
@@ -116,7 +114,7 @@ class Contacts {
         $appointments = array();
         $query = 'select *, aes_decrypt(remark, "' . Config::smsContactRemarkKey() . '") as remark_dec, aes_decrypt(proxyname, "' . Config::smsContactNameKey() . '") as proxyname_dec from ' . Config::dbSurvey() . '_contacts as t1 left join ' . Config::dbSurvey() . '_users as t2 on t1.urid = t2.urid where ' . getTextmodeStr() . ' t1.urid = ' . prepareDatabaseString($urid) . ' and event is not null order by t1.contactts desc';
         $result = $db->selectQuery($query);
-//echo $query;
+
         while ($row = $db->getRow($result)) {
             $appointments[] = new Contact($row);
         }
@@ -167,7 +165,6 @@ class Contacts {
             $contacts = array();
             //$csidQuery = ' AND code = 103 ';
             //   $result = $db->selectQuery('select *, aes_decrypt(remark, "' . Config::smsContactRemarkKey() . '") as remark_dec, aes_decrypt(proxyname, "' . Config::smsContactNameKey() . '") as proxyname_dec from ' . Config::dbSurvey() . '_contacts as t1 left join ' . Config::dbSurvey() . '_users as t2 on t1.urid = t2.urid where t1.urid = ' . prepareDatabaseString($urid) . $csidQuery . ' order by t1.contactts desc');
-//echo '<br/><br/><br/>'. 'select *, aes_decrypt(remark, "' . Config::smsContactRemarkKey() . '") as remark_dec, aes_decrypt(proxyname, "' . Config::smsContactNameKey() . '") as proxyname_dec from ' . Config::dbSurvey() . '_contacts as t1 left join ' . Config::dbSurvey() . '_users as t2 on t1.urid = t2.urid where t1.urid = ' . prepareDatabaseString($urid) . ' order by t1.contactts desc';
 
             $query = 'select *, aes_decrypt(remark, "' . Config::smsContactRemarkKey() . '") as remark_dec, aes_decrypt(proxyname, "' . Config::smsContactNameKey() . '") as proxyname_dec from ' . Config::dbSurvey() . '_contacts as t1 ';
             $query .= 'left join ' . Config::dbSurvey() . '_users as t2 on t1.urid = t2.urid ';

@@ -16,7 +16,6 @@ require_once("instruction.php");
 require_once("phpparser_bootstrap.php");
 
 
-
 ini_set('memory_limit', Config::compilerMemoryLimit());
 
 ini_set('xdebug.max_nesting_level', 4000);
@@ -104,11 +103,8 @@ class Compiler {
         $rule = str_replace("[", TEXT_BRACKET_LEFT, $rule);
         $rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
 
-        //$rule = str_replace("[", TEXT_BRACKET_LEFT, $rule);
-        //$rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
         // hide module dot notations
         //$rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo '<BR/>' . $rule;
         $rule = includeText($rule, $excluded);
 
         /* create fill function */
@@ -118,7 +114,7 @@ class Compiler {
         /* parse to find any errors */
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
         try {
-            //echo $rule . "<br/>";
+
             $stmts = $parser->parse("<?php " . $rule . " ?>");
             $stmt = $stmts[0];
             $stmt = new PHPParser_Node_Arg($stmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
@@ -139,7 +135,6 @@ class Compiler {
         $rule = str_replace(TEXT_BRACKET_RIGHT, "]", $rule);
 
         $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(getBasicName($rule)));
-        //echo getBasicName($rule);
         $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_SET_FILL_VALUE)), $args);
         $fillfunctionnode->addStmt($stmt);
 
@@ -174,7 +169,6 @@ class Compiler {
                 $fillfunctionnode->addStmt($stmt);
             }
 
-            //echo 'jjjj' . end($this->loops);
             // check for end of for loop
             $enddo = -1;
             if (sizeof($this->loops) > 0) {
@@ -203,31 +197,6 @@ class Compiler {
                     $nextrgid = end($this->whiles);
                 }
             }
-            /*                //echo '====' . $enddo;
-              if ($nextrgid > $enddo) {
-              $nextrgid = end($this->loops);
-              }
-              // check for end of while loop
-              else {
-              if (sizeof($this->whiles) > 0) {
-              $enddo = $this->findEndWhile(end($this->whiles));
-              //echo '====' . $enddo;
-              if ($nextrgid > $enddo) {
-              $nextrgid = end($this->whiles);
-              }
-              }
-              }
-              }
-              // check for end of while loop
-              else {
-              if (sizeof($this->whiles) > 0) {
-              $enddo = $this->findEndWhile(end($this->whiles));
-              //echo '====' . $enddo;
-              if ($nextrgid > $enddo) {
-              $nextrgid = end($this->whiles);
-              }
-              }
-              } */
 
             // last loop action, then link back to beginning of loop
             if ($this->lastloopactions[end($this->loops)] == $rgid) {
@@ -264,7 +233,7 @@ class Compiler {
                 }
                 // not in a group 
                 else {
-                    //echo $nextrgid . '-----';
+
                     // don't link if the next statement is the loop OR the last loop action OR it is a group action
                     //if ($nextrgid != end($this->loops)) {
                     $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
@@ -324,7 +293,6 @@ class Compiler {
         foreach ($variables as $var) {
             if ($remove == false) {
                 $code = $var->getFillCode();
-                //echo $code;
                 if (trim($code) != "") {
 
                     $this->currentfillvariable = $var->getName();
@@ -369,22 +337,14 @@ class Compiler {
                         $cnt++;
                     }
 
-                    //print_r($this->instructions);
-
-
 
                     /* process setfillvalue cases */
-                    //echo "<hr>" . $rule . $rgid;
                     for ($this->cnt = 1; $this->cnt <= sizeof($this->instructions); $this->cnt++) {
 
                         if (isset($this->instructions[$this->cnt])) {
-                            //echo $this->instructions[$this->cnt]->getRule() . "<br/>";
                             $this->addRule($rootnode, $this->instructions[$this->cnt]);
                         }
                     }
-                    //echo "END";
-
-
 
                     /* add end */
 
@@ -430,7 +390,6 @@ class Compiler {
                     //$setfillclasses[$rgid] = $this->printer->prettyPrint($stmts);
                     $setfillclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] = $this->printer->prettyPrint($stmts);
 
-                    //echo "<textarea style='width: 100%;' rows=5>" . $setfillclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] . "</textarea><hr>";
                 } else {
 
                     // no fill code, then remove
@@ -482,21 +441,15 @@ class Compiler {
         }
         /* keep track */
         $getfillclasses = $this->loadGetFillClasses();
-        //print_r($getfillclasses);
-        //echo 'ggggg';
         $fills = getReferences(implode(" ", $text), INDICATOR_FILL);
-        //print_r($fills);
+
         /* go through fills */
         foreach ($fills as $fill) {
 
             /* not processed before */
-            //if (!isset($getfillclasses[strtoupper($fill)])) {
-            //echo 'adding: ' . $fill . "<hr>";
             if ($fill != "") {
                 $getfillclasses['"' . strtoupper($fill) . '"'] = $this->addFill($fill);
             }
-            //echo 'added<br/>';
-            //}
         }
 
         if ($compile == true) {
@@ -521,22 +474,15 @@ class Compiler {
         }
         /* keep track */
         $getfillclasses = $this->loadGetFillClasses();
-        //print_r($getfillclasses);
-        //echo 'ggggg';
         $fills = getReferences(implode(" ", $text), INDICATOR_FILL_NOVALUE);
 
         /* go through fills */
         foreach ($fills as $fill) {
 
             /* not processed before */
-            //if (!isset($getfillclasses[strtoupper($fill)])) {
-            //echo 'adding: ' . $fill . "<hr>";
             if ($fill != "") {
                 $getfillclasses['"' . strtoupper(INDICATOR_FILL_NOVALUE . $fill) . '"'] = $this->addFillNoValue($fill);
             }
-            //echo $getfillclasses[strtoupper(INDICATOR_FILL_NOVALUE . $fill)];
-            //echo 'added<br/>';
-            //}
         }
 
         /* check for first time */
@@ -678,7 +624,6 @@ class Compiler {
         global $db;
         $text = array();
         $q = "select rule from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $seid . " and rule like '%group.^%' order by rgid asc";
-        //echo $q;
         if ($result = $db->selectQuery($q)) {
             if ($db->getNumberOfRows($result) > 0) {
                 while ($row = $db->getRow($result)) {
@@ -1114,21 +1059,17 @@ class Compiler {
         }
         /* keep track */
         $classes = $this->loadInlineFieldClasses();
-        //print_r($getfillclasses);
-        //echo 'ggggg';
         $fills = getReferences(implode(" ", $text), INDICATOR_INLINEFIELD_ANSWER);
         $fills2 = getReferences(implode(" ", $text), INDICATOR_INLINEFIELD_TEXT);
         $fills3 = array_unique(array_merge($fills, $fills2));
 
         /* go through fills */
         foreach ($fills3 as $fill) {
+            
             /* not processed before */
-            //if (!isset($classes[strtoupper($fill)])) {
             if ($fill != "") {
                 $classes['"' . strtoupper($fill) . '"'] = $this->addInlineField($fill);
             }
-            //echo $fill . $classes[strtoupper($fill)] . "<hr><hr>";
-            //}
         }
 
         /* check for first time */
@@ -1452,7 +1393,6 @@ class Compiler {
                     if ($compile == true) {
                         $engine = $this->printer->prettyPrint($stmts);
                         $engine = str_replace(" == 0", " == '0'", $engine);
-                        //              echo "<textarea style='width: 100%;' rows=50>" . $engine . "</textarea>";
 
                         /* store in db */
                         $bp = new BindParam();
@@ -1524,7 +1464,6 @@ class Compiler {
         foreach ($variables as $var) {
             if ($remove == false) {
                 $code = $var->getCheckCode();
-                //echo $code;
                 if (trim($code) != "") {
 
                     $this->currentfillvariable = $var->getName();
@@ -1569,27 +1508,16 @@ class Compiler {
                         $cnt++;
                     }
 
-                    //print_r($this->instructions);
-
-
-
                     /* process setfillvalue cases */
-                    //echo "<hr>" . $rule . $rgid;
                     for ($this->cnt = 1; $this->cnt <= sizeof($this->instructions); $this->cnt++) {
 
                         if (isset($this->instructions[$this->cnt])) {
-                            //echo $this->instructions[$this->cnt]->getRule() . "<br/>";
                             $this->addRule($rootnode, $this->instructions[$this->cnt]);
                         }
                     }
-                    //echo "END";
-
-
 
                     /* add end */
-
                     $stmts[] = new PHPParser_Node_Stmt_Break();
-
                     $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(null, $stmts);
 
 
@@ -1630,7 +1558,6 @@ class Compiler {
                     //$setfillclasses[$rgid] = $this->printer->prettyPrint($stmts);
                     $checkclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] = $this->printer->prettyPrint($stmts);
 
-                    //echo "<textarea style='width: 100%;' rows=5>" . $checkclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] . "</textarea><hr>";
                 } else {
 
                     // no check code, then remove
@@ -1681,8 +1608,6 @@ class Compiler {
         }
 
 
-
-        //echo "<hr>" . $rgid . ": " . $rule;
 
         /* empty line */
 
@@ -2102,7 +2027,6 @@ class Compiler {
                             $tofind = substr($mod, 0, stripos($mod, "."));
                             $section = $this->survey->getSectionByName($tofind);
                             if ($section->getName() == "") {
-                                //echo $tofind . '---';
                                 $this->addErrorMessage(Language::errorSectionNotFound($tofind));
                             }
                             $mod = substr($mod, stripos($mod, ".") + 1);
@@ -2123,7 +2047,6 @@ class Compiler {
                         $var = $this->survey->getVariableDescriptiveByName(getBasicName($rule));
                         if ($var->getAnswerType() == ANSWER_TYPE_SECTION) {
                             $sectionid = $var->getSection();
-                            //echo getBasicName($rule). '----';
                             $section = $this->survey->getSection($sectionid);
                             if ($section->getName() != "") {
                                 if (strtolower($this->sectionname) == strtolower($section->getName())) {
@@ -2241,7 +2164,6 @@ class Compiler {
                         $args[] = new PHPParser_Node_Expr_Concat($stmtleft->value->name->args[0]->value, new PHPParser_Node_Scalar_String("."));
                     }
                 } catch (PHPParser_Error $e) {
-                    //echo 'no';
                     return;
                 }
             }
@@ -2302,10 +2224,6 @@ class Compiler {
           // hide module dot notations
 
           $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-
-
-
-          //echo $rule;
 
           $rule = includeText($rule, $excluded);
 
@@ -2404,10 +2322,6 @@ class Compiler {
           // hide module dot notations
 
           $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-
-
-
-          //echo $rule;
 
           $rule = includeText($rule, $excluded);
 
@@ -2631,8 +2545,6 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "<hr>";
-
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
@@ -2709,8 +2621,6 @@ class Compiler {
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
             $rule = trim($this->instructions[$cnt]->getRule());
-
-            //echo $rule . "<hr>";
 
             if (startsWith($rule, "/*")) {
 
@@ -2801,7 +2711,7 @@ class Compiler {
         $this->groups[] = $rgid;
         $this->groupsend[] = $endrgid;
         $groupactions = $this->findStatementsInSubGroup($rgid);
-        //print_r($groupactions);
+
         /* add these sub group actions to the top group, so we know they are part of the group structure! */
         $current = $this->groupactions[end($this->realgroups)];
         $this->groupactions[end($this->realgroups)] = array_merge($current, $groupactions);
@@ -2895,7 +2805,6 @@ class Compiler {
 
 
         if (sizeof($this->loops) > 0 || sizeof($this->whiles) > 0) {
-            //echo 'jjjj' . end($this->loops);
             if (sizeof($this->loops) > 0) {
                 $enddo = $this->findEndDo(end($this->loops));
                 $endpoint = end($this->loops);
@@ -2915,18 +2824,13 @@ class Compiler {
                 $end = $endwhile;
                 $endpoint = end($this->whiles);
             }
-            //echo '====' . $enddo;
 
             if ($nextrgid > $end) {
                 $nextrgid = $endpoint; //;
             } else if ($nextrgid == 0) {
                 $nextrgid = $endpoint;
             }
-
-            //echo $rgid . ' goto: ' .$nextfalsergid;
         }
-
-
 
         // last loop action
         if ($this->lastloopactions[end($this->loops)] == $nextrgid) {
@@ -3013,16 +2917,12 @@ class Compiler {
     function analyzeIf($rule, $print = false) {
         /* multi-line if */
         if (endsWith(strtoupper($rule), ROUTING_THEN) == false) {
-            //echo $this->cnt;
             $found = false;
             for ($cnt = ($this->cnt + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
                 if (isset($this->instructions[$cnt])) {
 
                     $text = trim($this->instructions[$cnt]->getRule());
-//echo $text . '---';
-
-
                     if (startsWith($text, "/*")) {
 
                         $this->skipComments($cnt, $cnt);
@@ -3032,8 +2932,6 @@ class Compiler {
 
 
                         $rule .= " " . $text;
-                        //echo 'now: ' . $rule . "<hr>";
-                        //if ($pos > -1) {
                         if (endsWith(strtoupper($rule), ROUTING_THEN) == true) {
 
                             $this->cnt = $cnt;
@@ -3053,7 +2951,6 @@ class Compiler {
                 }
                 return;
             }
-            //echo 'RULE: ' . $rule . "<hr><hr>";
         }
 
 
@@ -3157,18 +3054,13 @@ class Compiler {
             }
         }
 
-        //echo $locate;
         // handle 1 in variable (set of enumerated reference)
         $find = array();
         $locate = '/' . PATTERN_ALPHANUMERIC . PATTERN_CASE_INSENSITIVE . LOGICAL_IN . PATTERN_ALPHANUMERIC . '/i'; // /i for case insensitive
-        //echo $locate . "<hr>";
         if (preg_match_all($locate, $rule, $find, PREG_SET_ORDER)) {
             foreach ($find as $found) {
-                //print_r($found);
                 $rule = $this->prepare(array($locate), array(FUNCTION_IN_ARRAY . "(" . $found[1] . ", explode('" . SEPARATOR_SETOFENUMERATED . "'," . $found[2] . "), 1)"), $rule, 1);
-                //echo $rule . "<hr>";
             }
-            //";
         }
 
         $rule = showModuleNotations($rule, TEXT_MODULE_DOT); // TEXT_MODULE_DOT
@@ -3194,10 +3086,8 @@ class Compiler {
 
             $parsestmts = $parser->parse("<?php " . $rule . " ?>");
 
-            //print_r($parsestmts);
-
             $ifstmt = $parsestmts[0]; // only one statement (no ; allowed in assignment right hand side)
-            //print_r($ifstmt);
+
             // complex expression, then wrap in fake argument object
 
             if ($ifstmt instanceof PHPParser_Node_Expr) { //$ifstmt instanceof PHPParser_Node_Expr_FuncCall || 
@@ -3222,7 +3112,6 @@ class Compiler {
             return $ifstmt;
         } catch (PHPParser_Error $e) {
 
-            //echo $e->getMessage();
             if ($iftype == ROUTING_IDENTIFY_ELSEIF) {
                 $this->addErrorMessage(Language::errorElseIfInvalid());
             } else {
@@ -3256,10 +3145,6 @@ class Compiler {
         /* get next rgid for when if statement is false */
 
         $nextfalsergid = $this->findNextAfterIf($rgid, $iftype);
-
-        //echo 'found next from ' . $rgid . ' if false: ' . $nextfalsergid . "<hr>";
-
-
 
         /* create if function */
 
@@ -3366,7 +3251,6 @@ class Compiler {
         $copynext = $nextfalsergid;
         if (sizeof($this->loops) > 0 || sizeof($this->whiles) > 0) {
 
-            //echo 'jjjj' . end($this->loops);
             if (sizeof($this->loops) > 0) {
                 $enddo = $this->findEndDo(end($this->loops));
                 $endpoint = end($this->loops);
@@ -3386,15 +3270,12 @@ class Compiler {
                 $end = $endwhile;
                 $endpoint = end($this->whiles);
             }
-            //echo '====' . $enddo;
 
             if ($nextfalsergid > $end) {
                 $nextfalsergid = $endpoint;
             } else if ($nextfalsergid == 0) {
                 $nextfalsergid = $endpoint;
             }
-
-            //echo $rgid . ' goto: ' .$nextfalsergid;
         }
 
 
@@ -3537,8 +3418,6 @@ class Compiler {
 
             // only one statement (no ; allowed in assignment right hand side)
             $stmt = new PHPParser_Node_Arg($stmts[0]);
-            //echo 'righthand';
-            //print_r($stmt);
             $this->updateVariables($stmt);
             $args[] = $stmt;
 
@@ -3636,7 +3515,6 @@ class Compiler {
                 }
             }
 
-            //echo 'jjjj' . end($this->loops);
             if (sizeof($this->loops) > 0) {
                 $enddo = $this->findEndDo(end($this->loops));
                 $endpoint = end($this->loops);
@@ -3663,7 +3541,6 @@ class Compiler {
                 $acts = end($this->whileactions);
             }
 
-            //echo '====' . $enddo;
             if ($nextrgid > $end) {
                 $nextrgid = $endpoint;
             }
@@ -3831,11 +3708,9 @@ class Compiler {
         //$rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
         // hide module dot notations
         //$rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo '<BR/>' . $rule;
         $rule = includeText($rule, $excluded);
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
         try {
-            //echo $rule . "<br/>";
             $stmts = $parser->parse("<?php " . $rule . " ?>");
             $stmt = $stmts[0];
             $stmt = new PHPParser_Node_Arg($stmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
@@ -3863,9 +3738,7 @@ class Compiler {
 
             $stmts = array();
             // store where we go next from here
-            //echo 'here';
             $nextrgid = $this->findNextStatementAfterQuestion($rgid);
-            //echo 'nothere';
             $this->addNext($rgid, $nextrgid);
 
             // loop action
@@ -3905,12 +3778,7 @@ class Compiler {
                 $nextrgid = $this->findNextStatementAfterQuestionInGroup($rgid, $groupendrgid);
 
                 /* we have an action that is not itself a group action */
-                //echo '<hr><hr>looking for' . $nextrgid . " before " .$groupendrgid ."<br/>";
-                //print_r($this->groupactions);
-                //echo "AAAA<hr>";
                 if ($nextrgid > 0 && $nextrgid < $groupendrgid && !inArray($nextrgid, $this->groupactions[end($this->groups)]) && !inArray($nextrgid, $this->loopactions[end($this->loops)]) && !inArray($nextrgid, $this->whileactions[end($this->whiles)])) {
-                    //echo $rgid . "<br/>";
-                    //echo $nextrgid;
                     $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
                     $stmt = new PHPParser_Node_Expr_Assign(new PHPParser_Node_Expr_Variable("temp"), new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsaction));
 
@@ -3975,7 +3843,6 @@ class Compiler {
             //$rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
             // hide module dot notations
             //$rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-            //echo '<BR/>' . $rule;
             $rule = includeText($rule, $excluded);
             /* $section = $this->survey->getSectionByName($rule);
               if ($section->getName() != "") {
@@ -3988,7 +3855,6 @@ class Compiler {
 
             $parser = new PHPParser_Parser(new PHPParser_Lexer);
             try {
-                //echo $rule . "<br/>";
                 $stmts = $parser->parse("<?php " . $rule . " ?>");
                 $stmt = $stmts[0];
                 $stmt = new PHPParser_Node_Arg($stmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
@@ -4012,8 +3878,6 @@ class Compiler {
 
             $stmts = array();
             // store where we go next from here
-            //echo 'here';
-            //echo 'nothere';            
             // loop action
             if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
@@ -4064,10 +3928,8 @@ class Compiler {
         if (endsWith($rule, ROUTING_IDENTIFY_INLINE)) {
             $inline = true;
             $pos = strripos($rule, ROUTING_IDENTIFY_INLINE);
-            //echo $pos;
             $rule = substr($rule, 0, $pos);
         }
-        //echo $rule;
         // check for array
         $var = $this->survey->getVariableDescriptiveByName(getBasicName($rule)); // new VariableDescriptive(); 
         if ($var->isArray()) {
@@ -4088,24 +3950,18 @@ class Compiler {
         //$rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
         // hide module dot notations
         //$rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo $rule;
         $rule = includeText($rule, $excluded);
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
         try {
 
             $stmtstemp = $parser->parse("<?php " . $rule . " ?>");
             // only one statement (no ; allowed in assignment right hand side)
-            //print_r($stmtstemp);
             $stmttemp = new PHPParser_Node_Arg($stmtstemp[0]); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
             $this->updateVariables($stmttemp);
 
-            //print_r($stmttemp->value);
             if ($stmttemp->value instanceof PHPParser_Node_Expr_MethodCall) {
-                //print_r($stmttemp->value->args[0]);
                 $args[] = $stmttemp->value->args[0];
             } else if ($stmttemp->value instanceof PHPParser_Node_Expr_Concat) {
-                //echo $rule . "<br/>";
-                //print_r($stmttemp->value->args[0]);
                 $args[] = $stmttemp->value;
             } else {
                 $rule = showModuleNotations($rule, TEXT_MODULE_DOT);
@@ -4121,9 +3977,7 @@ class Compiler {
         if (sizeof($this->groups) == 0) {
 
             // store where we go next from here
-            //echo 'here';
             $nextrgid = $this->findNextStatementAfterQuestion($rgid);
-            //echo 'nothere';
             $this->addNext($rgid, $nextrgid);
 
             // loop action
@@ -4179,14 +4033,11 @@ class Compiler {
                 $nextrgid = $this->findNextStatementAfterQuestionInGroup($rgid, $groupendrgid);
 
                 /* we have an action that is not itself a group action */
-                //echo '<hr><hr>looking for' . $nextrgid . " before " .$groupendrgid ."<br/>";
-                //print_r($this->groupactions);
-                //echo "AAAA<hr>";
+
                 // next statement is redo loop, then don't
                 if ($nextrgid == end($this->loops)) {
                     $stmts[] = new PHPParser_Node_Stmt_Return($args[0]);
                 } else if ($nextrgid > 0 && $nextrgid < $groupendrgid && !inArray($nextrgid, $this->groupactions[end($this->groups)]) && !inArray($nextrgid, $this->loopactions[end($this->loops)]) && !inArray($nextrgid, $this->whileactions[end($this->whiles)])) {
-                    //echo $rgid . "<br/>";
                     $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
                     $stmt = new PHPParser_Node_Expr_Assign(new PHPParser_Node_Expr_Variable("temp"), new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsaction));
 
@@ -4236,21 +4087,9 @@ class Compiler {
 
         $query = "replace into " . Config::dbSurvey() . "_screens (suid, seid, rgid, ifrgid, number, section, looptimes, outerlooptimes, outerlooprgids, outerwhilergids, dummy) values(" . prepareDatabaseString($this->suid) . ", " . prepareDatabaseString($this->seid) . ", '" . prepareDatabaseString($rgid) . "', '" . prepareDatabaseString($ifrgid) . "', '" . prepareDatabaseString($this->screencounter) . "', " . prepareDatabaseString($section) . ", " . prepareDatabaseString($this->looptimes) . ", '" . prepareDatabaseString($looptimes) . "','" . prepareDatabaseString($looprgid) . "','" . prepareDatabaseString($whilergid) . "', 0);";
 
-        //echo $query . "<br/>";
-
         $db->executeQuery($query);
     }
 
-    // TODO: ADD DUMMY SCREEN IF END OF OUTER LOOP OR OUTER WHILE, SO PROGRESS BAR BREAKS FINE
-    /* // add dummy entry if outer loop or while
-      if (sizeof($this->loops) == 1) {
-      global $db;
-      $this->screencounter++;
-      $query = "replace into " . Config::dbSurvey() . "_screens (suid, seid, rgid, ifrgid, number, section, looptimes, outerlooptimes, outerlooprgids, outerwhilergids, dummy) values(" . prepareDatabaseString($this->suid) . ", " . prepareDatabaseString($this->seid) . ", '" . prepareDatabaseString($rgid) . "', '" . prepareDatabaseString($ifrgid) . "', '" . prepareDatabaseString($this->screencounter) . "', -1, -1, '-1','-1','-1', 1);";
-      $db->executeQuery($query);
-      //echo $query;
-      }
-     */
 
     function addNext($from, $to) {
 
@@ -4260,8 +4099,6 @@ class Compiler {
 
             $to = "0"; // explicit zero since myisam doesn't like '' on newer mysql
         }
-
-        //echo "replace into " . Config::dbSurvey() . "_next (suid, seid, fromrgid, torgid) values('" . prepareDatabaseString($from) . "', '" . prepareDatabaseString($to) . "')";
 
         $query = "replace into " . Config::dbSurvey() . "_next (suid, seid, fromrgid, torgid) values(" . prepareDatabaseString($this->suid) . ", " . prepareDatabaseString($this->seid) . ", '" . prepareDatabaseString($from) . "', '" . prepareDatabaseString($to) . "')";
 
@@ -4345,7 +4182,6 @@ class Compiler {
         $bounds = splitString("/ TO /", strtoupper($rule));
         $counterplusstart = splitString("/:=/", $bounds[0]);
 
-        //print_r($excluded);
         $counterfield = includeText($counterplusstart[0], $excluded);
         $minimum = includeText($counterplusstart[1], $excluded);
         $maximum = includeText($bounds[1], $excluded);
@@ -4410,9 +4246,6 @@ class Compiler {
             $this->updateVariables($stmt);
             $args[] = $stmt;
 
-            //echo 'min: ' . $minimum;
-
-
 
             $stmts = $parser->parse("<?php " . $maximum . "?>");
 
@@ -4425,8 +4258,6 @@ class Compiler {
             $this->updateVariables($stmt);
 
             $args[] = $stmt;
-            //echo 'max: ' . $maximum;
-
             $stmts = $parser->parse("<?php " . $counterfield . "?>");
 
             // only one statement (no ; allowed in loop maximum)
@@ -4436,7 +4267,6 @@ class Compiler {
 
             $this->updateVariables($stmt);
 
-            //print_r($stmt);
             if ($stmt->value instanceof PHPParser_Node_Expr_MethodCall) {
                 $args[] = $stmt->value->args[0];
             } else {
@@ -4472,7 +4302,6 @@ class Compiler {
             $this->progressbarloops[] = $rgid;
 
             // if nested loop, then size is greater than 1
-            //echo '<hr>finding next for loop at ' . $rgid;
             if (sizeof($this->loops) > 1) {
 
                 $nextrgid = $this->findNextAfterForLoop($rgidafter, true);
@@ -4491,7 +4320,6 @@ class Compiler {
                 $nextrgid = $this->findNextAfterForLoop($rgidafter, false);
             }
 
-            //echo '<br/>found ' . $nextrgid;
             // set last loop action if nested loop and loop action
             $stmts = array();
             if (sizeof($this->loops) > 1) {
@@ -4527,7 +4355,6 @@ class Compiler {
                 $this->screencounter++;
                 $query = "replace into " . Config::dbSurvey() . "_screens (suid, seid, rgid, ifrgid, number, section, looptimes, outerlooptimes, outerlooprgids, outerwhilergids, dummy) values(" . prepareDatabaseString($this->suid) . ", " . prepareDatabaseString($this->seid) . ", '" . prepareDatabaseString($rgid) . "', '" . prepareDatabaseString($ifrgid) . "', '" . prepareDatabaseString($this->screencounter) . "', -1, -1, '-1','-1','-1', 1);";
                 $db->executeQuery($query);
-//echo $query;
             }
         }
 
@@ -4562,7 +4389,6 @@ class Compiler {
         $loopactions = array();
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
             $rule = trim($this->instructions[$cnt]->getRule());
-            //echo $rule . "<hr>";
             if (startsWith($rule, "/*")) {
                 $this->skipComments($cnt, $cnt);
             } else if (startsWith($rule, "//")) {
@@ -4637,7 +4463,7 @@ class Compiler {
 
         $this->loopactions[$rgid] = $loopactions;
         $this->lastloopactions[end($this->loops)] = end($loopactions);
-        //echo '<hr>added actions for ' . $rgid;
+
         return $loopactions;
     }
 
@@ -4648,7 +4474,6 @@ class Compiler {
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
             $rule = trim($this->instructions[$cnt]->getRule());
-            //echo $rule . "<hr>";
             if (startsWith($rule, "/*")) {
                 $this->skipComments($cnt, $cnt);
             } else if (startsWith($rule, "//")) {
@@ -4725,7 +4550,7 @@ class Compiler {
 
         $this->whileactions[$rgid] = $whileactions;
         $this->lastwhileaction[end($this->whiles)] = end($whileactions);
-        //echo '<hr>added actions for ' . $rgid;
+
         return $whileactions;
     }
 
@@ -4802,7 +4627,6 @@ class Compiler {
             $this->actions[] = $rgid;
 
             // if nested while, then size is greater than 1
-            //echo '<hr>finding next for loop at ' . $rgid;
             if (sizeof($this->whiles) > 1) {
 
                 $nextrgid = $this->findNextAfterWhile($rgidafter, true);
@@ -4821,7 +4645,6 @@ class Compiler {
                 $nextrgid = $this->findNextAfterWhile($rgidafter, false);
             }
 
-            //echo '<br/>found ' . $nextrgid;
             // set last while action if nested while and while action
             $stmts = array();
             if (sizeof($this->whiles) > 1) {
@@ -4901,7 +4724,6 @@ class Compiler {
         $level = 1;
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
             $rule = trim($this->instructions[$cnt]->getRule());
-            //echo $rule . "<hr>";
             if (startsWith($rule, "/*")) {
                 $this->skipComments($cnt, $cnt);
             } else if (startsWith($rule, "//")) {
@@ -4950,7 +4772,6 @@ class Compiler {
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
             $rule = trim($this->instructions[$cnt]->getRule());
-            //echo $rule . "<hr>";
 
             if (startsWith($rule, "/*")) {
                 $this->skipComments($cnt, $cnt);
@@ -5000,15 +4821,10 @@ class Compiler {
 
                 $rule = trim($this->instructions[$cnt]->getRule());
 
-                //echo $rule . '|||||';
-
                 if (startsWith($rule, "/*")) {
-
-                    //  echo  'the beginning: ' . $cnt;
 
                     $this->skipComments($cnt, $cnt);
 
-                    //  echo  'the end: ' . $cnt;
                 } else if (startsWith($rule, "//")) {
                     
                 } else if ($rule == "") {
@@ -5071,15 +4887,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5111,15 +4922,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "*/")) {
-
-                //echo 'skipping';
 
                 $this->skipReverseComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5149,15 +4955,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5190,15 +4991,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5230,15 +5026,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5271,15 +5062,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
 
-                //echo 'skipping';
-
                 $this->skipComments($cnt, $cnt);
-
-                //echo $cnt;
+                
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5311,15 +5097,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5351,15 +5132,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5391,15 +5167,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5488,15 +5259,10 @@ class Compiler {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5567,15 +5333,10 @@ class Compiler {
             }
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5725,18 +5486,13 @@ class Compiler {
         if (sizeof($subs) == 0) {
             return;
         }
-        //print_R($node);
-        //echo "<hr><hr>";
-        //print_r($subs);
-        //echo "<hr><hr>";
-//print_r($subs);
+
         // child nodes
         for ($i = 0; $i < sizeof($subs); $i++) {
 
             $nm = $subs[$i];
             $subnode = $node->$nm;
-            //print_R($subnode);
-            //echo "<br/>";
+
             // name node: this could be a variable
             if ($subnode instanceof PHPParser_Node_Name) {
 
@@ -5749,12 +5505,8 @@ class Compiler {
 
                 // restore any dot notations!
                 $name = str_replace(TEXT_MODULE_DOT, ".", $name);
-
-                //echo '<br/>UPDATING NAME ' . $name;
-                //$var = new VariableDescriptive();
-
                 $var = $this->survey->getVariableDescriptiveByName(getBasicName($name)); // new VariableDescriptive();  
-                //echo "<hr>getting: " . $name . '----' . getBasicName($name); 
+                
                 if (strtoupper($name) == VARIABLE_VALUE_NULL) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_NULL);
                     $node->$nm = $stmt;
@@ -5783,7 +5535,7 @@ class Compiler {
                     // check anything in name before any .
                     $nms = explode(".", $name);
                     for ($i = 0; $i < sizeof($nms) - 1; $i++) {
-                        //echo $nms[$i] .' ----';
+
                         $var = $this->survey->getVariableDescriptiveByName(getBasicName($nms[$i]));
                         if ($var->isArray() == false && contains("[", $nms[$i])) {
                             $this->addErrorMessage(Language::errorNotArray(strtolower(getBasicName($nms[$i]))));
@@ -5794,9 +5546,8 @@ class Compiler {
                     }
                     
                     $answertype = $var->getAnswerType();
-                    //echo '<hr>maybe: ' . $var->getName() . '---' . $answertype;
+
                     if (inArray($answertype, array(ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_RANK))) {
-                        //echo '<hr>LAST: ' . $var->getName();
                         $this->lastvar = $var;
                     }
                     
@@ -5810,7 +5561,6 @@ class Compiler {
                     $node->$nm = $stmt;
                 } else if ($this->fillclass == true && startsWith($name, VARIABLE_VALUE_FILL)) {
 
-                    //echo $name . " <hr>";
                     $line = trim(str_ireplace(VARIABLE_VALUE_FILL, "", $name));
                     if ($line != "") {
 
@@ -5825,7 +5575,6 @@ class Compiler {
                                 $this->updateVariables($temp);
                                 if ($temp->value instanceof PHPParser_Node_Expr_MethodCall) {
                                     $args[] = $temp->value->args[0];
-                                    //print_r($temp->value->args[0]);
                                 }
 
                                 // a non-bracketed field
@@ -5834,7 +5583,6 @@ class Compiler {
                                     /* not a constant, which happens if the counter field does not exist */
                                     if ($temp->value->name instanceof PHPParser_Node_Expr_MethodCall) {
                                         $args[] = $temp->value->name;
-                                        //print_r($temp->value->name->args[0]);
                                     }
                                 }
                             } catch (Exception $e) {
@@ -5849,7 +5597,7 @@ class Compiler {
                     }
                 } else if ($this->checkclass && (startsWith($name, VARIABLE_VALUE_SOFT_ERROR) || startsWith($name, VARIABLE_VALUE_HARD_ERROR))) {
                     $type = ERROR_HARD;
-                    //echo $line . '----';
+
                     if (startsWith($name, VARIABLE_VALUE_SOFT_ERROR)) {
                         $line = trim(str_ireplace(VARIABLE_VALUE_SOFT_ERROR, "", $name));
                     } else {
@@ -5869,7 +5617,6 @@ class Compiler {
                                 $this->updateVariables($temp);
                                 if ($temp->value instanceof PHPParser_Node_Expr_MethodCall) {
                                     $args[] = $temp->value->args[0];
-                                    //print_r($temp->value->args[0]);
                                 }
 
                                 // a non-bracketed field
@@ -5878,7 +5625,6 @@ class Compiler {
                                     /* not a constant, which happens if the counter field does not exist */
                                     if ($temp->value->name instanceof PHPParser_Node_Expr_MethodCall) {
                                         $args[] = $temp->value->name;
-                                        //print_r($temp->value->name->args[0]);
                                     }
                                 }
                             } catch (Exception $e) {
@@ -5896,7 +5642,7 @@ class Compiler {
                 } else {
 
                     if ($this->lastvar != null) {
-                        //echo "<hr>1: " . $name . '----' . $this->lastvar->getName();
+
                         $vc = $this->lastvar->getOptionCodeByAcronym($name);
                         if ($vc > 0) {
                             $stmt = new PHPParser_Node_Scalar_String($vc);
@@ -5914,7 +5660,6 @@ class Compiler {
                         }
                     } else {
 
-                        //echo "<hr>2: " . $name;
                         /* fill that is not present (or something else), then return the
                          * text representation of whatever was inputted
                          */
@@ -5966,7 +5711,7 @@ class Compiler {
                     if ($rightleft instanceof PHPParser_Node_Expr_ConstFetch) {
                         $this->extranode = new PHPParser_Node_Scalar_String($right->left->name->parts[0]);
                     } else if ($rightleft instanceof PHPParser_Node_Expr_FuncCall) {
-                        //echo 'ggfgf';
+
                         // TODO: add check for if variable is array
                         $node1 = new PHPParser_Node_Scalar_String($rightleft->name->parts[0]);
                         $args = $rightleft->args;
@@ -5977,7 +5722,6 @@ class Compiler {
                     }
 
                     $tt = new PHPParser_Node_Arg($left);
-                    //echo 'updating plus part<hr>';
                     $this->updateVariables($tt);
 
                     $subnode->left = $tt;
@@ -6001,14 +5745,11 @@ class Compiler {
             }
             // concat/minus/plus/mod/div handling (need custom handling to support [cnt] in the right hand of the expression)
             else if ($subnode instanceof PHPParser_Node_Expr_Concat || $subnode instanceof PHPParser_Node_Expr_Minus || $subnode instanceof PHPParser_Node_Expr_Plus || $subnode instanceof PHPParser_Node_Expr_Mod || $subnode instanceof PHPParser_Node_Expr_Div) {
-                //print_r($subnode);
+
                 $left = new PHPParser_Node_Arg($subnode->left);
                 $right = new PHPParser_Node_Arg($subnode->right);
                 $this->updateVariables($left); 
-                //echo '<br/>going to update<br/>';
                 $this->updateVariables($right);
-                //echo '<br/>updated</br>';
-                //print_r($right);
                 $subnode->left = $left->value;
                 $subnode->right = $right->value;
                 $node-$nm = $subnode;
@@ -6024,8 +5765,6 @@ class Compiler {
                 /* get function name */
                 $namenode = $subnode->name;
                 $name = $namenode->getFirst();
-                //echo '<br/>FUNCTION  callll' . $name;
-                //
                 $name = str_replace(TEXT_MODULE_DOT, ".", $name);
                
                 // real function call
@@ -6035,14 +5774,10 @@ class Compiler {
                         $this->updateVariables($args[$j]);
                     }
                 } else {
-                    //echo '<br/>NOT REAL FUNCTION  callll' . $name;
-                    // not a real function call, but a bracket statement
-                    //$var = new VariableDescriptive();
 
                     // check anything in name before any .
                     $nms = explode(".", $name);
                     for ($i = 0; $i < sizeof($nms) - 1; $i++) {
-                        //echo $nms[$i] .' ----';
                         $var = $this->survey->getVariableDescriptiveByName(getBasicName($nms[$i]));
                         if ($var->isArray() == false && contains("[", $nms[$i])) {
                             $this->addErrorMessage(Language::errorNotArray(strtolower(getBasicName($nms[$i]))));
@@ -6058,23 +5793,17 @@ class Compiler {
                     if ($var->getVsid() != "") {
 
                         // array statement, so question should be an array  
-                        //echo '<br/>NOT REAL FUNCTION  callll' . $name;
                         if ($var->isArray() == false) {
                             $this->addErrorMessage(Language::errorNotArray(strtolower(getBasicName($name))));
                         }
-                        //echo '<br/>NOT REAL FUNCTION  callll' . $name;
                         /* go through 'function' arguments 
                          * and change them to "[" . $this-getValue("field") . "]"
                          */
                         $answertype = $var->getAnswerType();
-                        //echo '<hr>maybe: ' . $var->getName() . '---' . $answertype;
                         if (inArray($answertype, array(ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_RANK))) {
-                            //echo '<hr>LAST: ' . $var->getName();
                             $this->lastvar = $var;
                         }
                         $args = array();
-                        //echo 'ook<br/>';
-                        //print_r($subnode);
                         $funcnode = $this->handleBracketExpression($subnode, $name);                        
                         if ($this->extranode != null) {
                             
@@ -6088,15 +5817,11 @@ class Compiler {
 
                             $args[] = $brack;
                         } else {
-                            //echo 'aaaa';                            
                             $args[] = $funcnode;
                         }
 
                         $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_GET_ANSWER)), $args);
                         $node->$nm = $stmt;
-                        //echo '<br/>at the end';
-                        //print_r($node->$nm);
-                        //}
                     } else {
 
                         /* fill that is not present (or something else), then return the
@@ -6111,7 +5836,6 @@ class Compiler {
                     }
                 }
             } else if ($subnode instanceof PHPParser_Node_Expr_Array) {
-                //echo ' array';
                 $items = $subnode->items;
                 for ($j = 0; $j < sizeof($items); $j++) {
                     $this->updateVariables($items[$j]);
@@ -6173,7 +5897,6 @@ class Compiler {
         //$rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
         // hide module dot notations
         //$rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo '<BR/>' . $rule;
         $rule = includeText($rule, $excluded);
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
 
@@ -6234,7 +5957,6 @@ class Compiler {
         //$rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
         // hide module dot notations
         //$rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo '<BR/>' . $rule;
         $rule = includeText($rule, $excluded);
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
 
@@ -6245,7 +5967,6 @@ class Compiler {
         $rootnode = $this->factory->class(CLASS_GETFILL . "_" . $classextension)->extend(CLASS_BASICFILL);
         $stmt = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Scalar_String(""));
         try {
-            //echo $rule . "<br/>";
             $stmts = $parser->parse("<?php " . $rule . " ?>");
             $stmt = $stmts[0];
             $stmt = new PHPParser_Node_Arg($stmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
@@ -6275,7 +5996,6 @@ class Compiler {
         $fillclass = $this->printer->prettyPrint($stmts);
 
         /* return result */
-        //echo $fillclass . "<hr>";
         return $fillclass;
     }
 
@@ -6296,7 +6016,6 @@ class Compiler {
         //$rule = str_replace("]", TEXT_BRACKET_RIGHT, $rule);
         // hide module dot notations
         //$rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo '<BR/>' . $rule;
         $rule = includeText($rule, $excluded);
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
 
@@ -6307,7 +6026,7 @@ class Compiler {
         $rootnode = $this->factory->class(CLASS_GETFILL . "_" . $classextension)->extend(CLASS_BASICFILL);
         $stmt = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Scalar_String(""));
         try {
-            //echo $rule . "<br/>";
+
             $stmts = $parser->parse("<?php " . $rule . " ?>");
             $stmt = $stmts[0];
             $stmt = new PHPParser_Node_Arg($stmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
@@ -6315,11 +6034,8 @@ class Compiler {
 
             // fake method call for Q1[1,1] reference
             if ($stmt->value instanceof PHPParser_Node_Expr_MethodCall) {
-                //print_r($stmt->value);
                 $stmt = new PHPParser_Node_Stmt_Return($stmt->value);
             } else {
-                //print_r($stmt->value->name);
-                //echo 'hghghghghg';
                 //$stmt = new PHPParser_Node_Stmt_Return($stmt->value->name->args[0]->value);                
                 $stmt = new PHPParser_Node_Stmt_Return($stmt->value->name);
             }
@@ -6341,7 +6057,6 @@ class Compiler {
         $fillclass = $this->printer->prettyPrint($stmts);
 
         /* return result */
-        //echo $fillclass . "<hr>";
         return $fillclass;
     }
 
@@ -6354,12 +6069,7 @@ class Compiler {
         for ($j = 0; $j < sizeof($args); $j++) {
 
             $argnode = $args[$j];
-//echo "<br/>";
-//print_R($argnode);
-//echo "<br/>";
             $this->updateVariables($argnode);
-
-
 
             // get value node inside argnode
 
@@ -6376,8 +6086,6 @@ class Compiler {
                 // first time
 
                 if ($bracketnode == null) {
-
-                    //echo 'start' . $j . '----';
 
                     if (sizeof($args) > 1) {
 
@@ -6423,9 +6131,6 @@ class Compiler {
                         }
                     }
 
-
-
-                    //print_r($bracketnode);
                 }
             } else {
 
@@ -6440,9 +6145,7 @@ class Compiler {
                     }
                 } else {
 
-                    //echo 'there' . $j . '----';
                     //$bracketnode->right = $valuenode;
-                    //print_r($bracketnode);
                 }
             }
         }
@@ -6722,8 +6425,6 @@ class Compiler {
 
         $q1 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $seid;
 
-        //echo $q1;
-
         $toprocess = array();
 
         $res1 = $db->selectQuery($q1);
@@ -6744,7 +6445,6 @@ class Compiler {
 
                             $previous = $row1["outerlooptimes"];
 
-                            //echo 'added ' . $row1["rgid"] . "<br/>";
                         } else {
 
                             /* ignore anything following until we exited any nested loops */
@@ -6761,10 +6461,6 @@ class Compiler {
 
         foreach ($toprocess as $t) {
 
-            //echo '<hr>Looking at: ' . $t["rgid"];
-
-
-
             $outerlooptimes = explode("~", $t["outerlooptimes"]);
 
             $outerlooprgids = explode("~", $t["outerlooprgids"]);
@@ -6777,9 +6473,6 @@ class Compiler {
 
             $outerlooprgids = array_reverse($outerlooprgids);
 
-            //print_r($outerlooptimes);
-            //print_r($outerlooprgids);
-
             $lookbefore = $t["number"];
 
             $dummy = sizeof($outerlooptimes);
@@ -6790,14 +6483,11 @@ class Compiler {
 
                 $needwork = true;
 
-                //echo '<hr>Looking at outer loop: ' . $o;
                 // how far can we look back? (not farther than end of any previous loops)
 
                 $maxback = "";
 
                 $q2 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $seid . " and number < " . $lookbefore . " and outerlooptimes=-1 order by number desc";
-
-                //echo $q2;
 
                 $res2 = $db->selectQuery($q2);
 
@@ -6811,12 +6501,9 @@ class Compiler {
                     $maxback = 0;
                 }
 
-                //echo '<hr>maxback: ' . $maxback;
                 // any entries that are with the right loop count
 
                 $q2 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $seid . " and number > " . $maxback . " and number < " . $lookbefore . " and looptimes=" . $o . " order by number desc";
-
-                //echo $q2 . "<hr>";
 
                 $res2 = $db->selectQuery($q2);
 
@@ -6842,11 +6529,7 @@ class Compiler {
 
                     $temp = array_reverse($outerlooptimes);
 
-                    //print_r($temp);
-
                     $looptimes = 1;
-
-                    //echo 'i is ' . $i . "<hr>";
 
                     for ($j = 0; $j < sizeof($temp) - $i; $j++) {
 
@@ -6855,13 +6538,9 @@ class Compiler {
                         $looptimes = $looptimes * $temp[$j];
                     }
 
-                    //echo '<br/>loop time: ' . end($temp);
-
                     $loopstring = implode("~", $out);
 
                     $query = "replace into " . Config::dbSurvey() . "_screens (suid, seid, rgid, number, section, looptimes, outerlooptimes, outerlooprgids, dummy) values(" . prepareDatabaseString($row2["suid"]) . ", " . prepareDatabaseString($row2["seid"]) . ", '" . prepareDatabaseString($outerlooprgids[$i]) . "', '" . prepareDatabaseString($t["number"]) . "', " . prepareDatabaseString($row2["section"]) . ", " . prepareDatabaseString($looptimes) . ", '" . prepareDatabaseString($loopstring) . "', '', " . $dummy . ")";
-
-                    //echo $query . "<br/>";
 
                     $db->executeQuery($query);
 
@@ -6920,8 +6599,6 @@ class Compiler {
 
                     if ($row1["section"] == -1 && $row1["outerlooptimes"] == -1 && $row1["dummy"] == 0) {
 
-                        //echo 'Adding entry in section ' . $sectionseid . " with loopstring " . $loopstring . "<br/>";
-
                         $progressbar->addEntry($sectionseid, $sectionrgid, $row1["rgid"], $loopstring, $row1["ifrgid"], $loopcount);
                     }
 
@@ -6945,10 +6622,8 @@ class Compiler {
                             $actions[] = array("ifrgid" => $row2["ifrgid"], "rgid" => $row2["rgid"], "looptimes" => $row2["looptimes"], "outerlooptimes" => $row2["outerlooptimes"], "section" => $row2["section"], "dummy" => $row2["dummy"]);
                         }
 
-                        //echo 'Processing loop in ' . $sectionseid . " at " . $row1["rgid"] . "<br/>";
-
                         $this->generateProgressBarLoop($progressbar, $sectionseid, $sectionrgid, $row1["rgid"], $row1["looptimes"], $row1["looptimes"], $row1["outerlooptimes"], $actions, $loopstring);
-                        //echo 'fniished with loop in ' . $sectionseid . " at " . $row1["rgid"] . "<br/>";
+
                         // add the action right after end of loop
                         // next one is a question screen
                         if ($row2["section"] == -1 && $row2["outerlooptimes"] == -1 && $row2["dummy"] == 0) {
@@ -6968,7 +6643,6 @@ class Compiler {
                                 $actions[] = array("ifrgid" => $row3["ifrgid"], "rgid" => $row3["rgid"], "looptimes" => $row3["looptimes"], "outerlooptimes" => $row3["outerlooptimes"], "section" => $row3["section"], "dummy" => $row3["dummy"]);
                             }
 
-                            //echo 'Processing loop in ' . $sectionseid . " at " . $row1["rgid"] . "<br/>";
                             //$this->generateProgressBarLoop($progressbar, $sectionseid, $sectionrgid, $row2["rgid"], $row2["looptimes"], $row2["looptimes"], $row2["outerlooptimes"], $actions, $loopstring);
                         } else if ($row2["section"] > -1 && $row2["dummy"] == 0) {
                             $this->generateProgressbarSection($progressbar, $sectionseid, $row2["section"], $row2["rgid"], $outerlooptimes, $loopstring);
@@ -6977,12 +6651,6 @@ class Compiler {
 
                     // section
                     else if ($row1["section"] > -1 && $row1["dummy"] == 0) {
-
-                        //echo 'Processing section in ' . $sectionseid . " at " . $row1["section"] . "<br/>";
-                        //if ($row1["ifrgid"] > 0) {
-                        //    echo 'HEHEHE WE SHOULD RESET HERE';
-                        //}
-                        //echo 'section!!!';
                         $this->generateProgressbarSection($progressbar, $sectionseid, $row1["section"], $row1["rgid"], $outerlooptimes, $loopstring);
                     }
                 }
@@ -6991,8 +6659,6 @@ class Compiler {
     }
 
     function generateProgressBarLoop($progressbar, $mainseid, $mainrgid, $rgid, $loopstoadd, $looptimes, $outerlooptimes, $actions, $loopstring = "") {
-
-        //print_r($actions);
 
         for ($m = 0; $m < $loopstoadd; $m++) {
 
@@ -7030,15 +6696,11 @@ class Compiler {
                         $nestedactions[] = array("ifrgid" => $subaction["ifrgid"], "rgid" => $subaction["rgid"], "looptimes" => $subaction["looptimes"], "outerlooptimes" => $subaction["outerlooptimes"], "section" => $subaction["section"], "dummy" => $subaction["dummy"]);
                     }
 
-                    //echo "<hr>Adding nested at " . $action["rgid"] . " with loop string " .  $loopstring . ($m + 1) . " to add: " . $loopstoadd . "<br/>"; 
-
                     $this->generateProgressBarLoop($progressbar, $mainseid, $mainrgid, $action["rgid"], $action["looptimes"] / $loopstoadd, $action["looptimes"], $action["outerlooptimes"], $nestedactions, $loopstring . ($m + 1));
 
-
-
                     // jump to end one (equals the entry after the nested loop)
-
                     $j = $k - 1;
+                    
                 } else {
 
 
@@ -7046,17 +6708,11 @@ class Compiler {
                     // question
 
                     if ($action["section"] == -1 && $action["dummy"] == 0) {
-
-                        //echo 'Adding entry in section ' . $sectionseid . " with loopstring " . $loopstring . ($m+1) . "<br/>";
-
                         $progressbar->addEntry($mainseid, $mainrgid, $action["rgid"], $loopstring . ($m + 1), $action["ifrgid"], ($m * 1), $rgid);
                     }
 
                     // section call
                     else if ($action["section"] > -1 && $action["dummy"] == 0) {
-
-                        //echo 'Processing section in ' . $mainseid . " at " . $action["section"] . "<br/>";
-
                         $this->generateProgressbarSection($progressbar, $mainseid, $action["section"], $action["rgid"], $outerlooptimes, $loopstring . ($m + 1));
                     }
                 }

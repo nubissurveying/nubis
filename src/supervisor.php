@@ -25,7 +25,6 @@ class Supervisor {
             $_SESSION['LASTPAGE'] = getFromSessionParams('page');
         }
 
-        //  echo '<br/><br/><br/>' . getFromSessionParams('page');
         if (isset($_SESSION['LASTPAGE'])) {
             switch ($_SESSION['LASTPAGE']) {
                 case 'supervisor.search': return $this->showSearchRes();

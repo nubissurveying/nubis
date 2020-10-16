@@ -17,11 +17,8 @@ ini_set("display_errors", 1);
 
 set_include_path(dirname(getcwd()));
 
-
 require_once('constants.php');
 require_once('functions.php');
-
-
 require_once('dbConfig.php');
 require_once('config.php');
 
@@ -74,6 +71,6 @@ if ($p == 'upload') { //upload data!
     $returnValue = 'ok';
 }
 
-
 echo $returnValue;
+
 ?>

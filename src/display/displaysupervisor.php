@@ -535,11 +535,6 @@ $(document).ready(function () {
         $rorh = loadvar('rorh', 1);
         $ceid = loadvar('ceid', 1);
 
-        //echo '<br/><br/><br/>' . $urid . ':' . $rorh . ":" . $ceid;
-//        $returnStr .= $this->displayInterviewerDropDown('supervisor.reports.statistics.contacts.graphs', $urid);
-        //bbbbbbbbbb
-
-
         $returnStr .= '<nav class="navbar navbar-default" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -798,7 +793,7 @@ var chart = new Highcharts.Chart({
             $query .= 'left join ' . dbConfig::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
             $query .= 'where ' . $userStr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND  t2.primkey is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         }
-        // echo '<br/><br/><br/>' . $query;
+
         $total = 0;
         $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', config::graphStartDate()) . " -1 month")) . "), 0   ],";
         $result = $db->selectQuery($query);
@@ -828,8 +823,6 @@ var chart = new Highcharts.Chart({
             $query .= 'left join ' . dbConfig::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
             $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND suid = ' . $rorh . ' and variablename="' . $fieldname . '" and answer is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         }
-
-        // echo '<br/><br/><br/>' . $query;
 
         $total = 0;
         $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', config::graphStartDate()) . " -1 months")) . "), 0   ],";
@@ -990,7 +983,7 @@ var chart = new Highcharts.Chart({
 
 
         }
-//                echo '<br/><br/><br/>' . $query;
+
         $total = 0;
         $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', config::graphStartDate()) . " -1 months")) . "), 0   ],";
         $result = $db->selectQuery($query);
@@ -1044,19 +1037,10 @@ var chart = new Highcharts.Chart({
         $returnStr .= '<script src="js/highcharts.js"></script>';
         $returnStr .= '<script src="js/modules/exporting.js"></script>';
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
-//        echo '<br/><br/><br/><br><br/>' . $this->getContactData();
+
         $returnStr .= $this->getSurveyInfoData($rorh);
 
-
-        /*        $returnStr .= '<table>';
-          $returnStr .= '<tr><td>Completed Interviews</td><td></td></tr>';
-          $returnStr .= '<tr><td>Non-Qualified</td><td></td></tr>';
-          $returnStr .= '<tr><td>Suspends/Breakoffs</td><td></tr>';
-          $returnStr .= '</table>'; */
-
-
-
-//END CONTENT
+        //END CONTENT
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
 
@@ -1105,8 +1089,6 @@ var chart = new Highcharts.Chart({
         $returnStr .= '<script src="js/highcharts.js"></script>';
         $returnStr .= '<script src="js/modules/exporting.js"></script>';
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
-//        echo '<br/><br/><br/><br><br/>' . $this->getContactData();
-//        echo '<hr><hr>';
         $returnStr .= $this->getResponseData($rorh);
 
 

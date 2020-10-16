@@ -22,7 +22,6 @@ class GPS {
         $query .= 'aes_decrypt(latitude, "' . Config::smsPersonalInfoKey() . '") as latitude, ';
         $query .= 'aes_decrypt(longitude, "' . Config::smsPersonalInfoKey() . '") as longitude ';
         $query .= ' from ' . Config::dbSurvey() . '_gps where dwellingid = "' . prepareDatabaseString($dwellingid) . '" and code = "' . prepareDatabaseString($village) . '"';
-        //echo '<br/><br/><br/>' . $query;
         $result = $db->selectQuery($query);
         $this->gps = $db->getRow($result);
     }

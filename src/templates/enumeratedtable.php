@@ -221,9 +221,7 @@ class EnumeratedTableTemplate extends TableTemplate {
         $orderedoptions = $options;
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
-            //$arr = explode(",", $this->engine->getAnswer($order));
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -296,9 +294,7 @@ class EnumeratedTableTemplate extends TableTemplate {
         $orderedoptions = $options;
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
-            //$arr = explode(",", $this->engine->getAnswer($order));
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {

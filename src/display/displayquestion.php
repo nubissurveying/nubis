@@ -89,7 +89,7 @@ class DisplayQuestionBasic extends Display {
 
         // get real variable names in subgroup
         $realvariablenames = $this->getRealVariables(explode("~", $vars));
-        //echo "template: " . $template . '---' . $realvariablenames . "<br/>";
+
         // get display for sub group
         return $this->showQuestions($vars, $realvariablenames, $template, $parentgroup);
     }
@@ -131,7 +131,6 @@ class DisplayQuestionBasic extends Display {
         } else {
 
             $groupname = strtolower($groupname);
-            //echo $groupname . '----' . $this->engine->replaceFills($groupname);
             $group = $this->engine->getGroup($this->engine->replaceFills($groupname));
             $template = $group->getTemplate();
 
@@ -440,7 +439,6 @@ class DisplayQuestionBasic extends Display {
         }
 
         /* question and answer display */
-        //echo $realvariables . '||||';
         $this->engine->determineDisplayNumbers($realvariables);
         if (sizeof($queryvariables) > 1) {
             $returnStr .= $this->showQuestions($variablenames, $realvariables, $groupname);
@@ -603,7 +601,7 @@ class DisplayQuestionBasic extends Display {
                             $lastcheck .= 'empty == true';
                             // THIS IS CURRENT, ALLOWS TO CHECK ONLY ONCE AND THEN JUST NOT CHECK ANYMORE: $extra_empty_check = "var empty = false; if (document.getElementById(\"em\").value == 0 && validateFormEmpty() == false) {";
                             $extra_empty_check = "var empty = false; if (validateFormEmpty() == false) {";
-                            //echo 'jjjjj' . $queryobject->getIfEmpty();
+
                             if ($this->ifempty == IF_EMPTY_WARN) {
                                 $extra_empty_check .= "document.getElementById(\"em\").value=1;";
                             }
@@ -1169,7 +1167,7 @@ class DisplayQuestionBasic extends Display {
 
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
+
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -1238,7 +1236,7 @@ class DisplayQuestionBasic extends Display {
 
         $label = $var->getEnumeratedLabel();
         $cnt = 1;
-        //print_r($splitup[1]);
+
         // TODO: SPLIT INTO NUMBER OF ARRAYS DEPENDING ON NUMBER OF COLUMNS, THEN PICK ONE FROM EACH ARRAY AND ADD AS A TD
         //foreach ($orderedoptions as $option) {
         for ($i = 0; $i < $itemspercolumn; $i++) {
@@ -1450,7 +1448,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
+
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -1800,7 +1798,6 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -2013,7 +2010,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
+
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -2244,7 +2241,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
+
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -2339,7 +2336,7 @@ class DisplayQuestionBasic extends Display {
             if ($var->isTableMobileLabels() == false) {
                 $nolabels = "data-tablesaw-no-labels";
             }
-            //echo $nolabels;
+
             $returnStr .= '<table role="presentation" data-tablesaw-firstcolumn ' . $nolabels . ' data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-setofenumerated-horizontal">';
         }
 
@@ -2651,7 +2648,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
+
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -3365,7 +3362,6 @@ li.draggable-item.ui-sortable-placeholder {
             $sortedsofar = explode(SEPARATOR_SETOFENUMERATED, $previousdata);
         }
 
-        //echo $previousdata . '---';
         $totalsorted = sizeof($sortedsofar);
 
         $str .= "<script type='text/javascript'>";
@@ -3509,7 +3505,7 @@ $(window).resize(function() {
 
         // droparea 2 use answer order
         $cnt = 1;
-        //print_r($sortedsofar);
+
         foreach ($sortedsofar as $s) {
             $v = $orderedoptions[$s];
             $text = $labels[$v["code"]];
@@ -4184,7 +4180,6 @@ $(window).resize(function() {
                 // add error string as parameter if we need it
                 $parameters[] = $this->getErrorTextString($varname);
 
-                //echo $tocall . '----';
                 if (function_exists($tocall)) {
                     try {
                         $f = new ReflectionFunction($tocall);
@@ -4278,7 +4273,7 @@ $(window).resize(function() {
         $answeridlist = array();
         $arr = explode(SEPARATOR_COMPARISON, $list);
         $displaynumbers = $this->engine->getDisplayNumbers();
-        //print_r($displaynumbers);
+
         foreach ($arr as $variable) {
             if (is_numeric($variable)) {
                 $answeridlist[] = $variable;
@@ -4286,7 +4281,7 @@ $(window).resize(function() {
                 $variablecheck = trim($variable); // old: str_replace(" ", "", $variable); (variable names can't have spaces, so trim better to deal with list containing spaces between variables
                 // variable that is also shown on screen
                 if (isset($displaynumbers[strtoupper($variablecheck)])) {
-                    //echo $variable . '---';
+                    
                     $variable = $variablecheck;
                     $var = $this->engine->getVariableDescriptive($variable);
                     if (!inArray($var->getAnswerType(), array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
@@ -4299,8 +4294,6 @@ $(window).resize(function() {
                 }
             }
         }
-
-        //print_r($answeridlist);
 
         return "['" . implode("','", $answeridlist) . "']";
     }
@@ -4336,7 +4329,7 @@ $(window).resize(function() {
             }
             $sm = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_SMALLER));
             if ($sm != "") {
-                //echo '!!!!!!!!!!!!!!!';
+                
                 $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_SETOFENUM_COMPARISON_SMALLER, $this->getAnswerList($sm)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_SMALLER));
             }
         } else if (inArray($at, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_SLIDER, ANSWER_TYPE_KNOB))) {
@@ -4362,7 +4355,7 @@ $(window).resize(function() {
             }
             $sm = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_SMALLER));
             if ($sm != "") {
-                //echo '!!!!!!!!!!!!!!!';
+                
                 $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_COMPARISON_SMALLER, $this->getAnswerList($sm)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_SMALLER));
             }
         }
@@ -4412,9 +4405,8 @@ $(window).resize(function() {
                     $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_COMPARISON_GREATER_EQUAL_TO_DATETIME, $this->getAnswerList($geq)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_GREATER_EQUAL_TO));
                 }
             }
-            //echo 'yyyyy';
-            $gr = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_GREATER));
-            //echo "<hr>" . $var->getComparisonGreater() . '----' . $gr;
+            
+            $gr = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_GREATER));            
             if ($gr != "") {
                 if ($answertype == ANSWER_TYPE_TIME) {
                     $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_COMPARISON_GREATER_TIME, $this->getAnswerList($gr)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_GREATER));
@@ -4505,11 +4497,9 @@ $(window).resize(function() {
         $value = "";
         if ($value != "") {
             $current = $value;
-        } else {
-            //echo $this->progressbarwidth * $this->engine->getProgress();
+        } else {            
             global $survey;
             $current = floor($this->progressbarwidth * $this->engine->getProgress($survey->getProgressBarType()));
-            //echo floor(($current / $this->progressbarwidth) * 100);
         }
         $progress = round(($current / $this->progressbarwidth) * 100);
 
@@ -4600,7 +4590,7 @@ $(window).resize(function() {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
+
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -4705,7 +4695,7 @@ $(window).resize(function() {
             if ($multiple == "") {
                 $returnStr .= '<select ' . $role . $linkedto . ' data-size="' . (sizeof($options) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-singledropdown-inline ' . $dkrfnaclass . '">';
             } else {
-                $returnStr .= '<select ' . $role . $linkedto . '  data-size="' . (sizeof($options) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-multipledropdown-inline ' . $dkrfnaclass . '">';
+                $returnStr .= '<select ' . $role . $linkedto . ' data-size="' . (sizeof($options) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-multipledropdown-inline ' . $dkrfnaclass . '">';
             }
         }
         $returnStr .= $empty;
@@ -4742,7 +4732,7 @@ $(window).resize(function() {
                     $disabled = ' disabled ';
                 }
 
-                $returnStr .= '<option data-content="' . $this->applyFormatting($option["label"], $var->getAnswerFormatting()) . '" ' . $optionrole . $disabled . $selected . ' value="' . $option["code"] . '">' . $this->applyFormatting($option["label"], $var->getAnswerFormatting()) . '</option>';
+                $returnStr .= '<option id="' . $id . '_' . $option["code"] . '" data-content="' . $this->applyFormatting($option["label"], $var->getAnswerFormatting()) . '" ' . $optionrole . $disabled . $selected . ' value="' . $option["code"] . '">' . $this->applyFormatting($option["label"], $var->getAnswerFormatting()) . '</option>';
             }
         }
         if ($inline == false) {
@@ -4763,13 +4753,19 @@ $(window).resize(function() {
                     $(document).ready(function() {
 
                     $("#' . $id . '").on(\'change\', function() {
-                       setTimeout(function() {$("#' . $id . '").trigger("updatecomplete"); }, 5);
+                        setTimeout(function() {$("#' . $id . '").trigger("updatecomplete"); }, 5);
                     });
 
                     $("#' . $id . '").on(\'updatecomplete\', function() {
-                      var selectedText = $(this).find("option:selected").text();
-                      $("[data-id=\'' . $id . '\'] span.filter-option").text(selectedText.replace(/(<([^>]+)>)/gi, ""));
-                    $("[data-id=\'' . $id . '\']").css("height", "34px");
+                        var selectedText = [];
+                        var cnt = 0;
+                        $(this).find("option:selected").each(function() {                        
+                            selectedText[cnt] = $(this).text();
+                            cnt++;
+                        });
+                        selectedText = selectedText.join(", ");
+                        $("[data-id=\'' . $id . '\'] span.filter-option").text(selectedText.replace(/(<([^>]+)>)/gi, ""));
+                        $("[data-id=\'' . $id . '\']").css("height", "34px");
 
                     });
 
@@ -4780,6 +4776,10 @@ $(window).resize(function() {
                     });
                 </script>';
         $returnStr .= minifyScript($str);
+        
+        if ($multiple != "" && $var->isInputMaskEnabled()) {
+            $returnStr .= $this->displayMultiDropdownUnchecking($id, $previousdata, $var->getInvalidSubSelected());
+        }
 
         return $returnStr;
     }

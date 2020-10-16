@@ -95,8 +95,7 @@ class LogActions {
             
             // exclude any $_POST data for external storage only variables
             foreach ($externalonly as $k => $v) {
-                if (isset($_POST[$v])) {
-                    echo 'unsetting ' . $v;
+                if (isset($_POST[$v])) {                    
                     unset($_POST[$v]);
                 }
             }
@@ -128,7 +127,7 @@ class LogActions {
         } else {
             $actions = array();
             $query = 'SELECT * FROM ' . Config::dbSurveyData() . '_actions as t1 left join ' . Config::dbSurveyData() . '_users as t2 on t1.urid = t2.urid where primkey = \'' . prepareDatabaseString($primkey) . '\' and action like \'interviewer.%\' order by t1.asid desc';
-            //echo '<br/><br/><br/>' . $query;
+
             $result = $db->selectQuery($query);
             while ($row = $db->getRow($result)) {
                 $actions[] = new LogAction($row);

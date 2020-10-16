@@ -104,9 +104,7 @@ class ReverseEnumeratedTableTemplate extends TableTemplate {
         $orderedoptions = $options;
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
-            //$arr = explode(",", $this->engine->getAnswer($order));
             $arr = $this->engine->getAnswer($order);
-            //print_r($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -245,8 +243,6 @@ class ReverseEnumeratedTableTemplate extends TableTemplate {
 
                 $cnt = $this->displaynumbers[strtoupper($variable)];
                 $varname = SESSION_PARAMS_ANSWER . $cnt;
-                //echo $varname;
-                //print_r($ids);
                 $this->engine->getDisplayObject()->addInlineFieldChecks($varname, $variable, $var, $ids);
             }
         }

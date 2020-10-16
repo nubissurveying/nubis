@@ -120,7 +120,6 @@ class Setting extends NubisObject {
         global $db;
         $query = "delete from " . Config::dbSurvey() . "_settings where suid=" . $this->getSuid() . " and object=" . $this->getObject() . " and objecttype='" . $this->getObjectType() . "' and name='" . $this->getName() . "' and mode=" . $this->getMode() . " and language=" . $this->getLanguage();
         $db->executeQuery($query);
-        //echo $query;
     }
 
     function save() {

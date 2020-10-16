@@ -656,7 +656,6 @@ class Checker {
     function checkReferences($refs) {
         $messages = array();
         foreach ($refs as $r) {
-            //echo $r . '----';
             if (trim($r) != "") {
                 if (contains($r, "[")) {
                     $this->checkArray($r, $messages);
@@ -725,15 +724,6 @@ class Checker {
 
         // http://stackoverflow.com/questions/2938137/is-there-way-to-keep-delimiter-while-using-php-explode-or-other-similar-function
         $parts = preg_split('/([\[\., \]])/', $str, -1, PREG_SPLIT_DELIM_CAPTURE);
-        //print_r($parts);
-        //echo "<hr><hr>";
-        //$sentences = array();
-        //for ($i = 0, $n = count($parts) - 1; $i < $n; $i+=2) {
-        //    $sentences[] = $parts[$i] . $parts[$i + 1];
-        //}
-        //if ($parts[$n] != '') {
-        //    $sentences[] = $parts[$n];
-        //}
 
         for ($i = 0; $i < sizeof($parts); $i++) {
             $s = $parts[$i];
@@ -748,7 +738,6 @@ class Checker {
                             $messages[] = Language::messageCheckerVariableNotArray($s);
                         }
                     } else {
-                        //echo $s;
                         if ($v->isArray() == true) {
                             $messages[] = Language::messageCheckerVariableArray($s);
                         }

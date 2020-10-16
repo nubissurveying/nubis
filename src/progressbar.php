@@ -1,1 +1,224 @@
-<?php/*  ------------------------------------------------------------------------  Copyright (C) 2014 Bart Orriens, Albert Weerman  This library/program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA  ------------------------------------------------------------------------ */class Progressbar {    private $suid;    private $seid;    private $entries;    private $storeentries;    private $counter;    //private $realcounter;    //private $resetted;    //private $oldifrgid;    private $loopentries;    //private $maxscreens;    function __construct($suid, $seid) {        $this->suid = $suid;        $this->seid = $seid;        $this->entries = array();        $this->storeentries = array();        $this->counter = 1;        //$this->realcounter = 1;        //$this->resetted = array();        //$this->oldifrgid = "";        $this->loopentries = array();        //$this->maxscreens = 0;    }    //function getMaximumAddedEntries($looprgid) {    //}    function addEntry($seid, $seidrgid, $rgid, $loopstring, $ifrgid, $plus, $looprgid = "") {        if ($seidrgid == "") {            $seidrgid = 0;        }        $number = $this->counter;        $this->entries[$this->seid . '-' . $seid . '-' . $seidrgid . '-' . $rgid . '-' . $loopstring] = array("seid" => $seid, "seidrgid" => $seidrgid, "rgid" => $rgid, "number" => $number, "loopstring" => $loopstring);        $this->storeentries[] = array("seid" => $seid, "seidrgid" => $seidrgid, "rgid" => $rgid, "number" => $number, "loopstring" => $loopstring);        //echo '<br/>Added with key: ' . $this->seid . '-' . $seid . '-' . $rgid . '-' . $loopstring . ' at screen ' . $number;        $this->counter++;    }    /* function resetCount($seid, $seidrgid, $rgid, $index, $ifrgid, $shorterindex) {      // already reset, then ignore      //if (inArray($index, $this->resetted)) {      //    return;      //}      //$this->resetted[] = $index; // TODO: DO WE NEED TO STORE THIS WITHOUT THE LOOP TIME, SO WE ALWAYS UPDATE IT WHEN WITHIN A LOOP???      if (isset($this->maxcounter[$index])) {      if ($this->counter > $this->maxcounter[$index]) {      //echo '<br/>Increased max for ' . $index . ' to ' . $this->counter;      $this->maxcounter[$index] = $this->counter;      }      } else {      $this->maxcounter[$index] = $this->counter;      }      // find screen number before this if started, so we can start from there      for ($i = sizeof($this->storeentries); $i >= 0; $i--) {      if (isset($this->storeentries[$i])) {      $entry = $this->storeentries[$i];      if ($entry["seid"] == $seid && $entry["seidrgid"] == $seidrgid) {      $rg = $entry["rgid"];      if ($rg < $ifrgid) {      $this->counter = $entry["number"]+1;      //echo'<br/>resetting ' . $rgid . ' with if ' . $ifrgid . ' to ' . $this->counter . ' at ' . $entry["rgid"];      return;      }      }      }      }      $this->counter = 1; // first line is if      }      function restoreCount($index) {      //print_r($this->maxcounter);      if (isset($this->maxcounter[$index])) {      //echo '<br/>RESTORED';      $this->counter = $this->maxcounter[$index]-1;      }      } */    function getScreenNumber($seid, $seidrgid, $rgid, $loopstring) {        //echo '<hr>INDEX:' .$this->seid . '-' . $seid . '-' . $seidrgid . '-' . $rgid . '-' . $loopstring . "<br/>";        if (isset($this->entries[$this->seid . '-' . $seid . '-' . $seidrgid . '-' . $rgid . '-' . $loopstring])) {            $entry = $this->entries[$this->seid . '-' . $seid . '-' . $seidrgid . '-' . $rgid . '-' . $loopstring];            //echo '<br/>found: ' . $entry["number"];            return $entry["number"];        }        return 0; // something went wrong    }    function getCounter() {        return $this->counter;    }    function getNumberOfScreens() {        return sizeof(array_keys($this->entries)); // $this->maxscreens;    }    function delete() {        global $db;        $del = "delete from " . Config::dbSurvey() . "_progressbars where suid=" . $this->suid . " and mainseid=" . $this->seid;        $db->executeQuery($del);    }    function load() {            }    function save() {        $this->delete();        global $db;        for ($j = 0; $j < sizeof($this->storeentries); $j++) {            $entry = $this->storeentries[$j];            $i = "replace into " . Config::dbSurvey() . "_progressbars (suid, mainseid, seid, seidrgid, rgid, number, loopstring) values(" . $this->suid . "," . $this->seid . "," . $entry["seid"] . "," . $entry["seidrgid"] . "," . $entry["rgid"] . "," . $entry["number"] . ",'" . $entry["loopstring"] . "')";            //echo $i ."<br/>";            $db->executeQuery($i);            $number++;        }    }    /* section based progress */    function getSectionProgress($suid, $mainseid, $seid, $rgid, $loopstring, $looprgid) {        global $engine;        //$suid = $engine->getSuid();        //$seid = $engine->getSeid();        //$rgid = $engine->getRgid();        //$loopstring = $engine->getLoopstring();        if ($loopstring == "") {            $loopstring = 1;        }        //echo $loopstring;        //echo $rgid . '----';        global $db;        $query = "select number, looptimes, outerlooprgids from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid . ' and rgid=' . $rgid;        $res = $db->selectQuery($query);        if ($res) {            if ($db->getNumberOfRows($res) > 0) {                $row = $db->getRow($res);                if ($row["looptimes"] == 1 && ($looprgid == 0 || $looprgid == "")) {                    return $row["number"];                }                // we are in a loop!                else {                    //echo 'ohno';                    // get loop rgid                    //$looprgid = $engine->getLoopRgid();                    // get number of first action in loop                    $query = "select number from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid . ' and rgid > ' . $looprgid . ' limit 0,1';                    $res = $db->selectQuery($query);                    if ($res) {                        if ($db->getNumberOfRows($res) > 0) {                            $row2 = $db->getRow($res);                            $startloop = $row2["number"];                            // get number right after the loop                            $query = "select number from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid . ' and rgid > ' . $rgid . ' and outerlooprgids != "' . $row["outerlooprgids"] . '" limit 0,1';                            $res = $db->selectQuery($query);                            if ($res) {                                if ($db->getNumberOfRows($res) > 0) {                                    $row1 = $db->getRow($res);                                    //echo 'end at: ' . $row1["number"];                                    $numberofquestions = $row1["number"] - $startloop; // number of question screens                                    //echo $difference/($row1["number"] - $startloop);                                    //$factor = $difference/($row["looptimes"]*$difference); // moving from one question to another the increment must be this                                                                    //$loopmax = $engine->loopmax;                                    //$loopmin = $engine->loopmin;                                    //$loopcounters = $engine->loopcounter;                                    // get loop data                                    global $db;                                    $query = "select loopmin, loopmax, loopcounter from " . Config::dbSurveyData() . "_loopdata where suid=" . $suid . " and primkey='" . $engine->getPrimaryKey() . "' and mainseid=" . $mainseid . " and seid=" . $seid . " and looprgid=" . $looprgid;                                    $res = $db->selectQuery($query);                                    //echo $query;                                    if ($res) {                                        $row4 = $db->getRow($res);                                        $loopmin = $row4["loopmin"];                                        $loopmax = $row4["loopmax"];                                        $loopcounters = $row4["loopcounter"];                                    }                                    // go through outer/inner loops                                    $counters = explode("~", $loopcounters);                                    $current = "";                                    foreach ($counters as $count) {                                        if ($current == "") {                                            $current = $engine->getAnswer($count);                                        } else {                                            $current = $current * $engine->getAnswer($count);                                        }                                    }                                    // calculate total number of outer loops                                    $outer = 1;                                                                        // untested code for calculating total number of outer loops                                    /*$beforelooprgid = $looprgid;                                    foreach ($counters as $count) {                                                                                $qb = "select * from " . Config::dbSurveyData() . "_loopdata where suid=" . $suid . " and primkey='" . $engine->getPrimaryKey() . "' and mainseid=" . $mainseid . " and seid=" . $seid . " and loopcounter='" . $count . "' and looprgid <" . $beforelooprgid . " order by looprgid desc";                                        $resb = $db->selectQuery($qb);                                        if ($resb) {                                            if ($db->getNumberOfRows($resb) > 0) {                                                $rowb = $db->getRow($resb);                                                $outer = $outer * ($rowb["loopmax"] - $rowb["loopmin"] + 1);                                                $beforelooprgid = $rowb["looprgid"];                                            }                                        }                                    }*/                                    $numberofloops = ($loopmax - $loopmin + 1) * $outer; // calculate total number of loops                                    // calculate factor: number of questions in one loop divided by the total number of questions across all loops                                    $factor = $numberofquestions / ($numberofloops * $numberofquestions);                                    //echo $loopmin . '----' . $loopmax . '----' . $difference . '----' . $factor . '-----' . $numberofquestions;                                    $extra = 0;                                    // calculate how much covered in this loop so far!                                                                    //$extra = ($loopstring - $loopmin) * $factor;                                    $extra = ($row["number"] - $startloop) * $factor;                                    $extra = $extra + ($current - $loopmin) * $numberofquestions * $factor;                                    $newnumber = $startloop + $extra;                                    //echo '---' . $newnumber . '----' . $extra;                                    return $newnumber;                                }                            }                        }                    }                }            }        }        return "";    }    function getSectionTotal($suid, $seid) {        global $db;        $query = "select count(*) as cnt from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid;        //echo $query;        //$query = "select sum(looptimes) as cnt from hrs_screens where suid=" . $suid . " and seid=" . $seid;        $res = $db->selectQuery($query);        if ($res) {            if ($db->getNumberOfRows($res) > 0) {                $row = $db->getRow($res);                //echo $row["cnt"];                return $row["cnt"];            }        }        return 1;    }}?>
+<?php
+
+/*
+  ------------------------------------------------------------------------
+  Copyright (C) 2014 Bart Orriens, Albert Weerman
+
+  This library/program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+  ------------------------------------------------------------------------
+ */
+
+class Progressbar {
+
+    private $suid;
+    private $seid;
+    private $entries;
+    private $storeentries;
+    private $counter;
+    //private $realcounter;
+    //private $resetted;
+    //private $oldifrgid;
+    private $loopentries;
+
+    //private $maxscreens;
+
+    function __construct($suid, $seid) {
+
+        $this->suid = $suid;
+
+        $this->seid = $seid;
+
+        $this->entries = array();
+        $this->storeentries = array();
+        $this->counter = 1;
+        //$this->realcounter = 1;
+        //$this->resetted = array();
+        //$this->oldifrgid = "";
+        $this->loopentries = array();
+        //$this->maxscreens = 0;
+    }
+
+    //function getMaximumAddedEntries($looprgid) {
+    //}
+
+    function addEntry($seid, $seidrgid, $rgid, $loopstring, $ifrgid, $plus, $looprgid = "") {
+
+        if ($seidrgid == "") {
+            $seidrgid = 0;
+        }
+        $number = $this->counter;
+        $this->entries[$this->seid . '-' . $seid . '-' . $seidrgid . '-' . $rgid . '-' . $loopstring] = array("seid" => $seid, "seidrgid" => $seidrgid, "rgid" => $rgid, "number" => $number, "loopstring" => $loopstring);
+        $this->storeentries[] = array("seid" => $seid, "seidrgid" => $seidrgid, "rgid" => $rgid, "number" => $number, "loopstring" => $loopstring);
+        $this->counter++;
+    }
+    
+    function getScreenNumber($seid, $seidrgid, $rgid, $loopstring) {
+
+        if (isset($this->entries[$this->seid . '-' . $seid . '-' . $seidrgid . '-' . $rgid . '-' . $loopstring])) {
+            $entry = $this->entries[$this->seid . '-' . $seid . '-' . $seidrgid . '-' . $rgid . '-' . $loopstring];
+            return $entry["number"];
+        }
+        return 0; // something went wrong
+    }
+
+    function getCounter() {
+        return $this->counter;
+    }
+
+    function getNumberOfScreens() {
+        return sizeof(array_keys($this->entries)); // $this->maxscreens;
+    }
+
+    function delete() {
+
+        global $db;
+
+        $del = "delete from " . Config::dbSurvey() . "_progressbars where suid=" . $this->suid . " and mainseid=" . $this->seid;
+
+        $db->executeQuery($del);
+    }
+
+    function load() {
+        
+    }
+
+    function save() {
+
+        $this->delete();
+
+        global $db;
+
+        for ($j = 0; $j < sizeof($this->storeentries); $j++) {
+            $entry = $this->storeentries[$j];
+            $i = "replace into " . Config::dbSurvey() . "_progressbars (suid, mainseid, seid, seidrgid, rgid, number, loopstring) values(" . $this->suid . "," . $this->seid . "," . $entry["seid"] . "," . $entry["seidrgid"] . "," . $entry["rgid"] . "," . $entry["number"] . ",'" . $entry["loopstring"] . "')";
+            $db->executeQuery($i);
+            $number++;
+        }
+    }
+
+    /* section based progress */
+
+    function getSectionProgress($suid, $mainseid, $seid, $rgid, $loopstring, $looprgid) {
+        global $engine;
+
+        if ($loopstring == "") {
+            $loopstring = 1;
+        }
+        global $db;
+        $query = "select number, looptimes, outerlooprgids from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid . ' and rgid=' . $rgid;
+
+        $res = $db->selectQuery($query);
+        if ($res) {
+            if ($db->getNumberOfRows($res) > 0) {
+                $row = $db->getRow($res);
+                if ($row["looptimes"] == 1 && ($looprgid == 0 || $looprgid == "")) {
+                    return $row["number"];
+                }
+                // we are in a loop!
+                else {
+
+                    // get number of first action in loop
+                    $query = "select number from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid . ' and rgid > ' . $looprgid . ' limit 0,1';
+                    $res = $db->selectQuery($query);
+                    if ($res) {
+                        if ($db->getNumberOfRows($res) > 0) {
+                            $row2 = $db->getRow($res);
+                            $startloop = $row2["number"];
+
+                            // get number right after the loop
+                            $query = "select number from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid . ' and rgid > ' . $rgid . ' and outerlooprgids != "' . $row["outerlooprgids"] . '" limit 0,1';
+                            $res = $db->selectQuery($query);
+                            if ($res) {
+                                if ($db->getNumberOfRows($res) > 0) {
+                                    $row1 = $db->getRow($res);
+
+                                    $numberofquestions = $row1["number"] - $startloop; // number of question screens
+                                    //$factor = $difference/($row["looptimes"]*$difference); // moving from one question to another the increment must be this                                
+                                    //$loopmax = $engine->loopmax;
+                                    //$loopmin = $engine->loopmin;
+                                    //$loopcounters = $engine->loopcounter;
+                                    // get loop data
+                                    global $db;
+                                    $query = "select loopmin, loopmax, loopcounter from " . Config::dbSurveyData() . "_loopdata where suid=" . $suid . " and primkey='" . $engine->getPrimaryKey() . "' and mainseid=" . $mainseid . " and seid=" . $seid . " and looprgid=" . $looprgid;
+                                    $res = $db->selectQuery($query);
+                                    
+                                    if ($res) {
+                                        $row4 = $db->getRow($res);
+                                        $loopmin = $row4["loopmin"];
+                                        $loopmax = $row4["loopmax"];
+                                        $loopcounters = $row4["loopcounter"];
+                                    }
+
+                                    // go through outer/inner loops
+                                    $counters = explode("~", $loopcounters);
+                                    $current = "";
+                                    foreach ($counters as $count) {
+                                        if ($current == "") {
+                                            $current = $engine->getAnswer($count);
+                                        } else {
+                                            $current = $current * $engine->getAnswer($count);
+                                        }
+                                    }
+
+                                    // calculate total number of outer loops
+                                    $outer = 1;
+                                    
+                                    // untested code for calculating total number of outer loops
+                                    /*$beforelooprgid = $looprgid;
+                                    foreach ($counters as $count) {                                        
+                                        $qb = "select * from " . Config::dbSurveyData() . "_loopdata where suid=" . $suid . " and primkey='" . $engine->getPrimaryKey() . "' and mainseid=" . $mainseid . " and seid=" . $seid . " and loopcounter='" . $count . "' and looprgid <" . $beforelooprgid . " order by looprgid desc";
+                                        $resb = $db->selectQuery($qb);
+                                        if ($resb) {
+                                            if ($db->getNumberOfRows($resb) > 0) {
+                                                $rowb = $db->getRow($resb);
+                                                $outer = $outer * ($rowb["loopmax"] - $rowb["loopmin"] + 1);
+                                                $beforelooprgid = $rowb["looprgid"];
+                                            }
+                                        }
+                                    }*/
+                                    $numberofloops = ($loopmax - $loopmin + 1) * $outer; // calculate total number of loops
+                                    // calculate factor: number of questions in one loop divided by the total number of questions across all loops
+                                    $factor = $numberofquestions / ($numberofloops * $numberofquestions);
+
+                                    $extra = 0;
+
+                                    // calculate how much covered in this loop so far!                                
+                                    //$extra = ($loopstring - $loopmin) * $factor;
+                                    $extra = ($row["number"] - $startloop) * $factor;
+                                    $extra = $extra + ($current - $loopmin) * $numberofquestions * $factor;
+                                    $newnumber = $startloop + $extra;
+
+                                    return $newnumber;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+    function getSectionTotal($suid, $seid) {
+
+        global $db;
+        $query = "select count(*) as cnt from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid;
+        
+        //$query = "select sum(looptimes) as cnt from hrs_screens where suid=" . $suid . " and seid=" . $seid;
+        $res = $db->selectQuery($query);
+        if ($res) {
+            if ($db->getNumberOfRows($res) > 0) {
+                $row = $db->getRow($res);
+                return $row["cnt"];
+            }
+        }
+        return 1;
+    }
+
+}
+
+?>

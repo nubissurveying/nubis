@@ -213,7 +213,6 @@ class BasicEngine extends NubisObject {
             if ($row["checks"] != "") {
                 $this->checkclasses = unserialize(gzuncompress($row["checks"]));
             }
-            //echo 'loaded';
         }
     }
 
@@ -264,7 +263,6 @@ class BasicEngine extends NubisObject {
         ob_start();
         eval($fillclasscode);
         $contents = ob_get_clean();
-        //echo $contents;
         if ($contents == "") {
             try {
                 $fillcl = new ReflectionClass($fillclass);
@@ -278,7 +276,6 @@ class BasicEngine extends NubisObject {
     }
 
     function addInlineField($variable) {
-        //echo 'inline: ' . $variable . "<hr>";
 
         /* no need to add inline fields if we hit update/change language, since
          * we still have those from the state, but it just overwrites earlier entries
@@ -304,9 +301,6 @@ class BasicEngine extends NubisObject {
 
     function replaceInlineFields($text, $enumid = "", $enumtype = "", $enumvalue = "") {
         $displaynumbers = $this->getDisplayNumbers();
-        //print_r($displaynumbers);
-        //echo 'INLINE: ' . $text . "<hr>";
-        //echo $this->getTemplate() . '---<br/>';
         $temp = $this->getTemplate();
 
         /* replace inline question texts */
@@ -337,15 +331,12 @@ class BasicEngine extends NubisObject {
                         $replacetext = $this->display->showQuestionText($realfield, $this->getVariableDescriptive($realfield), "uscic-question-inline");
                         //}
                     } else {
-                        //echo '<br/>no' . $text;
                         $replacetext = "";
                     }
                 }
 
                 $pattern = "/\\" . INDICATOR_INLINEFIELD_TEXT . preparePattern($fieldref) . "/i";
-                //echo $pattern;
                 $text = preg_replace($pattern, $replacetext, $text);
-                //echo 'now: ' . $text;
             }
             $cnt++;
 
@@ -361,7 +352,7 @@ class BasicEngine extends NubisObject {
         /* replace answer fields */
         $cnt = 0;
         while (strpos($text, INDICATOR_INLINEFIELD_ANSWER) !== false) {
-            //echo 'hhhh';
+
             $fields = getReferences($text, INDICATOR_INLINEFIELD_ANSWER);
 
             // sort inline fields by longest keys
@@ -376,19 +367,16 @@ class BasicEngine extends NubisObject {
                 } else {
                     $realfield = $this->getInlineField($field); // update in case of brackets
                     $fieldref = $field; //str_replace("[", "\[", str_replace("]", "\]", $field));
-                    //echo "<hr>" . $field . '----' . $realfield . "<br/>";
+
                     // only if in group we add inline fields
                     if ($temp != "") {
-                        //echo 'looking for: ' . $this->getInlineFieldValue($realfield);
-                        //$previousdata = strtr($this->getAnswer($field, $this->getInlineFieldValue($realfield)), array('\\' => '\\\\', '$' => '\$'));
                         $previousdata = strtr($this->getAnswer($realfield), array('\\' => '\\\\', '$' => '\$'));
-                        //echo $field . '---' . $previousdata . "<br/>";
                         $variable = $this->getVariableDescriptive($field);
                         $cnt = $displaynumbers[strtoupper($realfield)];
-                        //echo '---' . $cnt . '----';
+
                         // we have a cnt, then this is a field being displayed!
                         if ($cnt != "") {
-                            //echo "<hr>" . $field . '----' . $realfield . "<br/>";
+                            
                             /* if radio/set of enumerated, then add error check if inline field filled out and option not checked */
                             $varname = SESSION_PARAMS_ANSWER . $cnt;
                             $id = $this->getFill($realfield, $variable, SETTING_ID);
@@ -419,15 +407,12 @@ class BasicEngine extends NubisObject {
                             $replacetext = "";
                         }
                     } else {
-                        //echo '<br/>no' . $text;
                         $replacetext = "";
                     }
                 }
 
                 $pattern = "/\\" . INDICATOR_INLINEFIELD_ANSWER . preparePattern($fieldref) . "/i";
-                //echo $pattern;
                 $text = preg_replace($pattern, $replacetext, $text);
-                //echo 'now: ' . $text;
             }
             $cnt++;
 
@@ -444,9 +429,6 @@ class BasicEngine extends NubisObject {
     }
 
     function updateInlineFields($text) {
-        //print_r($displaynumbers);
-        //echo 'INLINE: ' . $text . "<hr>";
-        //echo $this->getTemplate() . '---<br/>';
         $cnt = 0;
         if (strpos($text, INDICATOR_INLINEFIELD_ANSWER) !== false) {
             $fields = getReferences($text, INDICATOR_INLINEFIELD_ANSWER);
@@ -460,11 +442,8 @@ class BasicEngine extends NubisObject {
                 }
                 $realfield = INDICATOR_INLINEFIELD_ANSWER . $this->getInlineField($field); // update in case of brackets
                 $fieldref = $field; //str_replace("[", "\[", str_replace("]", "\]", $field));
-                //echo $fieldref . '<hr>----' . $realfield;
                 $pattern = "/\\" . INDICATOR_INLINEFIELD_ANSWER . preparePattern($fieldref) . "/i";
-                //echo $pattern;
                 $text = preg_replace($pattern, $realfield, $text);
-                //echo 'now: ' . $text;
             }
         }
 
@@ -481,11 +460,8 @@ class BasicEngine extends NubisObject {
                 }
                 $realfield = INDICATOR_INLINEFIELD_TEXT . $this->getInlineField($field); // update in case of brackets
                 $fieldref = $field; //str_replace("[", "\[", str_replace("]", "\]", $field));
-                //echo $fieldref . '<hr>----' . $realfield;
                 $pattern = "/\\" . INDICATOR_INLINEFIELD_TEXT . preparePattern($fieldref) . "/i";
-                //echo $pattern;
                 $text = preg_replace($pattern, $realfield, $text);
-                //echo 'now: ' . $text;
             }
         }
 
@@ -495,12 +471,10 @@ class BasicEngine extends NubisObject {
     function getInlineField($variable) {
         if ($this->inlinefieldclasses) {
             $classextension = prepareClassExtension($variable);
-            //echo $variable . "||||||";
             $class = $this->loadInlineFieldClass(CLASS_INLINEFIELD . "_" . $classextension, $this->inlinefieldclasses['"' . strtoupper($variable) . '"']);
             if ($class) {
                 $result = $class->getInlineField(strtoupper($variable));
                 if ($result != "") {
-                    //echo $result;
                     return $result;
                 }
             }
@@ -536,7 +510,6 @@ class BasicEngine extends NubisObject {
         //if ($this->redofills == true) {
         //if (isset($this->setfillclasses)) {
         //   if (isset($this->setfillclasses[strtoupper(getBasicName($variable))])) {
-        //echo 'reoding: ' . $variable . getSurveyLanguage();
         //$this->setFillValue($this->setfillclasses[strtoupper(getBasicName($variable))]);
         if (!inArray(getBasicName($variable), $this->processedfills) && $this->wasAssigned(getBasicName($variable)) == false) { // only do each fill once!
             $this->setFillValue(getBasicName($variable));
@@ -547,12 +520,8 @@ class BasicEngine extends NubisObject {
         //}
 
         if ($this->getfillclasses) {
-            //echo $variable;
+            
             $classextension = prepareClassExtension($variable);
-
-            //echo $this->getfillclasses['"' . strtoupper($variable) . '"'];
-            //echo "<hr>";
-            //echo CLASS_GETFILL . "_" . $classextension;
             $getfillclass = $this->loadGetFillClass(CLASS_GETFILL . "_" . $classextension, $this->getfillclasses['"' . strtoupper($variable) . '"']);
             if ($getfillclass) {
 
@@ -586,7 +555,7 @@ class BasicEngine extends NubisObject {
         ob_start();
         eval($fillclasscode);
         $contents = ob_get_clean();
-        //echo $contents;
+        
         if ($contents == "") {
             try {
                 $fillcl = new ReflectionClass($fillclass);
@@ -636,11 +605,8 @@ class BasicEngine extends NubisObject {
     function setFillValue($variable) {
         $variable = trim($variable);
         if ($this->setfillclasses && isset($this->setfillclasses[strtoupper($variable) . getSurveyLanguage() . getSurveyMode()])) {
-            //echo strtoupper($variable) . getSurveyLanguage() . getSurveyMode();
-            //echo $variable . ":<textarea rows=5 cols=30>" . $this->setfillclasses[strtoupper($variable) . getSurveyLanguage() . getSurveyMode()] . "</textarea><br/><hr>";
             $setfillclass = $this->loadSetFillClass(CLASS_SETFILL . "_" . $variable, $this->setfillclasses[strtoupper($variable) . getSurveyLanguage() . getSurveyMode()]);
             if ($setfillclass) {
-                //echo ';ok';
                 // execute fill code
                 $setfillclass->doAction($setfillclass->getFirstAction());
             }
@@ -759,7 +725,6 @@ class BasicEngine extends NubisObject {
     function updateRemarkStatus($dirty = DATA_DIRTY) {
         global $db;
         $query = "update " . Config::dbSurveyData() . "_observations set dirty=$dirty where suid=" . prepareDatabaseString($this->getSuid()) . " and primkey='" . prepareDatabaseString($this->getPrimaryKey()) . "' and displayed='" . prepareDatabaseString(getFromSessionParams(SESSION_PARAM_VARIABLES)) . "'"; // stateid=" . $this->getStateID(); // . " and displayed='" . $this->getDisplayed() . "'";
-        //echo $query;
         $db->executeQuery($query);
     }
 
@@ -809,7 +774,6 @@ class BasicEngine extends NubisObject {
             $row = $db->getRow($result);
             $first = $row['stateid'];
             $q = "delete from " . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and stateid > ' . $first;
-            //echo $q;
             $db->executeQuery($q);
         }
     }
@@ -855,7 +819,6 @@ class BasicEngine extends NubisObject {
         global $db;
         $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . $this->getMainSeid() . ' order by stateid desc limit 0,1');
         if ($db->getNumberOfRows($result) > 0) {
-            //echo 'select * from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . $this->getMainSeid() . ' order by stateid desc limit 0,1';
             $row = $db->getRow($result);
             $result = $this->state->loadState($row['stateid'], $row["mainseid"], $row["seid"], $row["prefix"]);
             if ($result) {
@@ -900,7 +863,6 @@ class BasicEngine extends NubisObject {
 
     function loadPreviousSectionEntryState() {
         global $db;
-        //echo 'select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . $this->getMainSeid() . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and displayed="" order by stateid desc limit 0,1';
         $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . $this->getMainSeid() . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and displayed="" order by stateid desc limit 0,1');
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
@@ -1467,9 +1429,8 @@ class BasicEngine extends NubisObject {
                     }
                 }
             }
-            //echo 'yyyyy';
+
             $gr = trim($this->getFill($variable, $var, SETTING_COMPARISON_GREATER));
-            //echo "<hr>" . $var->getComparisonGreater() . '----' . $gr;
             if ($gr != "") {
                 $arr = explode(SEPARATOR_COMPARISON, $gr);
                 foreach ($arr as $a) {
@@ -1783,7 +1744,6 @@ class BasicEngine extends NubisObject {
         // stored internal or both, go through internal
         $variablename = $this->prefixVariableName($variablename);
         $ans = $this->state->getData($variablename);
-        //echo 'got: ' . $variablename . ": " . $ans . "<br/>";
         return $ans;
     }
 
@@ -1845,7 +1805,7 @@ class BasicEngine extends NubisObject {
     }
 
     function addAssignment($variablename, $oldvalue, $rgid) {
-//echo "<hr>adding" . $variablename;
+
         $vardesc = $this->getVariableDescriptive($variablename);
         if ($vardesc->isKeep()) {
             return; // skip if keep is set to yes
@@ -1950,7 +1910,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
          */
         if ($this->getPreviousForLoopLastAction() != "") {
 
-            //echo "<hr>previous loopaction: " . $this->getPreviousForLoopLastAction() . '---previous loop: ' . $this->getPreviousLoopRgid();
             /* clear so we don't keep repeating this as we are going through the loop */
             $this->setPreviousForLoopLastAction("");
 
@@ -1958,17 +1917,14 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
              * back into this loop, so we don't want to reset
              */
             if ($looprgid == $this->getPreviousLoopRgid()) {
-                //echo "<hr>back into loop: " . $looprgid . '---previous loop: ' . $this->getPreviousLoopRgid();
                 $this->reset[$looprgid] = false; // prevent reset as we exit the loop and call isFirstTimeLoop again
                 return false;
             }
             /* rgid of current loop comes after that of the previous state, 
              * then we are going into a new loop 
              */ else if ($looprgid > $this->getPreviousLoopRgid()) {
-                //echo "<hr>new loop: " . $looprgid . '---previous loop: ' . $this->getPreviousLoopRgid();
                 return true;
             } else if ($looprgid < $this->getPreviousLoopRgid()) {
-                //echo "<hr>up to nested loop: " . $looprgid . '---previous loop: ' . $this->getPreviousLoopRgid();
                 return false;
             }
         }
@@ -1993,7 +1949,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
         // no loop actions OR minimum is greater than maximum Or no minimum OR no maximum, then skip
         if ($loopactions == "" || ($normalfor == 1 && $min > $max) || ($normalfor == 2 && $min < $max) || $max == "" || $min == "") {
-            //echo '<HR>NO LOOP ACTIONS. CONTINUING TO ' . $nextrgid;
             $this->doAction($nextrgid);
             return;
         }
@@ -2002,7 +1957,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $current = $this->getAnswer($counterfield);
         $loopactions = explode("~", $loopactions);
 
-        //echo '<HR>ENTERING LOOP AT ' . $looprgid . ' WITH COUNTERFIELD ' . $counterfield . ' WITH CURRENT VALUE OF: ' . $current;
         // determine loop string from before
         $loopstring = "";
         $oc = explode("~", $outerloopcounters);
@@ -2013,15 +1967,12 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $this->setLoopRgid($looprgid);
 
         // first time entering the loop
-        //echo '<hr>CHECKING FOR FIRST TIME: ' . $looprgid . '---' . $current . '---' . $min;
         if (($current < $min || $this->isFirstTimeLoop($looprgid, $outerlooprgids)) && $exitfor != 2) {
             //$this->firsttimelockloopset[$looprgid] = true;
-            //echo '<hr>Set loop: ' . $looprgid . '---' . $current . '---' . $min;
             // store loop data
             global $db;
             $query = "replace into " . Config::dbSurveyData() . "_loopdata (suid, primkey, mainseid, seid, looprgid, loopmin, loopmax, loopcounter,looptype, loopactions) values (";
             $query .= $this->getSuid() . ", '" . $this->getPrimaryKey() . "', " . $this->getMainSeid() . "," . $this->getSeid() . ", " . $looprgid . "," . $min . "," . $max . ",'" . $counterfield . "'," . $normalfor . ",'" . implode("~", $loopactions) . "')";
-            //echo $query;
             $db->executeQuery($query);
 
             $this->reset[$looprgid] = false;
@@ -2029,8 +1980,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         }
         // maximum has been reached/exitfor --> end of for loop
         else if ($current > $max || $exitfor == 2) {
-            //echo 'ggfgffggfgf2';
-            //echo '<HR>REACHED MAXIMUM';
+            
             // nested loop we are exiting
             if ($outerloopcounters != "") {
 
@@ -2052,7 +2002,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         //if (true || $last == $looprgid) {
                             $countertoincrement = end($oc);
                             $now = $this->getAnswer($countertoincrement);
-                            //echo '<HR>OUTER LOOP GOING TO INCREMENT ' . $countertoincrement . ' - CURRENT VALUE IS: ' . $now;
                             $this->addAssignment($countertoincrement, $now, $nextrgid);
                             $this->setAnswer($countertoincrement, $now + 1);
                             //$outerrgids = explode("~", $outerlooprgids);
@@ -2070,7 +2019,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 unset($this->reset[$looprgid]);
 
                 // reset inner counter
-                //echo '<HR>INNER LOOP GOING TO RESET ' . $counterfield . ' - CURRENT VALUE IS: ' . $current;
                 $current = "";
                 $this->addAssignment($counterfield, $current, $looprgid);
                 $this->setAnswer($counterfield, "");
@@ -2104,14 +2052,13 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $this->setLoopRgid("");
             }
 
-            //echo '<HR>EXITED LOOP AT ' . $nextrgid;
             // loop string becomes the outer string
             $this->setLoopString($loopstring);
 
             /* do next action */
             $this->doAction($nextrgid);
         } else { /* still inside loop */
-            //echo 'continue';
+            
             // get last for loop action we did FOR THIS LOOP
             if ($outerloopcounters != "") {
                 $position = sizeof($oc);
@@ -2120,11 +2067,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             else {
                 $position = 0;
             }
-            //$position = 0;
-            //print_r($oc);
             $last = $this->getForLoopLastActionCurrentLoop($position);
 
-            //echo '<HR>LAST FOR LOOP ACTION WAS ' . $last;
             // no action found, then assume it is the first action
             if ($last == -1) {
                 $index = 0;
@@ -2134,14 +2078,12 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 // last for loop action we did == last action in for loop,
                 // then we completed a loop
                 if ($last == end($loopactions)) {
-                    //echo '<HR>LAST FOR LOOP ACTION WAS LAST ACTION. RESETTING';                    
                     $this->completeLoop($counterfield, $current, $looprgid, $loopstring);
                     return;
                 }
                 // last for loop action was not the last action in for loop,
                 // so we find the next action (if any)
                 else {
-                    //print_r($loopactions);
                     $index = array_search($last, $loopactions);
                     $next = $index + 1;
                 }
@@ -2149,7 +2091,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             // action(s) left
             if (isset($loopactions[$next])) {
-                //echo '<HR>MOVING TO NEXT FOR LOOP ACTION: ' . $loopactions[$next] . ' AT ' . $current;
                 $this->setLoopString($loopstring . $current); // update loop string for progress bar
 
                 /* do next action inside loop */
@@ -2179,7 +2120,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $this->setAnswer($counterfield, $current);
         $this->setLoopString($loopstring . $current); // update loop string for progress bar
         $this->resetForLoopLastAction();
-        //echo '<HR>COMPLETED FOR LOOP ' . $looprgid . ' at ' . $current . ' . REENTERING NOW';
         $this->reset[$looprgid] = false; // prevent reset for if we are re-entering
         $this->doAction($looprgid);
     }
@@ -2211,11 +2151,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
     function getForLoopLastActionCurrentLoop($position) {
         $current = trim($this->getForLoopLastAction());
-        //echo "<hr>CURRENT:" . $current;
         if ($current != "") {
             $arr = explode("~", $this->getForLoopLastAction());
-            //echo '<HR>NOW: ' . $current . ' at ' . $position;
-            //print_r($arr);
             if (isset($arr[$position])) {
                 return $arr[$position];
             }
@@ -2225,9 +2162,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
     function addForLoopLastAction($rgid, $position) {
         $current = trim($this->getForLoopLastAction());
-        //echo '<hr>ADDING ACTION STRING. START IS ' . $current;
         if ($current != "") {
-            //echo '<HR>ADDING RGID ' . $rgid;
             $arr = explode("~", $this->getForLoopLastAction());
             $new = array();
             foreach ($arr as $a) {
@@ -2267,13 +2202,10 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $this->setForLoopLastAction(implode("~", $new));
             }
         }
-        //echo '<hr>ADDED TO ACTION STRING. END IS ' . trim($this->getForLoopLastAction());
     }
 
     function removeForLoopLastAction() {
-        //return;
         $current = trim($this->getForLoopLastAction());
-        //echo '<hr>REMOVING LAST ENTRY FROM ACTION STRING. START IS ' . $current;
         if ($current != "") {
             $arr = explode("~", $this->getForLoopLastAction());
             array_pop($arr);
@@ -2281,21 +2213,17 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         } else {
             $this->setForLoopLastAction("");
         }
-        //echo '<hr>REMOVED FROM ACTION STRING. END IS ' . trim($this->getForLoopLastAction());
     }
 
     function resetForLoopLastAction() {
         $current = trim($this->getForLoopLastAction());
-        //echo '<hr>UPDATING ACTION STRING. START IS ' . $current;
         if ($current != "") {
-            //echo '<HR>UPDATING RGID ' . $rgid;
             $arr = explode("~", $this->getForLoopLastAction());
             $arr[sizeof($arr) - 1] = -1;
             $this->setForLoopLastAction(implode("~", $arr));
         } else {
             $this->setForLoopLastAction(""); // no loops left
         }
-        //echo '<hr>UPDATING ACTION STRING. END IS ' . trim($this->getForLoopLastAction());
     }
 
     function setForLoopLastAction($lastrgid) {
@@ -2306,7 +2234,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
     function doWhileLoop($whileactions, $condition, $whilergid, $nextrgid, $outerwhilergids, $exitwhile = 1) {
         if (!$condition || $whileactions == "") { //condition not met: get out of loop || no while actions: get out of loop
-            //echo 'leaving while: ' . $nextrgid;
             $this->doAction($nextrgid);
             return;
         }
@@ -2324,8 +2251,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         else {
             $position = 0;
         }
-        //$position = 0;
-        //print_r($oc);
+
         $last = $this->getForLoopLastActionCurrentLoop($position);
         $this->setWhileRgid($whilergid);
         if ($last == -1) {
@@ -2336,14 +2262,12 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             // last while action we did == last action in while,
             // then we completed a loop
             if ($last == end($whileactions)) {
-                //echo '<HR>LAST FOR LOOP ACTION WAS LAST ACTION. RESETTING';                    
                 $this->completeWhile($whilergid);
                 return;
             }
             // last for loop action was not the last action in for loop,
             // so we find the next action (if any)
             else {
-                //print_r($loopactions);
                 $index = array_search($last, $whileactions);
                 $next = $index + 1;
             }
@@ -2366,14 +2290,12 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
     function completeWhile($whilergid) {
         $this->resetWhileLastAction();
-        //echo '<HR>COMPLETED FOR LOOP ' . $looprgid . ' at ' . $current . ' . REENTERING NOW';
         $this->doAction($whilergid);
     }
 
     function doWhileLoopGroup($groupactions) {
         $grouplooparray = array();
         $groupactions = explode("~", $groupactions);
-        //print_r($groupactions);
         foreach ($groupactions as $ga) {
             $action = $this->doAction($ga);
             if ($action != "") {
@@ -2407,11 +2329,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
     function getWhileLastActionCurrentLoop($position) {
         $current = trim($this->getWhileLastAction());
-        //echo "<hr>CURRENT:" . $current;
         if ($current != "") {
             $arr = explode("~", $this->getWhileLastAction());
-            //echo '<HR>NOW: ' . $current . ' at ' . $position;
-            //print_r($arr);
             if (isset($arr[$position])) {
                 return $arr[$position];
             }
@@ -2421,9 +2340,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
     function addWhileLastAction($rgid, $position) {
         $current = trim($this->getWhileLastAction());
-        //echo '<hr>ADDING ACTION STRING. START IS ' . $current;
         if ($current != "") {
-            //echo '<HR>ADDING RGID ' . $rgid;
             $arr = explode("~", $this->getWhileLastAction());
             $new = array();
             foreach ($arr as $a) {
@@ -2463,13 +2380,10 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $this->setWhileLastAction(implode("~", $new));
             }
         }
-        //echo '<hr>ADDED TO ACTION STRING. END IS ' . trim($this->getForLoopLastAction());
     }
 
     function removeWhileLastAction() {
-        //return;
         $current = trim($this->getWhileLastAction());
-        //echo '<hr>REMOVING LAST ENTRY FROM ACTION STRING. START IS ' . $current;
         if ($current != "") {
             $arr = explode("~", $this->getWhileLastAction());
             array_pop($arr);
@@ -2477,21 +2391,17 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         } else {
             $this->setWhileLastAction("");
         }
-        //echo '<hr>REMOVED FROM ACTION STRING. END IS ' . trim($this->getForLoopLastAction());
     }
 
     function resetWhileLastAction() {
         $current = trim($this->getWhileLastAction());
-        //echo '<hr>UPDATING ACTION STRING. START IS ' . $current;
         if ($current != "") {
-            //echo '<HR>UPDATING RGID ' . $rgid;
             $arr = explode("~", $this->getWhileLastAction());
             $arr[sizeof($arr) - 1] = -1;
             $this->setWhileLastAction(implode("~", $arr));
         } else {
             $this->setWhileLastAction(""); // no loops left
         }
-        //echo '<hr>UPDATING ACTION STRING. END IS ' . trim($this->getForLoopLastAction());
     }
 
     function setWhileLastAction($lastrgid) {
@@ -2504,7 +2414,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             return "";
         }
         $current = $this->getAnswer($counterfield);
-        //echo "<hr>" . $counterfield . '---' . $min . '----' . $max . '----<br/>';
         $groupactions = explode("~", $groupactions);
         $grouplooparray = array();
 
@@ -2516,16 +2425,12 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             for ($tempcount = $min; $tempcount <= $max; $tempcount++) {
                 $this->addAssignment($counterfield, $tempcount, $looprgid);
                 $this->setAnswer($counterfield, $tempcount);
-                //echo "<hr>CURRENT COUNTER " . $counterfield . " IS " . $this->getAnswer($counterfield) . "<br/>";
                 foreach ($groupactions as $ga) {
-                    //echo $ga . "<br/>";
                     $action = $this->doAction($ga);
-                    //echo $action . "<hr>";
                     if ($action != "") {
                         $grouplooparray[] = $action;
                     }
                 }
-                //echo 'FINISHED LOOP ' . $tempcount . "<br/>";
             }
         }
         // reverse for (5 to 1)
@@ -2536,34 +2441,27 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             for ($tempcount = $min; $tempcount >= $max; $tempcount--) {
                 $this->addAssignment($counterfield, $tempcount, $looprgid);
                 $this->setAnswer($counterfield, $tempcount);
-                //echo "<hr>CURRENT COUNTER " . $counterfield . " IS " . $this->getAnswer($counterfield) . "<br/>";
                 foreach ($groupactions as $ga) {
-                    //echo $ga . "<br/>";
                     $action = $this->doAction($ga);
-                    //echo $action . "<hr>";
                     if ($action != "") {
                         $grouplooparray[] = $action;
                     }
                 }
-                //echo 'FINISHED LOOP ' . $tempcount . "<br/>";
             }
         }
+        
         // return result
-        //echo implode("~", $grouplooparray). "<br/>";
         return implode("~", $grouplooparray);
     }
 
     function doGroup($actions, $rgid, $template, $nextrgid) {
         $array = array();
         $actions = explode("~", $actions);
-        //echo 'starting group';
         foreach ($actions as $action) {
-            //echo '<BR/>ADDING: ' . $action . "<br/>";
             $action = $this->doAction($action);
             if ($action != "") {
                 $array[] = $action;
             }
-            //echo '<BR/>ADDED: ' . $action . "<br/>";
         }
 
         // no actions
@@ -2571,8 +2469,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $this->doAction($nextrgid);
             return;
         } else {
-            //echo implode("~", $array);
-            //echo 'GROUP' . $template;
             $this->showQuestion(implode("~", $array), $rgid, $template);
         }
     }
@@ -2594,8 +2490,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     }
 
     function doSection($prefix, $rgid, $seid, $mainrestart = false) {
-        //echo 'doing section ' . $seid . ' coming from ' . $this->seid . '<br/>';        
-        //echo $rgid . '----';
         $this->setRgid($rgid);
         $this->setDisplayed("");
         $this->setTemplate("");
@@ -2630,7 +2524,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $engine->setPrefix($prefix);
         $engine->setParentSeid($this->seid);
         $engine->setParentRgid($rgid);
-        //echo 'setting prefix to :' . $prefix . "<br/>";        
         $engine->setParentPrefix($parentprefix); // everything we have so far
         $engine->setForward($this->getForward());
         $engine->setFlooding($this->getFlooding());
@@ -2689,7 +2582,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $this->firsttimelock = true;
         global $db;
         $query = "select status from " . Config::dbSurveyData() . "_interviewstatus where suid = " . $this->getSuid() . " and primkey='" . $this->getPrimaryKey() . "'";
-        //echo $query;
         $res = $db->selectQuery($query);
         if ($res) {
 
@@ -2728,7 +2620,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         } else {
             $query = "update " . Config::dbSurveyData() . "_interviewstatus set status=" . INTERVIEW_LOCKED . " WHERE suid = " . $this->getSuid() . " and primkey = '" . $this->getPrimaryKey() . "' and mainseid=" . $this->getMainSeid() . " LIMIT 1";
         }
-        //echo $query;
         $db->executeQuery($query);
     }
 
@@ -2805,10 +2696,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             /* find out where to go after section call */
             $torgid = 0;
-            //echo 'select * from ' . Config::dbSurvey() . '_next where suid=' . prepareDatabaseString($this->getSuid()) . ' and seid=' . $this->seid . ' and fromrgid = ' . prepareDatabaseString($fromrgid);
             $result = $db->selectQuery('select torgid from ' . Config::dbSurvey() . '_next where suid=' . prepareDatabaseString($this->getSuid()) . ' and seid=' . $this->seid . ' and fromrgid = ' . prepareDatabaseString($fromrgid));
             if ($row = $db->getRow($result)) {
-                //echo 'select * from ' . Config::dbSurvey() . '_next where suid=' . prepareDatabaseString($this->getSuid()) . ' and seid=' . $this->seid . ' and fromrgid = ' . prepareDatabaseString($fromrgid);
                 $torgid = $row["torgid"];
 
                 /* update section info from previous section state in this section */
@@ -2821,11 +2710,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 /* check if we are going back to a loop */
                 $query = "select primkey from " . Config::dbSurveyData() . "_loopdata where suid=" . prepareDatabaseString($this->getSuid()) . " and primkey='" . $this->getPrimaryKey() . "' and mainseid=" . $mainseid . " and seid=" . $seid . " and looprgid=" . $torgid;
-                //echo $query;
                 $result = $db->selectQuery($query);
                 if ($db->getNumberOfRows($result) > 0) {
                     $this->reset[$torgid] = false; // so we don't reset the loop counter when going back to the section loop
-                    //echo 'ohyeahhaha';
                 }
 
                 /* do action */
@@ -2878,25 +2765,18 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
         // get last action in form (is empty if we just started)
         $lastform = getFromSessionParams(SESSION_PARAM_LASTACTION);
-        //echo 'current last: ' . $currentlast . '----' . $lastform;
         if ($lastform != "") {
             if ($lastform != $currentlast) { // submitted action is not the last action in the _actions table, then this is an old form!
-                //echo 'NONONO: current last: ' . $currentlast . '----' . $lastform;
                 return true;
             }
         }
         // lastform can be empty with F5 resubmit, leading to multiple scripts running at the same time
         else {
             if ($this->firstform == false) {
-                //echo 'gggg';
                 return true;
             }
-            //else {
-            //echo 'hhhh';
-            //}
         }
 
-        //echo 'OK: current last: ' . $currentlast . '----' . $lastform;
         // we are fine
         return false;
     }
@@ -2940,7 +2820,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
         // we are starting/returning to the survey/section OR submit of old form
         $oldform = $this->isOldFormSubmit();
-        //echo 'rgid: ' . getFromSessionParams(SESSION_PARAM_RGID) . '----';
         if (getFromSessionParams(SESSION_PARAM_RGID) == '' || $oldform) {
 
             // returning to the survey
@@ -2966,7 +2845,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         $realvariables = explode("~", $this->display->getRealVariables($variables));
                         if (sizeof($realvariables) > 0) {
                             $var = $this->getVariableDescriptive($realvariables[0]);
-                            //echo $var->getName();
                             $reentry = $var->getAccessReturnAfterCompletionAction();
                             $reentry_preload = $var->getAccessReturnAfterCompletionRedoPreload();
                         }
@@ -3000,12 +2878,10 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                         // redoing preloads
                         if ($reentry_preload == PRELOAD_REDO_YES) {
-                            //echo 'preloading again';
                             $pd = loadvarSurvey('pd');
                             if ($pd != '') {
                                 getSessionParamsPost(loadvarSurvey('pd'), 'PD');
                                 foreach ($_SESSION['PD'] as $field => $answer) {
-                                    //echo $field . ' set with ' . $answer . '<br/>'; 
                                     $this->setAnswer($field, $answer);
                                 }
                             }
@@ -3175,12 +3051,10 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                         // redoing preloads
                         if ($reentry_preload == PRELOAD_REDO_YES) {
-                            //echo 'preloading again';
                             $pd = loadvarSurvey('pd');
                             if ($pd != '') {
                                 getSessionParamsPost(loadvarSurvey('pd'), 'PD');
                                 foreach ($_SESSION['PD'] as $field => $answer) {
-                                    //echo $field . ' set with ' . $answer . '<br/>'; 
                                     $this->setAnswer($field, $answer);
                                 }
                             }
@@ -3376,7 +3250,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 if ($pd != '') {
                     getSessionParamsPost(loadvarSurvey('pd'), 'PD');
                     foreach ($_SESSION['PD'] as $field => $answer) {
-                        //echo $field . ' set with ' . $answer . '<br/>'; 
                         $this->setAnswer($field, $answer);
                     }
                 }
@@ -3410,8 +3283,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             /* get the rgid */
             $lastrgid = getFromSessionParams(SESSION_PARAM_RGID);
 
-            //echo 'dsdsdsdsdsdsd' . $lastrgid . '----' . $this->getPreviousRgid();
-
             /* check if rgid matches the one from the state AND no posted navigation
              * if not, then this is a browser resubmit
              */
@@ -3426,7 +3297,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $this->addTimings($lastrgid, $this->getStateId());
 
             /* get query display object for button labels */
-            //echo getFromSessionParams(SESSION_PARAM_VARIABLES) . '====';
             $vars = splitString("/~/", getFromSessionParams(SESSION_PARAM_VARIABLES));
 
             /* check for external storage only variables */
@@ -3619,7 +3489,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 } else {
                     // this should not happen
                     $this->showQuestion(VARIABLE_INTRODUCTION, "");
-                    //echo Language::messageSurveyStart();
                 }
 
                 /* save data record */
@@ -3658,7 +3527,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $cnt = 1;
                 foreach ($vars as $var) {
                     $vd = $this->getVariableDescriptive($var);
-                    if ($vd->getAnswerType() == ANSWER_TYPE_SETOFENUMERATED) {
+                    if ($vd->getAnswerType() == ANSWER_TYPE_SETOFENUMERATED || $vd->getAnswerType() == ANSWER_TYPE_MULTIDROPDOWN) {
                         $answer = "";
                         if ($dkrfnacheck == true) { /* dk/rf/na */
                             $answer = loadvarSurvey(SESSION_PARAMS_ANSWER . $cnt . "_dkrfna");
@@ -3757,7 +3626,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             else if (isset($_POST['navigation']) && inArray($_POST['navigation'], array($nextlabel, $dklabel, $rflabel, $nalabel))) {
                 $torgid = 0;
                 $result = $db->selectQuery('select torgid from ' . Config::dbSurvey() . '_next where suid=' . prepareDatabaseString($this->getSuid()) . ' and seid=' . prepareDatabaseString($this->seid) . ' and fromrgid = ' . prepareDatabaseString($lastrgid));
-                //echo 'select * from ' . Config::dbSurvey() . '_next where suid=' . prepareDatabaseString($this->getSuid()) . ' and seid=' . prepareDatabaseString($this->seid) . ' and fromrgid = ' . prepareDatabaseString($lastrgid);
                 if ($row = $db->getRow($result)) {
                     $torgid = $row["torgid"];
                 }
@@ -3782,10 +3650,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 /* store answers in db and previous state */
                 $cnt = 1;
-                //echo $torgid . '---';
 
                 foreach ($vars as $var) {
-                    //echo 'answer for ' . $var . ' at ' . $cnt . ' is: ' .  loadvar("answer" . $cnt) . '---<br/>';
+                    
                     // next button
                     if ($_POST['navigation'] == $nextlabel) {
                         $vd = $this->getVariableDescriptive($var);
@@ -4021,12 +3888,13 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             /* store answers in db and previous state */
             if ($update == true) {
+
                 $defaultcleanvariables = getDefaultCleanVariables();
                 $cnt = 1;
                 foreach ($vars as $var) {
 
                     $vd = $this->getVariableDescriptive($var);
-                    if ($vd->getAnswerType() == ANSWER_TYPE_SETOFENUMERATED) {
+                    if ($vd->getAnswerType() == ANSWER_TYPE_SETOFENUMERATED || $vd->getAnswerType() == ANSWER_TYPE_MULTIDROPDOWN) {
                         $answer = "";
                         if ($dkrfnacheck == true) { /* dk/rf/na */
                             $answer = loadvarSurvey(SESSION_PARAMS_ANSWER . $cnt . "_dkrfna");
@@ -4046,7 +3914,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         } else {
                             $dirty = DATA_DIRTY;
                         }
-                        //echo $var . '----' . $answer . "<br/>";
+
                         $this->setAnswer($var, $answer, $dirty);
                     } else {
                         if ($vd->getAnswerType() != ANSWER_TYPE_NONE) {
@@ -4130,10 +3998,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $vars = $this->state->getVariableNames();
                 $this->currentaction = ACTION_SURVEY_END;
                 foreach ($vars as $var) {
-                    //echo "<br>CHECK: " . $var;
                     $vd = $this->getVariableDescriptive(getBasicName($var));
                     if ($vd->getDataKeep() == DATA_KEEP_NO) {
-                        //echo 'everybody do their share';
                         $this->setAnswer($var, null);
                     }
                 }
@@ -4322,7 +4188,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
         $stateid = $this->getStateId();
 
-        //echo "<textarea rows=10 cols=10>" . $result . "</textarea>";
         $screen = gzcompress(urldecode(loadvar(POST_PARAM_SCREENSHOT)), 9);
         if ($stateid == "") {
             $stateid = 1;
@@ -4347,8 +4212,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         } else {
             $query = "insert into " . Config::dbSurveyData() . "_screendumps(scdid, suid, primkey, stateid, screen, mode, language, version) values (?,?,?,?,aes_encrypt(?, '" . $key . "'),?,?,?)";
         }
-        //echo $query;
-        //print_r($bp->get());
+
         $localdb->executeBoundQuery($query, $bp->get());
         return "";
     }
@@ -4368,8 +4232,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $localdb = $db;
         }
         $pardata = loadvar(POST_PARAM_PARADATA);
-        //echo $pardata;
-        //$displayed = $this->getDisplayed();
         $display = array();
         $vars = splitString("/~/", getFromSessionParams(SESSION_PARAM_VARIABLES));
         foreach ($vars as $variablename) {
@@ -4403,8 +4265,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         } else {
             $query = "insert into " . Config::dbSurveyData() . "_paradata(pid, suid, primkey, stateid, rgid, displayed, paradata, mode, language, version) values (?,?,?,?,?,?,aes_encrypt(?, '" . $key . "'),?,?,?)";
         }
-        //echo $query;
-        //print_r($bp->get());
+
         $localdb->executeBoundQuery($query, $bp->get());
     }
 
@@ -4433,7 +4294,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         if ($docend == "") {
             $docend = $time; // if no document end set, then use the time from processing (would happen if some code submits the page without setting the 'plets' variable
         }
-        //echo loadvar("plets") . '---';
+
         foreach ($vars as $var) {
             $var = $this->prefixVariableName($var);
             $query = "insert into " . Config::dbSurveyData() . '_times (suid, primkey, stateid, rgid, variable, begintime, begintime2, endtime, endtime2, timespent, timespent2, language, mode, version) values (';
@@ -4501,7 +4362,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $answer = "aes_encrypt('" . prepareDatabaseString($ans) . "', '" . $key . "')";
             }
             $localdb->executeQuery('INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (' . $suid . ',"' . $prim . '","' . $var . '",' . $answer . ',' . $dirty . ',' . $action . ',' . $version . ',' . $language . ',' . $mode . ')');
-            //echo 'INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (' . $suid . ',"' . $prim . '","' . $var . '",' . $answer . ',' . $dirty . ',' . $action . ',' . $version . ',' . $language . ',' . $mode . ')<br/>';
         } else {
 
             $bp = new BindParam();
@@ -4558,22 +4418,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         /* unlock */
         $this->unlock();
 
-        /* show question(s) */
-        /* ini_set('output_buffering', 'off');
-          ini_set('zlib.output_compression', false);
-          while (@ob_end_flush());
-
-          ini_set('implicit_flush', true);
-          ob_implicit_flush(true);
-          header('Content-type: text/plain');
-          header('Cache-control: no-cache');
-          $multiplier = 8;
-          $size = 1024 * $multiplier;
-          for ($i = 1; $i <= $size; $i++) {
-          echo ".";
-          }
-         */
-
         /* DATA FLOODER, then no need to build the screen */
         if ($this->getFlooding() == true) {
             return;
@@ -4601,7 +4445,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     // used to keep track of fill text in group statements
     function addFillValue($variable) {
 
-        //echo 'adding for: ' . $variable;
         $language = getSurveyLanguage();
         $var = $this->getVariableDescriptive($variable);
         $options = $var->getOptions();
@@ -4878,7 +4721,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 break;
             case ANSWER_TYPE_CUSTOM:
                 $custom = $this->replaceFills($var->getAnswerTypeCustom(), true);
-                //echo $custom . '---';
                 $arr = array(SETTING_PAGE_FOOTER => $pagefooter, SETTING_PAGE_HEADER => $pageheader, SETTING_ANSWERTYPE_CUSTOM => $custom, SETTING_PLACEHOLDER => $placeholder, SETTING_ERROR_MESSAGE_INLINE_ANSWERED => $inlineansweredwarning, SETTING_FILLTEXT => $filltext, SETTING_QUESTION => $this->replaceFills($var->getQuestion(), true), SETTING_MAXIMUM_CALENDAR => $this->replaceFills($var->getMaximumDatesSelected(), true), SETTING_EMPTY_MESSAGE => $emptywarning, SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR => $dateswarning, SETTING_JAVASCRIPT_WITHIN_ELEMENT => $inlinejavascript, SETTING_JAVASCRIPT_WITHIN_PAGE => $pagejavascript, SETTING_SCRIPTS => $scripts, SETTING_ID => $id, SETTING_STYLE_WITHIN_ELEMENT => $inlinestyle, SETTING_STYLE_WITHIN_PAGE => $pagestyle, SETTING_HOVERTEXT => $this->replaceFills($var->getHoverText(), true), SETTING_CHECKTEXT => $checktext);
                 break;
             case ANSWER_TYPE_SLIDER:
@@ -4905,9 +4747,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     }
 
     function getFill($variable, $vardescriptive, $texttype = "question") {
-        //echo 'returning for' . $variable . "<br/>";
         $array = $this->state->getFillText($variable);
-        //print_r($array);        
+        
         //use text array if text array (if group statement)
         if ($array != null && sizeof($array) > 0) {
             switch ($texttype) {
@@ -4928,8 +4769,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     }
                     return $options;
                 default:
-                    //echo 'hhhhh' . $texttype . '----' . $array[$texttype] . '<br/>';
-                    //return $array[$texttype];
+
                     if (isset($array[$texttype])) {
                         return $this->replaceInlineFields($array[$texttype]);
                     }
@@ -5292,7 +5132,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
                 $pattern = "/\\" . INDICATOR_FILL . preparePattern($fillref) . "/i";
                 $text = preg_replace($pattern, $filltext, $text);
-                //echo 'NOW: ' . $text . "<br/>";
             }
 
             $cnt++;
@@ -5314,11 +5153,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     }
 
     function getDisplayValue($variable, $value) {
-        //echo $variable . ":" . $value;
         $var = $this->getVariableDescriptive($variable);
         if ($var) {
             $type = $var->getAnswerType();
-            //echo $type;
             switch ($type) {
                 case ANSWER_TYPE_OPEN:
                     return $value;
@@ -5359,7 +5196,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     /* DATA FLOODER */
 
     function doFakeSubmit($variables, $rgid, $template) {
-        //echo $variables . '---<hr>';
+
         // clear any previous post variables
         $_POST = array();
 
@@ -5388,30 +5225,24 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         setSessionParameter(SESSION_PARAM_RGID, $rgid);
         setSessionParameter(SESSION_PARAM_GROUP, $template);
         $_POST['navigation'] = $nextlabel;
-        //print_r($variables);
         $realvariables = explode("~", $this->getDisplayObject()->getRealVariables($variables));
         setSessionParameter(SESSION_PARAM_VARIABLES, implode("~", $realvariables));
         setSessionParameter(SESSION_PARAM_TIMESTAMP, date("Y-m-d H:i:s"));
 
-        //print_r($realvariables);
         $this->setDisplayCounter(0); // reset
         $this->determineDisplayNumbers(implode("~", $realvariables));
         $displaynumbers = $this->getDisplayNumbers();
-        //print_r($displaynumbers);
-        //echo "<hr>" . $engine->getRgid() . '----' . $template . '----' . $nextlabel;
+
         // generate answer(s)
         foreach ($realvariables as $rl) {
             $var = $this->getVariableDescriptive($rl);
-            //echo $rl . '----' . getSurveyLanguage() . '----' . getSurveyMode();
             if (!inArray($var->getAnswerType(), array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
                 $number = $displaynumbers[strtoupper($rl)];
                 $id = SESSION_PARAMS_ANSWER . $number;
                 $_POST[$id] = $this->generateAnswer($var, $queryobject);
-                //echo '<hr>Setting ' . $var->getName() . ' with answer type: ' . $var->getAnswerType() . ' to: ' . $_POST[$id];
             }
         }
-        //print_r($_POST);
-        //echo 'DONE';
+
         $_POST['r'] = 'dummy'; // add this so session parameters are used
     }
 
@@ -5938,7 +5769,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
             }
         }
-        //echo 'yyyyy';
+
         $gr = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_GREATER));
         if ($gr != "") {
             $values = explode("-", $gr);

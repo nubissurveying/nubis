@@ -276,7 +276,7 @@ class DisplayResearcher extends Display {
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
             $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
         }
-        //print_r($selected);
+
         $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
         $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
@@ -296,13 +296,11 @@ class DisplayResearcher extends Display {
         $returnStr .= '<script src="js/modules/exporting.js"></script>';
         $returnStr .= '<script src="js/export-csv.js"></script>';
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
-//        echo '<br/><br/><br/><br><br/>' . $this->getContactData();
-//        echo '<hr><hr>';
         $returnStr .= $this->getResponseData();
 
         $returnStr .= '</div>'; // well
         /// END NEW NEW NEW       
-//OVERVIEW        
+        //OVERVIEW        
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
         $returnStr .= $this->showFooter(false);
@@ -311,7 +309,6 @@ class DisplayResearcher extends Display {
 
     function showReportsAggregates($content = "") {
         $survey = new Survey($_SESSION['SUID']);
-        //echo $_SESSION["SUID"] . '----';
 
         $returnStr = $this->showResearchHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
@@ -446,7 +443,7 @@ class DisplayResearcher extends Display {
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
             $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
         }
-        //print_r($selected);
+
         $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
         $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
@@ -602,8 +599,7 @@ class DisplayResearcher extends Display {
         $returnStr .= '<script src="js/modules/exporting.js"></script>';
         $returnStr .= '<script src="js/export-csv.js"></script>';
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
-//        echo '<br/><br/><br/><br><br/>' . $this->getContactData();
-//        echo '<hr><hr>';
+
         $returnStr .= $this->getContactData();
         $returnStr .= '</div>'; //container and wrap
 
@@ -666,7 +662,7 @@ class DisplayResearcher extends Display {
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
             $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
         }
-        //print_r($selected);
+
         $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
         $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
@@ -753,7 +749,7 @@ class DisplayResearcher extends Display {
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
             $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
         }
-        //print_r($selected);
+
         $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
         $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
@@ -828,7 +824,7 @@ class DisplayResearcher extends Display {
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
             $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
         }
-        //print_r($selected);
+
         $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
         $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
@@ -904,8 +900,7 @@ class DisplayResearcher extends Display {
         $returnStr .= '<script src="js/modules/exporting.js"></script>';
         $returnStr .= '<script src="js/export-csv.js"></script>';
         $returnStr .= '<div id="chart1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
-        //print_r($brackets);
-        //print_r($timings);
+
         $returnStr.= $this->getTimingsDataRespondent($survey->getName() . ' - ' . loadvar('respondent'), implode(",", $timings), $brackets);
         $returnStr .= '</div>'; // well
 
@@ -2066,7 +2061,7 @@ var chart = new Highcharts.Chart({
     }
 
     function getTimingsDataRespondent($title, $data, $brackets) {
-        //echo $data;
+
         $bracks = '';
         for ($i = 0; $i < sizeof($brackets); $i++) {
             $br = $brackets[$i];
@@ -2181,7 +2176,7 @@ var chart = new Highcharts.Chart({
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
             $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
         }
-        //print_r($selected);
+
         $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
         $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";
@@ -2260,7 +2255,6 @@ var chart = new Highcharts.Chart({
         $returnStr.= '<br/><br/><div id="chart2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
 
         $browsers = '';
-        //print_r($browsercounts);
         ksort($browsercounts);
         foreach ($browsercounts as $b => $count) {
             if ($browsers != '') {
@@ -2274,7 +2268,6 @@ var chart = new Highcharts.Chart({
         $returnStr.= '<br/><br/><div id="chart3" style="min-width: 310px; height: 400px; margin: 0 auto"></div>';
 
         $os = '';
-        //print_r($oscounts);
         ksort($oscounts);
         foreach ($oscounts as $b => $count) {
             if ($os != '') {
@@ -2454,7 +2447,6 @@ var chart = new Highcharts.Chart({
 
     function showReportsParadata($content = "") {
         $survey = new Survey($_SESSION['SUID']);
-        //echo $_SESSION["SUID"] . '----';
         $headers[] = array('link' => setSessionParamsHref(array('page' => 'researcher.reports'), Language::headerReports()), 'label' => Language::headerReports());
         $headers[] = array('link' => '', 'label' => Language::headerReportsParadata());
 
@@ -2594,7 +2586,7 @@ var chart = new Highcharts.Chart({
         if (loadvar(DATA_OUTPUT_TYPEDATA) != "") {
             $selected[loadvar(DATA_OUTPUT_TYPEDATA)] = "selected";
         }
-        //print_r($selected);
+
         $returnStr .= "<option " . $selected[0] . " value=" . DATA_REAL . ">" . Language::optionsDataReal() . "</option>";
         $returnStr .= "<option " . $selected[1] . " value=" . DATA_TEST . ">" . Language::optionsDataTest() . "</option>";
         $returnStr .= "</select>";

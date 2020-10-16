@@ -39,14 +39,11 @@ class Action {
         }
         $logactions = new LogActions();
         $nosessionactions = $logactions->getNumberOfActionsBySession($this->phpid, USCIC_SMS);
-        //echo 'ytytytyt';
-        //echo ' [[[[' . $this->phpid;
         if ($nosessionactions == 0) { //no entry yet: ask for prim_key!  
             $logactions->addAction('', '', "loginstart", USCIC_SMS);
             $login = new Login($this->phpid);
             return $login->getSMSLoginScreen();
         } else {
-            //echo ']]]]]';
             $loggedin = $logactions->getLoggedInSMSSession($this->phpid);
             if ($loggedin["count"] == 0) { //no prim_key (=username in sms) assigned to this sessionid. Assign if given (and check for pwd etc??)!
                 $username = loadvar('username');
@@ -78,7 +75,6 @@ class Action {
                     $sms = new SMS($_SESSION['URID'], $this->phpid);
                     return $sms->getPage();
                 } else { //something went wrong.. no urid..start new session
-                    //echo 'ohno';
                     endSession();
                     session_start();
                     session_regenerate_id(true);
@@ -208,7 +204,6 @@ class Action {
                 // we don't have an active session, so fall back to whatever was passed along as language in post OR is the default language
                 $l = getSurveyLanguage();
                 if (file_exists("language/language" . getSurveyLanguagePostFix($l) . ".php")) {
-                    //echo 'well done';
                     require_once('language' . getSurveyLanguagePostFix($l) . '.php'); // language  
                 } else {
                     require_once('language_en.php'); // fall back on english language file
@@ -278,9 +273,7 @@ class Action {
 
                 // include language file
                 $l = getSurveyLanguage();
-                //echo 'NOW: ' . $l;
                 if (file_exists("language/language" . getSurveyLanguagePostFix($l) . ".php")) {
-                    //echo 'well done';
                     require_once('language' . getSurveyLanguagePostFix($l) . '.php'); // language  
                 } else {
                     require_once('language_en.php'); // fall back on english language file

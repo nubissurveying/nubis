@@ -630,7 +630,6 @@ $configuration = array(
                 $query = "REPLACE INTO `" . loadvar("databasetablename") . "_users` (`urid`, `status`, `name`, `username`, `password`, `usertype`, usersubtype, `sup`, `filter`, `regionfilter`, `testmode`, `communication`, `settings`, `access`, `lastdata`, `ts`) VALUES
                 (1, 1, 'Sysadmin', 'sysadmin', aes_encrypt('sysadmin','" . loadvar("encryptionadmin") . "'), 4, 1, NULL, 1, 0, 0, 2, 0x613a313a7b733a31303a226e6176696e6272656164223b733a313a2231223b7d, NULL, NULL, '2014-04-12 00:20:49');";
                 $db->executeQuery($query);
-                //echo $query;
                 return $this->getContent("finish");
             }
         }

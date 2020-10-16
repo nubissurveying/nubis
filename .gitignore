@@ -11,3 +11,27 @@ src/nbproject/private/private.xml
 src/nbproject/project.properties
 src/nbproject/project.xml
 src/.htaccess
+src/js/AVRecorder/recorderJs/recorder.js
+src/js/AVRecorder/recorderFlash/VERSION
+src/js/AVRecorder/recorderFlash/recorder.swf
+src/js/AVRecorder/recorderFlash/recorder.js
+src/js/AVRecorder/recorderFlash/README.md
+src/js/AVRecorder/recorderFlash/Makefile
+src/js/AVRecorder/recorderFlash/LICENSE
+src/js/AVRecorder/recorderFlash/av-recorder.js
+src/js/AVRecorder/recorderFlash/av-recorder-html5.js
+src/js/AVRecorder/recorderFlash/av-recorder-api.js
+src/js/AVRecorder/README.md
+src/js/AVRecorder/package.json
+src/js/AVRecorder/package-lock.json
+src/js/AVRecorder/nubis question to record.txt
+src/js/AVRecorder/LICENSE
+src/js/AVRecorder/examples/demoRecordFile.php
+src/js/AVRecorder/examples/demo.php
+src/js/AVRecorder/AVRecorder/loader.css
+src/js/AVRecorder/AVRecorder/getusermedia.js
+src/js/AVRecorder/AVRecorder/av-recorder.js
+src/js/AVRecorder/AVRecorder/av-recorder.css
+src/js/AVRecorder/AVRecorder/av-recorder-html5.js
+src/js/AVRecorder/AVRecorder/av-recorder-api.js
+src/js/AVRecorder/.project

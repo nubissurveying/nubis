@@ -109,11 +109,9 @@ class Watcher {
     }
 
     function getDisplayValue($var, $value) {
-        //echo "<hr>" . $var->getName() . ":" . $var->getAnswerType();        
-        //$var = $survey->getVariableDescriptive($variable);
+
         if ($var) {
             $type = $var->getAnswerType();
-            //echo $type;
             switch ($type) {
                 case ANSWER_TYPE_OPEN:
                     return $value;

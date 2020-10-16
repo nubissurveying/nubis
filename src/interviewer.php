@@ -27,7 +27,6 @@ class Interviewer {
             $logActions->addAction(getFromSessionParams('primkey'), $this->user->getUrid(), getFromSessionParams('page'));
         }
 
-        //  echo '<br/><br/><br/>' . getFromSessionParams('page');
         if (isset($_SESSION['LASTPAGE'])) {
             switch ($_SESSION['LASTPAGE']) {
                 case 'interviewer.info': return $this->showIwerInfoFromCalendar(getFromSessionParams('primkey'));
@@ -182,7 +181,6 @@ class Interviewer {
             $familyR = $this->getDataFromSurvey($d, 'familyR');
             $financialR = $this->getDataFromSurvey($d, 'financialR');
             $coverscreenR = $this->getDataFromSurvey($d, 'HR009'); //person currently filling out questions
-            //echo '<br/><br/><br/>' . $familyR . '--' . $financialR . '</br>';
 
             $respondents = $respondentorhousehold->getRespondents();
             $Rcnt = 1;
@@ -201,7 +199,6 @@ class Interviewer {
                     $movedout = trim($this->getDataFromSurvey($d, 'HR011[' . $Rcnt . ']'));
                 }
 
-                //echo '<br/><br/><br/>' . $movedout;
                 $finR = 0;
                 if ($Rcnt == $financialR) {
                     $finR = 1;
@@ -537,7 +534,6 @@ class Interviewer {
     function showSendReceiveReceiveData() {
         $displayInterviewer = new DisplayInterviewer();
         $communication = new Communication();
-        //echo '<br/><br/><br/>';
         if ($communication->receiveFromServer($this->user->getUrid())) { //success receiving data to server
             $message = $displayInterviewer->displaySuccess(Language::labelDataReceived());
             //send confirmation to the server

@@ -1839,13 +1839,10 @@ class Type extends Component {
 
     function getSetOfEnumeratedOptionLabel($value) {
         $this->setOptions();
-        //echo'<hr>IN:' . $value;
         $values = explode("~", $value);
-        //print_r($values);
         //sort($values);
         $labels = array();
         foreach ($values as $v) {
-            //echo 'getting ' . $v . "<br/>";
             $labels[] = $this->getOptionLabel($v);
         }
 
@@ -4253,7 +4250,6 @@ class Type extends Component {
         $query .= "'" . prepareDatabaseString($this->getName()) . "'";
         $query .= ")";
 
-        //echo $query;
         $db->executeQuery($query);
 
         /* save settings */

@@ -1352,7 +1352,7 @@ th.uscic-table-row-cell-header-enumerated {
     }
 
     /* question color text */
-    .tablesaw-stack tbody tr td:first-child, .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-question-cell-enumerated,
+    .tablesaw-stack tbody tr:not(.uscic-table-row-enumerated-horizontal) td:first-child, .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-question-cell-enumerated,
     .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-cell-question-multicolumn {
         background-color: #c7e1fb;
     }

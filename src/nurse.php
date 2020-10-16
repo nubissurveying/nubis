@@ -25,7 +25,6 @@ class Nurse {
         if (getFromSessionParams('page') != null) {
             $_SESSION['LASTPAGE'] = getFromSessionParams('page');
         }
-        //echo '<br/><br/><br/>' . getFromSessionParams('page');
 
         if (isVisionTestNurse(new User($_SESSION['URID']))) {
             return $this->mainPage();  //vision test: only return main page
@@ -181,11 +180,8 @@ class Nurse {
     }
 
     function showRespondentInfo($primkey, $message = '') {
-        //        echo "<br/><br/><br/>asdddddddddddddddddddd";
-
         $respondent = new Respondent($primkey);
         $displayNurse = new DisplayNurse();
-        //  print_r($respondent);
         return $displayNurse->showRespondentInfo($respondent, $message);
     }
 
@@ -502,8 +498,6 @@ body
         $respondent = new Respondent($primkey);
         $lab = new Lab($respondent->getPrimkey());
 
-        //echo "print trackingsheet!";
-        //echo "start";
         ob_clean();
 
         echo $this->parseTextTrackingSheet(file_get_contents('documentation/Tracking Sheet/Header.html'), $respondent, $lab);
@@ -597,7 +591,6 @@ body
 
     function showRespondentLabRequestRes($primkey) {
         $lab = new Lab($primkey);
-//echo '<br/><br/><br/>';
         $storage = $_POST;
 //       unset($storage['r']);
         unset($storage['r']);
@@ -659,9 +652,7 @@ body
         echo '<table style="height:55px;" width=100% border=1 cellspacing=0 cellpadding=0><tr><td><table border=0 width=100%>';
 
         echo '<tr><td><font style="font-size:9px">barcode</font></td><td align=right><font style="font-size:9px">spec barcode</font></td></tr>';
-        //    echo '<tr><td><font style="font-size:9px">type</font></td><td align=right><font style="font-size:9px">&nbsp;</font></td></tr>';
         echo '<tr><td><font style="font-size:9px">harv date</font></td><td align=right><font style="font-size:9px">&nbsp;</font></td></tr>';
-        //    echo '<tr><td><font style="font-size:9px">volume</font></td><td align=right><font style="font-size:9px">coord</font></td></tr>';
         echo '</table></td></tr></table>';
 
         echo '</td></tr>';
@@ -847,7 +838,7 @@ body
                 $timeslab[$key] = date('Y-m-d');
                 $notcollected[$key] = date('Y-m-d');
             }
-            //echo implode('~', $timeslab);
+
             if (isset($_POST['notcollected'])) { //not present!
                 $message = Language::labelNurseMarkNotCollected();
                 $lab->setLabBloodNotCollected(implode('~', $notcollected));
@@ -902,7 +893,6 @@ body
         $lab->setUrid($selurid);
         $lab->saveChanges();
 
-//      echo '<br/><br/><br/>' . loadvar('urid');
         //set urid for lab
         //add to communication:   _lab, _household, _respondent
 

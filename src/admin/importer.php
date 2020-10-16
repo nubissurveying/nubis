@@ -193,14 +193,14 @@ class Importer {
             $type->setAnswerType(ANSWER_TYPE_RANGE);
             $type->setMinimum($min);
             $type->setMaximum($max);
-            //echo 'adding range: ' . $name . " ($min, $max)<hr>";
+            
         } else if (startsWith($options, "(")) {
             $type->setAnswerType(ANSWER_TYPE_ENUMERATED); // override on variable level
             $options = substr($options, 1); // remove first (
             $options = substr($options, 0, strlen($options) - 1); // remove last (
             $options = explode("\n", $options);
             $optout = array();
-            //echo 'adding (set of) enumerated: ' . $name . "<br/>";
+            
             foreach ($options as $opt) {
                 $firstpos = strpos($opt, '"');
                 $lastpos = strrpos($opt, '"');
@@ -211,16 +211,16 @@ class Importer {
                 $optiontext = substr($opt, 0, $dot) . substr($opt, $dot + 1, strlen($opt));
                 $optout[] = $optiontext;
             }
-            //echo implode("\n", $optout) . "<hr>";
+            
             $type->setOptionsText(implode("\n", $optout));
         } else if (startsWith($options, "STRING")) {
-            //echo 'adding string: ' . $name . "<hr>";
+            
             $type->setAnswerType(ANSWER_TYPE_STRING);
         } else if (startsWith($options, "INTEGER")) {
-            //echo 'adding integer: ' . $name . "<hr>";
+            
             $type->setAnswerType(ANSWER_TYPE_INTEGER);
         } else if (startsWith($options, "REAL")) {
-            //echo 'adding real: ' . $name . "<hr>";
+            
             $type->setAnswerType(ANSWER_TYPE_DOUBLE);
         } else {
             // type that refers itself to another type, not supported in nubis, ignore
@@ -316,7 +316,6 @@ class Importer {
                 $vd->setAnswerType(ANSWER_TYPE_SETOFENUMERATED);
                 $options = substr($options, 1); // remove first (
                 $options = substr($options, 0, strlen($options) - 1); // remove last (
-                //echo $options . "<hr>";
                 $options = explode("\n", $options);
                 $optout = array();
                 $cnt = 0;
@@ -328,7 +327,6 @@ class Importer {
                         if (endsWith($opt, '",') || endsWith($opt, '"')) {
                             $lastpos = strrpos($opt, '"');
                         } else {
-                            //echo 'multiline:' . $opt . "<hr>";
                             $lastpos = strlen($opt);
                         }
 
@@ -357,14 +355,12 @@ class Importer {
                         } else if (endsWith($opt, '"')) {
                             $opt = str_replace('"', "", $opt);
                         }
-                        //print_r($optout);
+
                         $previous = $optout[$cnt - 1];
-                        //echo $name . ': adding ' . $opt . ' to ' . $previous;
                         $optout[$cnt - 1] = $previous . " " . $opt;
                     }
                 }
-                //print_r($optout);
-                //echo "<hr>";
+
                 $vd->setOptionsText(implode("\n", $optout));
             } else if (startsWith($type, "(")) {
                 $vd->setAnswerType(ANSWER_TYPE_ENUMERATED);
@@ -382,7 +378,6 @@ class Importer {
                         if (endsWith($opt, '",') || endsWith($opt, '"')) {
                             $lastpos = strrpos($opt, '"');
                         } else {
-                            //echo 'multiline:' . $opt . "<hr>";
                             $lastpos = strlen($opt);
                         }
 
@@ -411,9 +406,8 @@ class Importer {
                         } else if (endsWith($opt, '"')) {
                             $opt = str_replace('"', "", $opt);
                         }
-                        //print_r($optout);
+                        
                         $previous = $optout[$cnt - 1];
-                        //echo $name . ': adding ' . $opt . ' to ' . $previous;
                         $optout[$cnt - 1] = $previous . " " . $opt;
                     }
                 }
@@ -432,7 +426,7 @@ class Importer {
                 $vd->setAnswerType(ANSWER_TYPE_STRING); // default to string if unknown
             }
         } else {
-            //echo 'found type: ' . $name . ': ' . $type . "<hr>";
+
             if ($setofenum == false) {
                 $vd->setAnswerType(SETTING_FOLLOW_TYPE);
             } else {
@@ -551,13 +545,13 @@ class Importer {
 
                 // find where it ends
                 $ending = $this->findEnd($all, $i);
-                //echo 'found LOCALS' . $ending . '-----' . $all[$ending];
+                
                 if ($all[$ending] != "" && $this->isKeyword($all[$ending])) {
                     $subarray = array_slice($all, $i, ($ending - $i + 1));
                 } else {
                     $subarray = array_slice($all, $i, ($ending - $i));
                 }
-                //print_r($subarray);
+                
                 $locals[] = $subarray;
             }
             // TYPES start
@@ -614,7 +608,6 @@ class Importer {
 
         for ($j = 0; $j < sizeof($procedures); $j++) {
             $subarray = $procedures[$j];
-            //print_r($subarray);
             $name = $subarray[0];
             $name = trim(str_ireplace("PROCEDURE ", "", $name));
             $variable = str_ireplace("Txt_", "", $name);
@@ -630,7 +623,7 @@ class Importer {
                         $lineout = "";
                         foreach ($words as $w) {
                             if (startsWith($w, "pe")) {
-                                //echo $w . '---||'.  substr($w, 2, strlen($w)) . "---<hr>";
+                                
                                 $lineout[] = substr($w, strlen("pe"), strlen($w));
                             } elseif (startsWith($w, "pi")) {
                                 $lineout[] = substr($w, strlen("pi"), strlen($w));
@@ -651,14 +644,14 @@ class Importer {
 
             $var = $survey->getVariableDescriptiveByName($variable);
             if ($var->getVsid() != "") {
-                //echo 'found and adding to: '. $variable . "<hr>";
+                
                 $var->setFillCode(implode("\n", $code));
                 $var->setSeid($fillseid); // add to fills section;
                 $var->setPosition($position);
                 $var->save();
                 $position++;
             } else {
-                //echo 'creating new: '. $variable . "<hr>";
+                
                 $var = new VariableDescriptive();
                 $var->setSuid($this->suid);
                 $var->setSeid($fillseid); // add to fills section;
@@ -698,7 +691,7 @@ class Importer {
             for ($k = 1; $k <= sizeof($fieldarray); $k++) {
 
                 $t = trim($fieldarray[$k]);
-                //echo $t . "<hr>";
+                
                 // end of field definition
                 if ($firstfound == true && $t == "") {
 
@@ -789,7 +782,7 @@ class Importer {
             for ($k = 1; $k <= sizeof($fieldarray); $k++) {
 
                 $t = trim($fieldarray[$k]);
-                //echo $t . "<hr>";
+                
                 // end of field definition
                 if ($firstfound == true && $t == "") {
 
@@ -799,17 +792,7 @@ class Importer {
                         $keys = array_keys($descriptions);
                         $seid = $keys[0];
                     }
-
-                    /* echo 'name: ' . $name . "<br/>";
-                      echo 'section: ' . $sectionidentifier . "(" . $seid . ")<br/>";
-                      echo 'text: ' . $text . "<br/>";
-                      echo 'label: ' . $label . "<br/>";
-                      echo 'type: ' . $type . "<br/>";
-                      echo 'options: ' . $options . "<br/>";
-                      echo 'section: ' . $sectionidentifier . "(" . $seid . ")<br/>";
-                      echo 'array: ' . $array . "<br/>";
-                      echo "<hr>"; */
-
+                    
                     $this->addVariable($survey, $currentvsid, $name, $text, $label, $type, $options, $seid, $array, $position);
                     $position++;
 
@@ -831,7 +814,6 @@ class Importer {
 
                 // comment, then ignore
                 //if (startsWith(trim($fieldarray[$k]), "{")) {
-                //echo 'ignoring: ' . $fieldarray[$k];
                 //   continue;
                 //}
 
@@ -841,8 +823,7 @@ class Importer {
                     $namedesc = trim($fieldarray[$k]);
 
                     // single line definition
-                    if (contains($namedesc, ":")) {
-                        //echo $namedesc ."<hr>";
+                    if (contains($namedesc, ":")) {                        
                         $nametemp = split(":", $namedesc);
                         $name = trim($nametemp[0]);
                         $issectionvar = false;
@@ -868,16 +849,6 @@ class Importer {
                             $keys = array_keys($descriptions);
                             $seid = $keys[0];
                         }
-
-                        /* echo 'name: ' . $name . "<br/>";
-                          echo 'text: ' . $text . "<br/>";
-                          echo 'label: ' . $label . "<br/>";
-                          echo 'type: ' . $type . "<br/>";
-                          echo 'options: ' . $options . "<br/>";
-                          echo 'section: ' . $sectionidentifier . "(" . $seid . ")<br/>";
-                          echo 'array: ' . $array . "<br/>";
-                          echo "<hr>"; */
-
 
                         $this->addVariable($survey, $currentvsid, $name, $text, $label, $type, $options, $seid, $array, $position, $issectionvar);
                         $position++;
@@ -935,16 +906,6 @@ class Importer {
                         $keys = array_keys($descriptions);
                         $seid = $keys[0];
                     }
-
-                    /* echo 'name: ' . $name . "<br/>";
-                      echo 'text: ' . $text . "<br/>";
-                      echo 'label: ' . $label . "<br/>";
-                      echo 'type: ' . $type . "<br/>";
-                      echo 'options: ' . $options . "<br/>";
-                      echo 'section: ' . $sectionidentifier . "(" . $seid . ")<br/>";
-                      echo 'array: ' . $array . "<br/>";
-                      echo "<hr>";
-                     */
 
                     $this->addVariable($survey, $currentvsid, $name, $text, $label, $type, $options, $seid, $array, $position);
                     $position++;
@@ -1018,19 +979,16 @@ class Importer {
     }
     
     function stripWordQuotes($str) {
-//echo $str;
+
         // https://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
         return str_replace($this->chrmap, "", $str);
     }
     
     function stripNonAscii($str) {
-//echo $str;
+
         // https://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
         $str = $this->stripWordQuotes($str);
-//if ($str != $str1) {
-        //  echo $str . '---' . $str1;
-        // exit;
-//}
+
         // http://stackoverflow.com/questions/1176904/php-how-to-remove-all-non-printable-characters-in-a-string
         return preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $str);
     }
@@ -1528,10 +1486,9 @@ class Importer {
         $str = str_ireplace(EXPORT_PLACEHOLDER_URID, $urid, $str);
         $str = str_ireplace(EXPORT_PLACEHOLDER_SUID, $this->addtosuid, $str);
         $queries = explode("\n", $str);
-        //print_r($queries);
         $tables = Common::surveyExportTables();
         foreach ($queries as $q) {
-            //echo $q . "<hr>";
+
             $q = explode(EXPORT_DELIMITER, trim($q));
             if (sizeof($q) != 3) {
                 continue;
@@ -1539,7 +1496,6 @@ class Importer {
             if (!inArray($q[0], $tables)) {
                 continue;
             }
-            //echo $q[1];
             $fields = sizeof(explode(",", $q[1]));
             $f = "";
             for ($i = 0; $i < $fields; $i++) {
@@ -1559,9 +1515,7 @@ class Importer {
             for ($i = 0; $i < $fields2; $i++) {
                 $val = & prepareImportString($it[$i]);
                 $bp->add(MYSQL_BINDING_STRING, $val);
-                //echo 'adding: ' . $val . '----';
             }
-            //echo print_r($bp->get()) . "<br/>";
             $this->db->executeBoundQuery($query, $bp->get());
         }
 
@@ -1803,7 +1757,7 @@ class Importer {
     function convertSections() {
 
         $query = "select meid as seid, name as name, parentmeid as pid, description as description, visible as hidden, qorder from " . $this->sourcetable . "_module where syid=" . $this->syid . " order by meid";
-//echo $query;
+
         if ($res = $this->importdb->selectQuery($query)) {
 
             if ($this->importdb->getNumberOfRows($res) > 0) {
@@ -2392,8 +2346,6 @@ class Importer {
 
                             $query = "update " . $this->targettable . "_routing set rule='group." . $line . "' where suid=" . $this->suid . " and seid=" . $row["seid"] . " and rgid=" . $row["rgid"];
 
-                            //echo $query;
-
                             $this->db->executeQuery($query);
 
                             /* add group */
@@ -2415,11 +2367,10 @@ class Importer {
                 $query = "select * from " . $this->targettable . "_routing where suid=" . $this->suid . " and rule like 'jumpback(%' order by rgid asc";
                 if ($res = $this->db->selectQuery($query)) {
                     if ($this->db->getNumberOfRows($res) > 0) {
-                        //echo 'jjjj';
+
                         while ($row = $db->getRow($res)) {
                             $line = str_replace(")", "", substr($row["rule"], strpos($row["rule"], "(") + 1));
                             $query = "update " . $this->targettable . "_routing set rule='moveBackward." . $line . "' where suid=" . $this->suid . " and seid=" . $row["seid"] . " and rgid=" . $row["rgid"];
-                            //echo $query;
                             $this->db->executeQuery($query);
                         }
                     }
@@ -2429,11 +2380,11 @@ class Importer {
                 $query = "select * from " . $this->targettable . "_routing where suid=" . $this->suid . " and rule like 'jump(%' order by rgid asc";
                 if ($res = $this->db->selectQuery($query)) {
                     if ($this->db->getNumberOfRows($res) > 0) {
-                        //echo 'aaaaj';
+
                         while ($row = $this->importdb->getRow($res)) {
                             $line = str_replace(")", "", substr($row["rule"], strpos($row["rule"], "(") + 1));
                             $query = "update " . $this->targettable . "_routing set rule='moveForward." . $line . "' where suid=" . $this->suid . " and seid=" . $row["seid"] . " and rgid=" . $row["rgid"];
-                            //echo $query;
+
                             $this->db->executeQuery($query);
                         }
                     }
@@ -2470,12 +2421,11 @@ class Importer {
 
                     /* add usage in variables */
                     $query = "select * from " . $this->targettable . "_settings where suid=" . $this->suid . " and name='" . SETTING_OPTIONS . "' and objecttype=" . OBJECT_VARIABLEDESCRIPTIVE . " and value='" . $row["name"] . "'";
-//                    echo $query;
+
                     $res1 = $this->db->selectQuery($query);
 
                     if ($res1) {
 
-                        //echo 'found some for ' . $row["tyd"] . "-----" . $query . "<br/>";
                         if ($this->db->getNumberOfRows($res1) > 0) {
                             while ($row1 = $this->db->getRow($res1)) {
                                 $q = "update " . $this->targettable . "_variables set tyd=" . $row["id"] . " where suid=" . $this->suid . " and vsid=" . $row1["object"];
@@ -2521,7 +2471,6 @@ class Importer {
                 );
 
                 foreach ($updates as $update) {
-                    //echo $update;
                     $this->db->executeQuery($update);
                 }
             }

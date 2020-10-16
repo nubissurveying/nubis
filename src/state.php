@@ -140,12 +140,10 @@ class State extends NubisObject {
     }
 
     function addInlineField($variable) {
-        //echo 'adding: ' . $variable;
         $this->inlinefields[strtoupper($variable)] = $variable;
     }
 
     function isInlineField($variable) {
-        //print_r($this->inlinefields);
         return inArray($variable, $this->inlinefields);
     }
 
@@ -438,7 +436,6 @@ class State extends NubisObject {
         $l = getSurveyLanguage();
         $m = getSurveyMode();
         $v = getSurveyVersion();
-        //echo $l . $m . $v;
 
         $bp->add(MYSQL_BINDING_INTEGER, $l);
         $bp->add(MYSQL_BINDING_INTEGER, $m);
@@ -574,7 +571,6 @@ class State extends NubisObject {
                 /* update in-memory */
                 $this->variables[strtoupper($variablename)] = $variable;
                 $this->data[strtoupper($variablename)] = $answer;
-                //echo 'set ' . $variablename .  ' to ' . $answer;
 
                 /* update state memory if array update 
                  * (this does not happen in variable.php via $engine->setAnswer()
@@ -583,7 +579,7 @@ class State extends NubisObject {
                 global $engine;
                 $var = $engine->getVariableDescriptive($variablename);
                 if ($var->isArray() && contains($variablename, "[")) {
-                    //echo 'set ' . $variablename .  ' to ' . $answer;
+
                     $arr = $this->getData(getBasicName($variablename));
                     $index = str_replace("]", "", substr($variablename, strrpos($variablename, "[") + 1));
 
@@ -593,7 +589,6 @@ class State extends NubisObject {
                     // flatten array
                     $arr = flatten($arr); // flatten array
                     $this->data[strtoupper(getBasicName($variablename))] = $arr;
-                    //print_r($arr);
                 }
                 // set of enum/multi-dropdown and answer is for whole set of enum (so not something like q1_1_ := response), then update in-memory option selections
                 else if (($var->getAnswerType() == ANSWER_TYPE_SETOFENUMERATED || $var->getAnswerType() == ANSWER_TYPE_MULTIDROPDOWN) && !contains($variablename, "_")) {
@@ -696,8 +691,7 @@ class State extends NubisObject {
 
         /* undo assignments */
         foreach ($unique as $variable => $value) {
-            //echo '<hr>undoing: ' . $variable . ',' . $value;
-            //echo "<br/>";
+
             if (inArray($variable, $cleanvariables)) {
                 $dirty = DATA_CLEAN;
             } else {

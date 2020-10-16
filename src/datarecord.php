@@ -172,7 +172,6 @@ class DataRecord {
             sort($datanames);
             $names = implode("~", $datanames);
         }
-        //echo implode("~", $datanames) . '----';
 
         if ($this->newrecord == true) {
             $query = "insert into " . Config::dbSurveyData() . "_datarecords (suid, primkey, datanames, data) values (?,?,?,$data)";
@@ -184,7 +183,6 @@ class DataRecord {
             $data = gzcompress(serialize($this->data), 9);
             $bp->add(MYSQL_BINDING_STRING, $data);
             $db->executeBoundQuery($query, $bp->get());
-            //echo 'new<br/>';
         } else {
             $query = "update " . Config::dbSurveyData() . "_datarecords set datanames=?, data=$data where suid=? and primkey=?";
             $bp = new BindParam();
@@ -195,7 +193,6 @@ class DataRecord {
             $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
             $bp->add(MYSQL_BINDING_STRING, $this->primkey);
             $db->executeBoundQuery($query, $bp->get());
-            //echo 'update<br/>';
         }
     }
 

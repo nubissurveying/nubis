@@ -57,13 +57,9 @@ class Respondents {
         global $db;
         $respondents = array();
         $query = 'select primkey from ' . Config::dbSurvey() . '_contacts as t1 left join ' . Config::dbSurvey() . '_respondents as t2 on t1.primkey = t2.primkey where t1.code = 500 and t2.selected = 1 and t1.primkey not like "999%" and t1.ts < DATE_SUB(now(), INTERVAL 6 MONTH) LIMIT 0, 300';
-// urid = "' . prepareDatabaseString($urid) . '"';
-//      echo '<br/><br/><br/>' . $query;
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
-//echo $row[8];
-//echo '-';
-//print_r($row);
+
             $respondents[] = new Respondent($row['primkey']);
         }
         return $respondents;
@@ -205,7 +201,7 @@ class Respondents {
             $urid = $user->getUrid();
         }
         $query = 'replace into ' . Config::dbSurvey() . '_respondents (primkey, firstname, urid, test, hhid, sex, age, selected, present, permanent, hhorder) values (\'' . $primkey . '\', aes_encrypt(\'' . $firstname . '\', \'' . Config::smsPersonalInfoKey() . '\'), ' . prepareDatabaseString($urid) . ', ' . $test . ', \'' . $hhid . '\', aes_encrypt(\'' . $sex . '\', \'' . Config::smsPersonalInfoKey() . '\'), aes_encrypt(\'' . $age . '\', \'' . Config::smsPersonalInfoKey() . '\'), ' . $selected . ', ' . $present . ', ' . $permanent . ', ' . $hhorder . ')';
-        //echo '<br/><br/><Br/>' . $query . '<hr>';
+
         $result = $db->selectQuery($query);
         return new Respondent($primkey);
     }
@@ -221,7 +217,7 @@ class Respondents {
         $query = 'select primkey from ' . Config::dbSurveyData() . '_lab where 
               aes_decrypt(barcode, \'' . Config::filePictureKey() . '\') = \'' . prepareDatabaseString($searchterm) . '\' or
               aes_decrypt(labbarcode, \'' . Config::filePictureKey() . '\') = \'' . prepareDatabaseString($searchterm) . '\'';
-//echo $query;
+
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
             if ($row['primkey'] != '') {
@@ -289,8 +285,6 @@ class Respondents {
 
             )';
 
-        // echo '<br/><br/><br/>' . $query;
-
         $result = $db->selectQuery($query);
 
         while ($row = $db->getRow($result)) {
@@ -304,7 +298,7 @@ class Respondents {
     function getRespondentByLoginCode($logincode) {
         global $db;
         $query = 'select *, ' . $this->getDeIdentified() . ' from ' . Config::dbSurvey() . '_respondents where aes_decrypt(logincode, \'' . Config::loginCodeKey() . '\') = \'' . prepareDatabaseString($logincode) . '\'';
-//echo $query;
+
         if ($result = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($result) > 0) {
                 $row = $db->getRow($result);

@@ -167,8 +167,7 @@ class SurveyAjax {
         } else {
             $query = "insert into " . Config::dbSurveyData() . "_paradata(pid, suid, primkey, stateid, rgid, displayed, paradata, mode, language, version) values (?,?,?,?,aes_encrypt(?, '" . $key . "'),?,?,?)";
         }
-        //echo $query;
-        //print_r($bp->get());
+
         $db->executeBoundQuery($query, $bp->get());
         exit;
     }
@@ -208,8 +207,7 @@ class SurveyAjax {
         } else {
             $query = "insert into " . Config::dbSurveyData() . "_screendumps(scdid, suid, primkey, stateid, screen, mode, language, version) values (?,?,?,?,aes_encrypt(?, '" . $key . "'),?,?,?)";
         }
-        //echo $query;
-        //print_r($bp->get());
+
         $db->executeBoundQuery($query, $bp->get());
         exit;
     }

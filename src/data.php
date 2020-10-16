@@ -26,7 +26,6 @@ class Data {
             $key = "aes_decrypt(answer, '" . $survey->getDataEncryptionKey() . "') as answer_dec";
         }
         $query = "select variablename, " . $key . ", dirty, language, mode, ts from " . Config::dbSurveyData() . "_data where suid=" . $suid . " and primkey='" . $primkey . "' order by ts asc, variablename asc";
-        //echo $query;
         $res = $db->selectQuery($query);
         $arr = array();
         if ($res) {
@@ -67,7 +66,6 @@ class Data {
         $query = "select $decrypt from " . Config::dbSurveyData() . "_screendumps where suid=" . prepareDatabaseString($suid) . " and primkey='" . prepareDatabaseString($id) . "' order by ts asc";
         $res = $db->selectQuery($query);
         $arr = array();
-        //echo $query;
         if ($res) {
             if ($db->getNumberOfRows($res) > 0) {
                 while ($row = $db->getRow($res)) {
@@ -88,7 +86,6 @@ class Data {
         $query = "select $decrypt from " . Config::dbSurveyData() . "_screendumps where suid=" . prepareDatabaseString($suid) . " and primkey='" . prepareDatabaseString($id) . "' order by scdid limit " . $cnt . ", 1";
         $res = $db->selectQuery($query);
         $arr = array();
-        //echo $query;
         if ($res) {
             if ($db->getNumberOfRows($res) > 0) {
                 $row = $db->getRow($res);
@@ -103,7 +100,6 @@ class Data {
         $query = "select screen from " . Config::dbSurveyData() . "_screendumps where suid=" . prepareDatabaseString($suid) . " and primkey='" . prepareDatabaseString($id) . "'";
         $res = $db->selectQuery($query);
         $arr = array();
-        //echo $query;
         if ($res) {
             return $db->getNumberOfRows($res);
         }
@@ -122,7 +118,6 @@ class Data {
         $cnt8 = 0;
         global $db;
         $select = "select variable, sum(timespent) as total2 from " . Config::dbSurveyData() . "_consolidated_times where suid=" . $suid . " and timespent < $cutoff group by variable order by variable asc"; // , ts asc
-        //echo $select;
         $res = $db->selectQuery($select);
         if ($res) {
 
@@ -152,7 +147,7 @@ class Data {
                 }
             }
         }
-//echo $total . '----' . ($cnt+$cnt1+$cnt2+$cnt3+$cnt4+$cnt5+$cnt6+$cnt7+$cnt8);
+
         return array($cnt, $cnt1, $cnt2, $cnt3, $cnt4, $cnt5, $cnt6, $cnt7, $cnt8);
     }
 
@@ -258,9 +253,8 @@ class Data {
 
         // add dkarray if active
         $arr = array_merge($arr, $dkarray);
-        //print_r($arr);
-        // return result        
 
+        // return result        
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
         return $arr;
     }
@@ -285,12 +279,10 @@ class Data {
               ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;";
         $db->executeQuery($create);
 
-// update
-//echo $suid . '----';
-//exit;
+        // update
         $query = "delete from " . Config::dbSurveyData() . "_consolidated_times where suid=" . $suid;
         $db->executeQuery($create);
-//echo $query . '----';
+
         // old non-group by compliant: $query = "REPLACE INTO " . Config::dbSurveyData() . "_consolidated_times SELECT suid, primkey, begintime, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . Config::dbSurveyData() . "_times where suid=" . $suid . " group by primkey, begintime order by primkey asc";
         $query = "REPLACE INTO " . Config::dbSurveyData() . "_consolidated_times SELECT min(suid) as suid, primkey, begintime, min(stateid) as stateid, min(variable) as variable, avg(timespent) as timespent, min(language) as language, min(mode) as mode, min(version) as version, min(ts) as ts FROM " . Config::dbSurveyData() . "_times where suid=" . $suid . " group by primkey, begintime order by primkey asc";
         $db->executeQuery($query);
@@ -308,7 +300,6 @@ class Data {
         $cnt8 = 0;
         global $db;
         $select = "select primkey, sum(timespent)/60 as total2 from " . Config::dbSurveyData() . "_consolidated_times where suid=" . $suid . "  and  timespent < $cutoff group by primkey order by primkey asc";
-        //echo $select;
         $res = $db->selectQuery($select);
         if ($res) {
 
@@ -355,7 +346,7 @@ class Data {
                 }
             }
         }
-//echo $total . '----' . ($cnt+$cnt1+$cnt2+$cnt3+$cnt4+$cnt5+$cnt6+$cnt7+$cnt8);
+
         return array($cnt, $cnt1, $cnt2, $cnt3, $cnt4, $cnt5, $cnt6, $cnt7, $cnt8);
     }
 
@@ -407,21 +398,19 @@ class Data {
                 }
             }
         }
-//echo $total . '----' . ($cnt+$cnt1+$cnt2+$cnt3+$cnt4+$cnt5+$cnt6+$cnt7+$cnt8);
-        $labels2 = array_keys($dates);
-        //print_r($labels);
+
+        $labels2 = array_keys($dates);        
         sort($labels2);
         $labels = array();
         foreach ($labels2 as $l) {
             $labels[] = date("F j, Y", $l) . ' (' . $dates3[$l] . ')';
         }
-        //print_r($labels);
+        
         return $dates;
     }
 
     function getTimingsDataPerRespondent($suid, $prim, &$labels, $cutoff = 301) {
         $select = "select avg(timespent)/60 as total2, min(language) as language, min(ts) as ts from " . Config::dbSurveyData() . "_consolidated_times where suid=" . $suid . " and primkey='" . $prim . "' and timespent < $cutoff group by stateid order by stateid asc";
-        //echo $select;
         global $db;
         $res = $db->selectQuery($select, $this->db);
         $dates = array();
@@ -483,7 +472,6 @@ class Data {
             $answer = "cast(aes_decrypt(answer, '" . $survey->getDataEncryptionKey() . "') as char) as answer_dec";
         }
         $select = "select " . $answer . " from " . Config::dbSurveyData() . "_data where suid=" . $suid . " and variablename='" . VARIABLE_PLATFORM . "'";
-        //echo $select;
         global $db;
         $res = $db->selectQuery($select);
         $data = array();
@@ -515,7 +503,6 @@ class Data {
             $query = "select variablename, sum(answer) as total from " . Config::dbSurveyData() . "_processed_paradata where suid=" . $survey->getSuid() . " and variablename like '" . $name . "\_%' group by variablename order by variablename";
         }
         $res = $db->selectQuery($query);
-        //echo $query;
         if ($res) {
             if ($db->getNumberOfRows($res) > 0) {
                 while ($row = $db->getRow($res)) {
@@ -524,67 +511,8 @@ class Data {
                 }
             }
         }
-        //print_r($arr);
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
         return $arr;
-
-        /*
-          // BELOW IS OLD
-          $decrypt = "paradata as data_dec";
-          if ($survey->getDataEncryptionKey() != "") {
-          $decrypt = "aes_decrypt(paradata, '" . $survey->getDataEncryptionKey() . "') as data_dec";
-          }
-
-          //if ($variable->isArray()) {
-          //    $query = "select $decrypt from " . Config::dbSurveyData() . "_data where suid=" . $survey->getSuid() . ' and variablename like "' . $name . '"' . " order by primkey";
-          //} else {
-          $query = "select primkey, $decrypt, displayed from " . Config::dbSurveyData() . "_paradata where suid=" . $survey->getSuid() . ' and (displayed = "' . $name . '" OR displayed like "%' . $name . '~%") order by primkey';
-          //}
-          //echo $query;
-          $res = $db->selectQuery($query);
-          $codes = array_values(Common::errorCodes());
-          if ($res) {
-          if ($db->getNumberOfRows($res) > 0) {
-          while ($row = $db->getRow($res)) {
-          $line = strtoupper($row["displayed"]);
-
-          // if displayed == variable OR displayed contains ~varname~ or displayed starts with varname~, process; otherwise skip
-          if ($line == strtoupper($name) || contains($line, "~" . $name . "~") || startsWith($line, $name . "~")) {
-          $a = explode("||", $row["data_dec"]);
-          $displayed = explode("~", $row["displayed"]);
-          $variables = array();
-          foreach ($displayed as $d) {
-          if (startsWith($d, ROUTING_IDENTIFY_SUBGROUP) == false && startsWith($d, ROUTING_IDENTIFY_ENDSUBGROUP) == false) {
-          $variables[] = $d;
-          }
-          }
-          $position = array_search($name, $variables) + 1;
-          foreach ($a as $k) {
-          $t = explode(":", $k);
-          $code = $t[0];
-          if (inArray($code, $codes)) {
-          $s = explode("=", $t[1]);
-          $varname = $s[0];
-          $number = str_replace("answer", "", str_replace("_name[]", "", $varname));
-          if ($position == $number) {
-          if (isset($arr[strtoupper($code)])) {
-          $arr[strtoupper($code)] = $arr[strtoupper($code)] + 1;
-          } else {
-          $arr[strtoupper($code)] = 1;
-          }
-          }
-          }
-          }
-          //echo $row["data_dec"] . "<br/>";
-          }
-          }
-          }
-          }
-          //print_r($arr);
-          // ||FO=1447956435841||MM:318:792=1447956438952||FI=1447956442805
-
-          $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
-          return $arr; */
     }
 
     function processParaData($name = "") {
@@ -594,8 +522,6 @@ class Data {
         global $survey, $db;
 
         $query = "select max(pid) as pid from " . Config::dbSurveyData() . "_processed_paradata where suid=" . $survey->getSuid();
-        //}
-        //echo $query;
         $pid = 0;
         $res = $db->selectQuery($query);
         if ($res) {
@@ -619,8 +545,7 @@ class Data {
         } else {
             $query = "select *, $decrypt from " . Config::dbSurveyData() . "_paradata where pid > $pid and suid=" . $survey->getSuid() . ' and (displayed = "' . $name . '" OR displayed like "%' . $name . '~%") order by primkey, pid asc';
         }
-        //}
-        //echo $query;
+
         $res = $db->selectQuery($query);
         $codes = array_values(Common::errorCodes());
         if ($res) {
@@ -636,7 +561,6 @@ class Data {
 
                         // k: varname
                         // a: array of error codes with number of times
-                        //print_r($arr);
                         foreach ($arr as $k => $a) {
                             foreach ($a as $error => $times) {
                                 $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
@@ -647,7 +571,6 @@ class Data {
                                 }
                                 $query .= ")";
                                 $db->executeQuery($query);
-                                //echo $query . "<hr>";
                             }
                         }
 
@@ -692,7 +615,6 @@ class Data {
                                         $vararray = array();
                                     }
                                     if (isset($vararray[strtoupper($code)])) {
-                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
                                         $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
                                     } else {
                                         $vararray[strtoupper($code)] = 1;
@@ -707,7 +629,6 @@ class Data {
                                         $vararray = array();
                                     }
                                     if (isset($vararray[strtoupper($code)])) {
-                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
                                         $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
                                     } else {
                                         $vararray[strtoupper($code)] = 1;
@@ -724,7 +645,6 @@ class Data {
 
                         // k: varname
                         // a: array of error codes with number of times
-                        //print_r($arr);
                         foreach ($arr as $k => $a) {
                             foreach ($a as $error => $times) {
                                 $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
@@ -735,7 +655,6 @@ class Data {
                                 }
                                 $query .= ")";
                                 $db->executeQuery($query);
-                                //echo $query . "<hr>";
                             }
                         }
 

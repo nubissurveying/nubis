@@ -174,7 +174,6 @@ class DisplaySms extends DisplaySysAdmin {
 		<th><label><input type="checkbox" id="checkAll"/> &nbsp;&nbsp;id</label></th>
 		<th>Name</th>';
 
-            //echo 'here';
             $columns = $this->defaultDisplayOverviewAddressColumns();
             foreach ($columns as $column) {
                 $returnStr .= '<th>' . $column . '</th>';
@@ -250,7 +249,6 @@ $("#checkAll").change(function () {
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
         $returnStr .= $this->showFooter(false);
-        //echo $returnStr;
         return $returnStr;
     }
 
@@ -284,7 +282,6 @@ $("#checkAll").change(function () {
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
         $returnStr .= $this->showFooter(false);
-        //echo $returnStr;
         return $returnStr;
     }
 

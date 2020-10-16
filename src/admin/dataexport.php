@@ -410,7 +410,6 @@ class DataExport {
 
         // get variable names
         foreach ($vars as $key => $subvars) {
-            //echo "<br/>" . $key;
             $subvars = $subvars["vars"];
             ksort($subvars, SORT_STRING); // sort by variable name
             foreach ($subvars as $d) {
@@ -622,7 +621,7 @@ class DataExport {
         // get all variables and figure out which ones we can include remarks for
         $this->variabledescriptives = $this->survey->getVariableDescriptives();
         foreach ($this->variabledescriptives as $vd) {
-            //echo 'going to add: ' . $vd->getName() . "<br/>";
+
             // hidden variable
             if ($this->getProperty(DATA_OUTPUT_HIDDEN) == DATA_HIDDEN && $vd->isHidden()) {
                 continue;
@@ -691,8 +690,6 @@ class DataExport {
         }
         $query = "select *, $decrypt from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_observations where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extra . " order by primkey";
         $res = $this->db->selectQuery($query);
-        //echo $query;
-        //exit;
 
         if ($res) {
             if ($this->db->getNumberOfRows($res) == 0) {
@@ -797,9 +794,6 @@ class DataExport {
               ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;";
         $this->db->executeQuery($create);
 
-// update
-//echo $suid . '----';
-//exit;
         $query = "delete from table " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid;
         $this->db->executeQuery($query);
         //// old non-group by compliant: $query = "REPLACE INTO " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times SELECT min(suid), primkey, begintime, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_times where suid=" . $this->suid . " group by primkey, begintime order by primkey asc";
@@ -812,8 +806,6 @@ class DataExport {
         if ($this->getProperty(DATA_OUTPUT_VARLIST) != "") {
             $filter = explode("~", $this->getProperty(DATA_OUTPUT_VARLIST));
             $extra = " AND (variable='" . implode("' OR variable='", $filter) . "')";
-            //echo $extra;
-            //exit;
         }
         if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
             $extra .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
@@ -825,13 +817,10 @@ class DataExport {
         $cutoff = Config::getTimingCutoff(); //DATA_TIMINGS_CUTOFF; // more than 5 minutes we ignore in calculating total interview time	
         $data = '';
         $select = "select primkey, variable, timespent, language, mode from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . $extra . " order by primkey asc, ts asc";
-        //echo $select;
-        //exit;
         $res = $this->db->selectQuery($select);
         if ($this->db->getNumberOfRows($res) > 0) {
 
             while ($row = $this->db->getRow($res)) {
-//print_r($row);        
                 //if (is_numeric($row["primkey"])) {
 
                 /* no match on language, mode and version, then treat as never gotten */
@@ -971,9 +960,6 @@ class DataExport {
     function processErrorParaData($name = "") {
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         $query = "select max(pid) as pid from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_error_paradata where suid=" . $this->survey->getSuid();
-        //}
-        //echo $query;
-        //exit;
         $pid = 0;
         $res = $this->db->selectQuery($query);
         if ($res) {
@@ -997,9 +983,6 @@ class DataExport {
         } else {
             $query = "select *, $decrypt from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_paradata where pid > $pid and suid=" . $this->survey->getSuid() . ' and (displayed = "' . $name . '" OR displayed like "%' . $name . '~%") order by primkey, pid asc';
         }
-        //}
-        //echo $query;
-        //exit;
         $res = $this->db->selectQuery($query);
         $codes = array_values(Common::errorCodes());
         if ($res) {
@@ -1065,8 +1048,6 @@ class DataExport {
     function processParaData($name = "") {
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         $query = "select max(pid) as pid from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_processed_paradata where suid=" . $this->survey->getSuid();
-        //}
-        //echo $query;
         $pid = 0;
         $res = $this->db->selectQuery($query);
         if ($res) {
@@ -1090,8 +1071,6 @@ class DataExport {
         } else {
             $query = "select *, $decrypt from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_paradata where pid > $pid and suid=" . $this->survey->getSuid() . ' and (displayed = "' . $name . '" OR displayed like "%' . $name . '~%") order by primkey, pid asc';
         }
-        //}
-        //echo $query;
         $res = $this->db->selectQuery($query);
         $codes = array_values(Common::errorCodes());
         if ($res) {
@@ -1117,7 +1096,6 @@ class DataExport {
                                 }
                                 $query .= ")";
                                 $this->db->executeQuery($query);
-                                //echo $query . "<hr>";
                             }
                         }
 
@@ -1166,7 +1144,6 @@ class DataExport {
                                         $vararray = array();
                                     }
                                     if (isset($vararray[strtoupper($code)])) {
-                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
                                         $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
                                     } else {
                                         $vararray[strtoupper($code)] = 1;
@@ -1181,7 +1158,6 @@ class DataExport {
                                         $vararray = array();
                                     }
                                     if (isset($vararray[strtoupper($code)])) {
-                                        //echo $k . '------adding for: ' . $oldprimkey . '----' . $variable . "<hr>";
                                         $vararray[strtoupper($code)] = $vararray[strtoupper($code)] + 1;
                                     } else {
                                         $vararray[strtoupper($code)] = 1;
@@ -1199,7 +1175,6 @@ class DataExport {
 
                         // k: varname
                         // a: array of error codes with number of times
-                        //print_r($arr);
                         foreach ($arr as $k => $a) {
                             foreach ($a as $error => $times) {
                                 $query = "replace into " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
@@ -1210,7 +1185,6 @@ class DataExport {
                                 }
                                 $query .= ")";
                                 $this->db->executeQuery($query);
-                                //echo $query . "<hr>";
                             }
                         }
 
@@ -1307,8 +1281,6 @@ class DataExport {
         $filter = array();
         if ($this->getProperty(DATA_OUTPUT_VARLIST) != "") {
             $filter = explode("~", $this->getProperty(DATA_OUTPUT_VARLIST));
-            //echo $this->getProperty(DATA_OUTPUT_VARLIST);
-            //exit;
         }
 
         // sort data names by name
@@ -1392,8 +1364,6 @@ class DataExport {
 
                     $query = "select primkey, variablename, $decrypt, language, mode, version from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_processed_paradata where suid=" . $this->suid . " and primkey='" . $row["primkey"] . "'";
                     $this->currentrecord = array();
-                    //echo $query;
-                    //exit;
                     $res2 = $this->db->selectQuery($query);
                     if ($res2) {
                         if ($this->db->getNumberOfRows($res2)) {
@@ -1562,8 +1532,6 @@ class DataExport {
         if ($this->getProperty(DATA_OUTPUT_VARLIST) != "") {
             $filter = explode("~", $this->getProperty(DATA_OUTPUT_VARLIST));
             $extra = " AND (variable='" . implode("' OR variable='", $filter) . "')";
-            //echo $extra;
-            //exit;
         }
         if ($this->getProperty(DATA_OUTPUT_FROM) != "") {
             $extra .= " and ts > '" . $this->getProperty(DATA_OUTPUT_FROM) . "'";
@@ -1578,13 +1546,10 @@ class DataExport {
         }
         $data = '';
         $select = "select primkey, displayed, language, mode, $decrypt, ts from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_paradata where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . $extra . " order by primkey asc, pid asc";
-        //echo $select;
-        //exit;
         $res = $this->db->selectQuery($select);
         if ($this->db->getNumberOfRows($res) > 0) {
 
             while ($row = $this->db->getRow($res)) {
-//print_r($row);        
                 //if (is_numeric($row["primkey"])) {
 
                 /* no match on language, mode and version, then treat as never gotten */
@@ -1726,13 +1691,10 @@ class DataExport {
         }
         $data = '';
         $select = "select primkey, variablename, language, mode, $decrypt, ts from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_error_paradata where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) < " . $this->maxprimkeylength . $extra . " order by primkey asc, variablename asc";
-        //echo $select;
-        //exit;
         $res = $this->db->selectQuery($select);
         if ($this->db->getNumberOfRows($res) > 0) {
 
             while ($row = $this->db->getRow($res)) {
-//print_r($row);        
                 //if (is_numeric($row["primkey"])) {
 
                 /* no match on language, mode and version, then treat as never gotten */
@@ -2285,8 +2247,6 @@ class DataExport {
                 $decrypt = ", MAX( LENGTH( cast(aes_decrypt(answer, '" . $this->survey->getDataEncryptionKey() . "') as char))) AS max";
             }
             $query = "select variablename" . $decrypt . " from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_data where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extracompleted . $extra . " group by variablename";
-            //echo $query;
-            //exit;
             $res = $this->db->selectQuery($query);
             if ($res) {
                 if ($this->db->getNumberOfRows($res) == 0) {
@@ -2309,8 +2269,6 @@ class DataExport {
         $filter = array();
         if ($this->getProperty(DATA_OUTPUT_VARLIST) != "") {
             $filter = explode("~", $this->getProperty(DATA_OUTPUT_VARLIST));
-            //echo $this->getProperty(DATA_OUTPUT_VARLIST);
-            //exit;
         }
 
         /* collect info to sort */
@@ -2360,7 +2318,7 @@ class DataExport {
         if ($this->getProperty(DATA_OUTPUT_VARIABLES_WITHOUT_DATA) == VARIABLES_WITHOUT_DATA_YES) {
             $this->variabledescriptives = $this->survey->getVariableDescriptives();
             foreach ($this->variabledescriptives as $vd) {
-                //echo 'going to add: ' . $vd->getName() . "<br/>";
+
                 // hidden variable
                 if ($this->getProperty(DATA_OUTPUT_HIDDEN) == DATA_HIDDEN && $vd->isHidden()) {
                     continue;
@@ -2403,7 +2361,7 @@ class DataExport {
 
         /* retrieve variable information */
         foreach ($vars as $key => $subvars) {
-            //echo "<br/>" . $key;
+            
             $subvars = $subvars["vars"];
             sort($subvars, SORT_STRING); // sort by variable name
             foreach ($subvars as $d) {
@@ -2526,8 +2484,6 @@ class DataExport {
 
                         $query = "select primkey, variablename, $decrypt, language, mode, version, dirty from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_data where suid=" . $this->suid . " and primkey='" . $row["primkey"] . "'";
                         $this->currentrecord = array();
-                        //echo $query;
-                        //exit;
                         $res2 = $this->db->selectQuery($query);
                         if ($res2) {
                             while ($row2 = $this->db->getRow($res2)) {
@@ -2581,19 +2537,16 @@ class DataExport {
     }
 
     function stripWordQuotes($str) {
-//echo $str;
+
         // https://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
         return str_replace($this->chrmap, "", $str);
     }
 
     function stripNonAscii($str) {
-//echo $str;
+
         // https://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
         $str = $this->stripWordQuotes($str);
-//if ($str != $str1) {
-        //  echo $str . '---' . $str1;
-        // exit;
-//}
+
         // http://stackoverflow.com/questions/1176904/php-how-to-remove-all-non-printable-characters-in-a-string
         return preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $str);
     }
@@ -3161,7 +3114,7 @@ class DataExport {
         } else {
             $bytes = pack("d", $byte);
         }
-        //echo mb_strlen($bytes);
+        
         //fwrite($handle, $bytes); // d
         $this->streamwrite($bytes); // d
         $bytelen = mb_strlen($bytes, 'ISO-8859-1'); // necessary otherwise stata file is corrupted
@@ -3280,13 +3233,8 @@ class DataExport {
 
     function getValue($primkey, $record, $fieldname) {
 
-        // criteria
-        //$languages = $this->getProperty(DATA_OUTPUT_LANGUAGES);
-        //$modes = $this->getProperty(DATA_OUTPUT_MODES);
-        //$versions = $this->getProperty(DATA_OUTPUT_VERSIONS);
-        //$primkey = $record->getPrimaryKey();
         $value = null; // assume never asked
-        //echo $fieldname;
+        
         // from _data table
         if ($this->getProperty(DATA_OUTPUT_TYPE) == DATA_OUTPUT_TYPE_DATA_TABLE) {
             $value = $this->getDataTableValue($primkey, $fieldname);
@@ -3294,7 +3242,6 @@ class DataExport {
         // from _datarecords table
         else {
             $variableobject = $record->getData($fieldname);
-            //echo 'jjjjj';
             if ($variableobject) {
 
                 /* no match on language, mode and version, then treat as never asked */

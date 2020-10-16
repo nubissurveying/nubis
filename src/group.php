@@ -2224,7 +2224,6 @@ class Group extends Component {
         $query .= prepareDatabaseString($this->getGid()) . ",";
         $query .= "'" . prepareDatabaseString($this->getName()) . "'";
         $query .= ")";
-        //echo $query;
         $db->executeQuery($query);
 
         /* save settings */

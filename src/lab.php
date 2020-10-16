@@ -109,7 +109,6 @@ class Lab {
             global $survey, $db;
             $query = 'select *, aes_decrypt(answer, "' . $survey->getDataEncryptionKey() . '") as answer from ' . Config::dbSurvey() . '_data where primkey = "' . prepareDatabaseString($this->getPrimkey()) . '" and variablename="bs021"';
             $result = $db->selectQuery($query);
-//            print_r($result);
             if ($result != null && $db->getNumberOfRows($result) > 0) {
                 $row = $db->getRow($result);
                 $barcode = $row['answer'];
@@ -117,7 +116,6 @@ class Lab {
                 $this->saveChanges();
                 return $barcode;
             } else {//no barcode....
-                //echo "no code";
                 return '';
             }
         }
@@ -544,7 +542,6 @@ class Lab {
 
         $query .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
 
-        //echo '<br/><br/><br/>' . $query;
         $db->executeQuery($query);
     }
 

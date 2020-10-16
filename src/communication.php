@@ -36,15 +36,7 @@ class Communication {
         $data = array('p' => 'updateavailable', 'urid' => $urid);
 
         $result = $this->curlToServer($data, $postUrl);
-        /*
-          $ch = curl_init($postUrl);
-          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-          curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-          $result = curl_exec($ch);
-          $info = curl_getinfo($ch); */
-        //echo '<br/><br/><br/>' . $result;
+        
         if (trim($result) == 'yes') {
             return true;
         }
@@ -56,15 +48,6 @@ class Communication {
         $data = array('p' => 'datareceived', 'urid' => $urid);
         $result = $this->curlToServer($data, $postUrl);
 
-        /*
-          $ch = curl_init($postUrl);
-          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-          curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-          $result = curl_exec($ch);
-          $info = curl_getinfo($ch); */
-        //   echo '<br/><br/><br/>' . $result;
         if (trim($result) == 'yes') {
             return true;
         }
@@ -82,7 +65,6 @@ class Communication {
             $wherets .= ' AND ' . $extraCondition;
         }
         foreach ($tables as $table) {
-            //echo '<br/><br/><br/>select * from ' . Config::dbSurvey() . '_' . $table . $wherets;
 
             $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_' . $table . $wherets);
             if ($db->getNumberOfRows($result) > 0) {
@@ -119,13 +101,7 @@ class Communication {
                 $return .= ";\n";
             }
         }
-        //echo '<br/><br/><br/>';
-        //echo $return;
-        //echo '<hr>';
-        //  $return = $this->encryptAndCompress($return);
-//        $return = gzcompress($return, 6);
-        //echo '<br/><br/><br/>' . $return;
-        //echo '<hr>';
+
         return $return;
     }
 
@@ -143,24 +119,7 @@ class Communication {
         $data = array('p' => 'upload', 'urid' => $urid, 'query' => $str);
 
         $result = $this->curlToServer($data, $postUrl);
-        /*
-
-
-          $ch = curl_init($postUrl);
-          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-          curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-
-          //application/x-www-form-urlencoded
-          //multipart/form-data
-
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
-          $result = curl_exec($ch);
-          $info = curl_getinfo($ch); */
-        //echo '<br/><br/><br/>' . $result;
-        //exit;
+        
         if (trim($result) == 'ok') {
             return true;
         }
@@ -171,57 +130,27 @@ class Communication {
         $postUrl = getCommunicationServer();
         $data = array('p' => 'receive', 'urid' => $urid);
 
-        $result = $this->curlToServer($data, $postUrl);
-        /*
-
-          $ch = curl_init($postUrl);
-          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-          curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
-          $result = curl_exec($ch);
-          $info = curl_getinfo($ch); */
-        //  echo '<br/><br/><br/>' . $result;
-        $this->importData($result);
-        //echo $result;
-//        if (trim($result) == 'ok'){
-        return true;
-        //      }
-        //    return false;
+        $result = $this->curlToServer($data, $postUrl);        
+        $this->importData($result);        
+        return true;       
     }
 
     function importData($str) {
         global $db;
-        //echo '<br/><br/><br/><br>' . $str . '<br>';
-        //echo 'decompress:<br/>';
-        //echo $deflate;
-        //echo '<hr>';
+
         $lines = explode("!~!~!", trim($str));
-        // echo '<br/><br/><br/><br/>';
-        //foreach($lines as $line){
-        //    echo "-----" . $line;
-        //  echo '<br/>';
+
         for ($i = 0; $i < sizeof($lines); $i = $i + 2) {
 
             $parameters = explode('~', $lines[$i]);
             $line = $lines[$i + 1];
             $deflate = $this->decryptAndUncompress(($line));
 
-            /*
-              echo $lines[$i] . ":" . $parameters[0];
-              echo '<hr>';
-              echo $deflate;
-              echo '<hr>';
-             */
             if ($parameters[0] == 1) { //sql
-                //          $deflate = gzuncompress(trim($line));
-                // echo '<br/>deflated<br/>';
-                // echo $deflate;
-                //echo '<br/><br/><br/><br/><br/><br/>aaaaaaaaaaaaaAA<br/>';
+
                 $linessql = explode("\n", $deflate);
                 foreach ($linessql as $linesql) {
                     if (trim($linesql) != '') {
-                        echo '<br/>exec: ' . $linesql . '<br/>';
                         $db->executeQuery($linesql);
                     }
                 }
@@ -263,7 +192,6 @@ class Communication {
             $query .= 'COMPRESS(AES_ENCRYPT("' . addslashes($updateSql) . '", "' . Config::smsCommunicationKey() . '")) ';
             $query .= ')';
             $db->executeQuery($query);
-            // echo '<br/><br/><br/>' . $query;
         }
     }
 
@@ -277,14 +205,6 @@ class Communication {
         $query .= 'COMPRESS(AES_ENCRYPT("' . addslashes($str) . '", "' . Config::smsCommunicationKey() . '")), ';
         $query .= '"' . prepareDatabaseString($filename) . '", 2)';
         $db->executeQuery($query);
-
-        /*
-          $query = 'select * from haalsi_communication';
-          $result = $db->selectQuery($query);
-          $row = $db->getRow($result);
-
-          echo '<textarea rows=60 cols=20>' . $this->decryptAndUncompress($row['sqlcode']) . '</textarea>';
-         */
         return $query;
     }
 
@@ -322,7 +242,6 @@ class Communication {
     function setUpdateReceived($urid) {
         global $db;
         $query = 'update ' . Config::dbSurvey() . '_communication set received = 1, receivedts = "' . date('Y-m-d H:i:s') . '" where urid = ' . $urid;
-        //echo $query;
         return $db->selectQuery($query);
     }
 
@@ -406,7 +325,6 @@ class Communication {
     function removeRecord($hnid) {
         global $db;
         $query = 'delete from ' . Config::dbSurvey() . '_communication where hnid = ' . $hnid;
-        //echo '<br/><br/><br/>' . $query;
         return $db->executeQuery($query);
     }
 
@@ -421,7 +339,6 @@ class Communication {
 //            $query .= 'COMPRESS(AES_ENCRYPT("' . addslashes($updateSql) . '", "' . Config::smsCommunicationKey() . '")), ';
             $query .= '2)';
             $db->executeQuery($query);
-            // echo '<br/><br/><br/>' . $query;
         }
     }
 

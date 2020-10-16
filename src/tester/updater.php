@@ -122,11 +122,9 @@ class Updater {
     }
 
     function getDisplayValue($var, $value) {
-        //echo "<hr>" . $var->getName() . ":" . $var->getAnswerType();        
-        //$var = $survey->getVariableDescriptive($variable);
+
         if ($var) {
             $type = $var->getAnswerType();
-            //echo $type;
             switch ($type) {
                 case ANSWER_TYPE_OPEN:
                     return $value;
@@ -170,12 +168,7 @@ class Updater {
         $survey = new Survey(getFromSessionParams('watchsuid'));
         $var = $survey->getVariableDescriptiveByName($is["variablename"]);
         $cnt = loadvar("cnt");
-        //echo $cnt;
-        //echo '----' . loadvar("updatevariable" . $cnt) . '----' . loadvar("answer" . $cnt);
-        //echo $this->engine->getDirty(loadvar("updatevariable" . $cnt));
         $r = $this->engine->getAnswer(loadvar("updatevariable" . $cnt));
-        //echo '-----' . $r;
-        //echo loadvar("answer" . $cnt) . '-----';
         $this->engine->setAnswer(loadvar("updatevariable" . $cnt), loadvar("answer" . $cnt), $this->engine->getDirty(loadvar("updatevariable" . $cnt)));
         $this->update();
     }

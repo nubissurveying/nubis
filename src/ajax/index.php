@@ -18,9 +18,7 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 
-
 // include constants
-
 require_once("../constants.php");
 
 require_once("../functions.php");

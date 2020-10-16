@@ -47,14 +47,12 @@ class PaperGenerator {
                 /* set uscic-paperversion-nesting counter */
                 $this->nesting = $nestingcounter;
                 while ($row = $db->getRow($rules)) {
-                    //echo $row["rule"] . "<br/>";
                     $this->instructions[$row["rgid"]] = new RoutingInstruction($row["suid"], $row["seid"], $row["rgid"], $row["rule"]);
                 }
-//echo'yytyyy';
+
                 /* process rules */
                 for ($this->cnt = 1; $this->cnt <= sizeof($this->instructions); $this->cnt++) {
                     if (isset($this->instructions[$this->cnt])) {
-                        //echo $this->instructions[$this->cnt]->getRule() . "<br/>";
                         $this->addRule($rootnode, $this->instructions[$this->cnt]);
                     }
                 }
@@ -223,7 +221,6 @@ class PaperGenerator {
             $instruction->setRule($rule);
         }
 
-        //echo "<hr>" . $rgid . ": " . $rule;
         /* empty line */
         if ($rule == "") {
             
@@ -261,7 +258,6 @@ class PaperGenerator {
 
             // ONLY if in group
             //if (sizeof($this->groups) > 0) {
-            //    echo 'sub';
                 $this->addSubGroup($node, $instruction);
             //} else { // ignore the subgroup statement
             //    $this->cnt = $this->findEndSubGroup($rgid);
@@ -499,15 +495,12 @@ class PaperGenerator {
         $inline = false;
         if (endsWith($rule, ROUTING_IDENTIFY_INLINE)) {
             $inline = true;
-            //echo $rule;
             $pos = strrpos($rule, ROUTING_IDENTIFY_INLINE);
-            //echo $pos;
             $rule = substr($rule, 0, $pos);
         }
-        //echo $rule;
+        
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo $rule;
         $rule = includeText($rule, $excluded);
         $var = $this->survey->getVariableDescriptiveByName(getBasicName($rule));
         if ($var->getVsid() != "") {
@@ -560,7 +553,6 @@ class PaperGenerator {
 
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo $rule;
         $rule = includeText($rule, $excluded);
         
         $this->addToStatements("<div class='uscic-paperversion-inspect uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-inspect-condition'>Value of question '" . $rule . "' asked as question</div></div>", 1); 
@@ -581,7 +573,6 @@ class PaperGenerator {
 
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo $rule;
         $rule = includeText($rule, $excluded);
         
         $this->addToStatements("<div class='uscic-paperversion-fill uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-fill-condition'>Fill code of question '" . $rule . "' executed</div></div>", 1); 
@@ -715,7 +706,6 @@ class PaperGenerator {
         $bounds = splitString("/ TO /", strtoupper($rule));
         $counterplusstart = splitString("/:=/", $bounds[0]);
 
-        //print_r($excluded);
         $counterfield = includeText($counterplusstart[0], $excluded);
         $minimum = includeText($counterplusstart[1], $excluded);
         $maximum = includeText($bounds[1], $excluded);
@@ -750,15 +740,10 @@ class PaperGenerator {
 
             $rule = trim($this->instructions[$cnt]->getRule());
 
-            //echo $rule . "  " . $level . "<hr>";
-
             if (startsWith($rule, "/*")) {
-
-                //echo 'skipping';
 
                 $this->skipComments($cnt, $cnt);
 
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -784,11 +769,8 @@ class PaperGenerator {
         $level = 1;
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
             $rule = trim($this->instructions[$cnt]->getRule());
-            //echo $rule . "  " . $level . "<hr>";
             if (startsWith($rule, "/*")) {
-                //echo 'skipping';
                 $this->skipComments($cnt, $cnt);
-                //echo $cnt;
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {

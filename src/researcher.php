@@ -275,8 +275,6 @@ class Researcher {
 
         $this->determineModeLanguage($de);
 
-        //echo $mods . '----' . $langs;        
-        //exit;
         $de->setProperty(DATA_OUTPUT_VARLIST, $cookievars);
         $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
         // $de->setProperty(DATA_OUTPUT_LANGUAGES, implode("~", loadvar(DATA_OUTPUT_LANGUAGES)));

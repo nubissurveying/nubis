@@ -232,10 +232,8 @@ function loadProgressBar($suid, $seid, $version) {
 function loadSetFillClasses($suid, $seid, $version) {
     global $db;
     $q = "select setfills from " . Config::dbSurvey() . "_engines where suid=" . $suid . " and seid=" . $seid . " and version=" . $version;
-    //echo $q;
     $r = $db->selectQuery($q);
     if ($row = $db->getRow($r)) {
-        //echo "<textarea style='width: 100%;' rows=50>" . gzuncompress($row["setfills"]) . "</textarea>";
         if ($row["setfills"] != "") {
             return unserialize(gzuncompress($row["setfills"]));
         }
@@ -252,8 +250,6 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
     global $db;
 
     $enginename = CLASS_ENGINE . $seid;
-
-    //echo $enginename;
 
     try {
 
@@ -273,9 +269,6 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
 
     // get compiled code
     if ($row = $db->getRow($r)) {
-
-        //echo "<textarea style='width: 100%;' rows=50>" . gzuncompress($row["engine"]) . "</textarea>";
-
         ob_start();
         $code = unserialize(gzuncompress($row["engine"]));
     } 
@@ -314,12 +307,10 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
     }
 
     $enginename = CLASS_ENGINE . $seid;
-    //echo $enginename;
     try {
         $engineclass = new ReflectionClass($enginename);
 
         if ($engineclass) {
-            //echo $enginename;
             return $engineclass->newInstance($suid, $primkey, $phpid, $version, $seid, $doState, $doContext);
         }
     } catch (Exception $e) {
@@ -903,7 +894,7 @@ function getSurveyLanguage() {
 
     // check for old language from session
     $l = getFromSessionParams(SESSION_PARAM_LANGUAGE);
-    //echo $l;
+
     if (isSurveyLanguage($l)) {
         $language = $l;
         return $l;
@@ -1109,7 +1100,6 @@ function getSurveySection($suid = "", $primkey = "") {
                 /* check for last state to determine which section we are going to */
                 global $db;
                 $result = $db->selectQuery('select seid from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($suid) . '  and primkey = "' . prepareDatabaseString($primkey) . '" and mainseid=' . getSurveyMainSection($suid, $primkey) . ' order by stateid desc limit 0,1');
-                //echo 'select * from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($suid) . '  and primkey = "' . prepareDatabaseString($primkey) . '" and mainseid=' . getSurveyMainSection($suid, $primkey) . ' order by stateid desc limit 0,1';
                 if ($db->getNumberOfRows($result) > 0) {
                     $row = $db->getRow($result);
                     $seid = $row["seid"];
@@ -1201,7 +1191,6 @@ function getSurveyMainSection($suid, $primkey) {
                 /* check for last state to determine which section we are going to */
                 global $db;
                 $result = $db->selectQuery('select mainseid from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($suid) . '  and primkey = "' . prepareDatabaseString($primkey) . '" order by stateid desc limit 0,1');
-                //echo 'select * from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($suid) . '  and primkey = "' . prepareDatabaseString($primkey) . '" order by stateid desc limit 0,1';
                 if ($db->getNumberOfRows($result) > 0) {
                     $row = $db->getRow($result);
                     $seid = $row["mainseid"];
@@ -1354,15 +1343,14 @@ function splitString($pattern, $str, $flag = PREG_SPLIT_NO_EMPTY, $limit = -1) {
 }
 
 function preparePattern($pattern) {
-    //$pattern = str_replace("[", "\[", str_replace("]", "\]", $pattern));
-    //echo $pattern . '----' . str_replace("/", "\/", preg_quote($pattern)) . "<hr>";
+
     $pattern = preg_quote($pattern);
     $arr = array("/", "*"); // seems these don't get backslashed by preg_quote
 
     foreach ($arr as $a) {
         $pattern = str_replace($a, '\\' . $a, $pattern);
     }
-    //echo $pattern;
+
     return $pattern;
 }
 
@@ -1417,7 +1405,6 @@ function getReferences($text, $indicator) {
             }
         }
         if (isset($matches[1])) {
-            //echo '||||' . $matches[1] . '||||';
             $fills[] = str_replace(TEXT_RANDOM_FILL, $matches[1], $fill[0]);
         } else {
             $fills[] = $fill[0];
@@ -1641,21 +1628,17 @@ function dataexportSort($arr1, $arr2) {
     //array("sectionposition" => $section->getPosition(), "seid" => $vd->getSeid(), "varposition" => $vd->getPosition(), "varname" => strtoupper($vd->getName()), "vars" => $arr);
 
     if ($arr1["order"] < $arr2["order"]) {
-        //echo "<br/>POSITION: " . $arr1["varname"] . ' before ' . $arr2["varname"];
         return -1;
     }
     if ($arr1["order"] > $arr2["order"]) {
-        //echo "<br/>POSITION: " . $arr2["varname"] . ' before ' . $arr1["varname"];
         return 1;
     }
 
     // one section before another
     if ($arr1["sectionposition"] < $arr2["sectionposition"]) {
-        //echo "<br/>POSITION: " . $arr1["varname"] . ' before ' . $arr2["varname"];
         return -1;
     }
     if ($arr1["sectionposition"] > $arr2["sectionposition"]) {
-        //echo "<br/>POSITION: " . $arr2["varname"] . ' before ' . $arr1["varname"];
         return 1;
     }
 
@@ -1663,11 +1646,9 @@ function dataexportSort($arr1, $arr2) {
     // different section, order by seid (or by name?)
     if ($arr1["seid"] != $arr2["seid"]) {
         if ($arr1["seid"] < $arr2["seid"]) {
-            //echo "<br/>SEID: " . $arr1["varname"] . '(' . $arr1["seid"] . ') before ' . $arr2["varname"] . '(' . $arr2["seid"] . ')';
             return -1;
         }
         if ($arr1["seid"] > $arr2["seid"]) {
-            //echo "<br/>SEID: " . $arr2["varname"] . '(' . $arr1["seid"] . ') before ' . $arr1["varname"] . '(' . $arr2["seid"] . ')';
             return 1;
         }
     }
@@ -1675,11 +1656,9 @@ function dataexportSort($arr1, $arr2) {
     // same section
     // one variable before another
     if ($arr1["varposition"] < $arr2["varposition"]) {
-        //echo "<br/>POSITION: " . $arr1["varname"] . ' before ' . $arr2["varname"];
         return -1;
     }
     if ($arr1["varposition"] > $arr2["varposition"]) {
-        //echo "<br/>POSITION: " . $arr2["varname"] . ' before ' . $arr1["varname"];
         return 1;
     }
 
@@ -1801,7 +1780,6 @@ function getOptionsOrderNormalReverseFixed($variable, $fixed = array()) {
 
 function getOptionsOrderRandomPreserveGroups($variable, $groups = array()) {
     global $engine;
-    //echo 'ohno';
     $var = $engine->getVariableDescriptive($variable);
     $options = $engine->getFill($variable, $var, SETTING_OPTIONS);
     $order = array();
@@ -2132,7 +2110,6 @@ function encryptC($text, $salt) {
 }
 
 function decryptC($text, $salt) {
-    //echo '---'.trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
     return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
 }
 
@@ -2188,9 +2165,7 @@ function confirmAction($message, $key) {
 
 // http://stackoverflow.com/questions/3776682/php-calculate-age
 function calculateAge($year, $month, $day) {
-    //$birthDate = "12/17/1983";
     $currentyear = date("Y");
-    //echo (date("md", date("U", mktime(0, 0, 0, $day, $month, $year))) > date("md") ? (($currentyear - $year) - 1) : ($currentyear - $year));
     return (date("md", date("U", mktime(0, 0, 0, $day, $month, $year))) > date("md") ? (($currentyear - $year) - 1) : ($currentyear - $year));
 }
 
@@ -2251,8 +2226,7 @@ function captureScreenshot($result) {
     } else {
         $query = "insert into " . Config::dbSurveyData() . "_screendumps(scdid, suid, primkey, stateid, screen, mode, language, version) values (?,?,?,?,aes_encrypt(?, '" . $key . "'),?,?,?)";
     }
-    //echo $query;
-    //print_r($bp->get());
+
     $db->executeBoundQuery($query, $bp->get());
     return "";
 }
@@ -2375,7 +2349,6 @@ function parse_csv_field($field) {
 function getCommunicationServer() {
     $server = dbConfig::defaultCommunicationServer();
     if (is_array($server)) {
-        //echo "dsadsadsadsa";
         return $server[$_SESSION['COMMSERVER']];
     }
     return $server;

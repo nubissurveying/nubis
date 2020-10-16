@@ -22,7 +22,6 @@ class CatiInterviewer {
 
     function getPage() {
         global $logActions;
-//        echo '<br/><br/><br/>-----' . getFromSessionParams('page') . ";;" . getFromSessionParams('primkey');
         if (getFromSessionParams('page') != null) {
             $logActions->addAction(getFromSessionParams('primkey'), $this->user->getUrid(), getFromSessionParams('page'));
             switch (getFromSessionParams('page')) {
@@ -109,7 +108,6 @@ class CatiInterviewer {
 
     function showPhoneAnswer($primkey) {
         $respondent = new Respondent($primkey);
-        //echo '----'  . $primkey . '=====';
         $displayCatiInterviewer = new DisplayCatiInterviewer();
         return $displayCatiInterviewer->showPhoneAnswered($respondent);
     }

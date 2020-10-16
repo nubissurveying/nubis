@@ -731,11 +731,9 @@ class VariableDescriptive extends Component {
 
             $this->outputoptions[] = array("code" => $code, "label" => $label, "acronym" => $acronym);
             if ($this->maximumoptioncode == "" || $code > $this->maximumoptioncode) {
-                //echo 'set it';
                 $this->maximumoptioncode = $code;
             }
         }
-        //print_r($this->options);
     }
 
     function getOutputOptionsText($default = true) {
@@ -3206,11 +3204,9 @@ class VariableDescriptive extends Component {
 
             $this->options[] = array("code" => $code, "label" => $label, "acronym" => $acronym);
             if ($this->maximumoptioncode == "" || $code > $this->maximumoptioncode) {
-                //echo 'set it';
                 $this->maximumoptioncode = $code;
             }
         }
-        //print_r($this->options);
     }
 
     function getOptionLabel($code) {
@@ -3225,16 +3221,12 @@ class VariableDescriptive extends Component {
     function getSetOfEnumeratedOptionLabel($value) {
 
         $this->setOptions();
-        //echo'<hr>IN:' . $value;
         $values = explode(SEPARATOR_SETOFENUMERATED, $value);
-
-        //print_r($values);
         //sort($values);
 
         $labels = array();
         foreach ($values as $v) {
             if (trim($v) != "") {
-                //echo 'getting ' . $v . "<br/>";
                 $label = trim($this->getOptionLabel($v));
                 if ($label != "") {
                     $labels[] = $label;
@@ -6256,8 +6248,6 @@ class VariableDescriptive extends Component {
     function getFillTextByLine($line) {
         $this->fillines = explode("\r\n", $this->getFillText());
         if (isset($this->fillines[$line - 1])) {
-            //echo'<br/><textarea rows=10 cols=50>' . $this->fillines[$line - 1] . '</textarea> ==== ' . $line;
-//echo '----found: ';// . $this->fillines[$line - 1] . "<br/>";
             return $this->fillines[$line - 1];
         }
 
@@ -6285,8 +6275,6 @@ class VariableDescriptive extends Component {
     function getCheckTextByLine($line) {
         $this->checklines = explode("\r\n", $this->getCheckText());
         if (isset($this->checklines[$line - 1])) {
-            //echo'<br/><textarea rows=10 cols=50>' . $this->fillines[$line - 1] . '</textarea> ==== ' . $line;
-//echo '----found: ';// . $this->fillines[$line - 1] . "<br/>";
             return $this->checklines[$line - 1];
         }
 
@@ -7068,7 +7056,6 @@ class VariableDescriptive extends Component {
         
         // check for type
         if ($types == true && $this->hasType()) {
-            //echo 'nonon';
             if ($newsuid != "" && $oldsuid != $newsuid) {        
                 $this->type->copy($newsuid);
                 $this->setTyd($this->type->getTyd());
@@ -7125,25 +7112,6 @@ class VariableDescriptive extends Component {
         }
     }
 
-    /* function determineRuntimeProperties($lang, $mode, $methods) {
-      $changed = $this->getChanged();
-      if (sizeof($changed) == 0) {
-      $changed = array_keys($methods);
-      }
-      echo $this->getName() . "<br/>";
-      print_r($changed);
-      echo "<hr>";
-
-      foreach ($changed as $ch) {
-      if (isset($methods[$ch])) {
-      $reflectionMethod = new ReflectionMethod($this, $methods[$ch]);
-      $this->runtimeproperties[strtoupper($ch) . $lang . $mode] = $reflectionMethod->invoke();
-      }
-      }
-
-      return;
-      } */
 }
-
 
 ?>

@@ -396,8 +396,6 @@ class DisplayTranslator extends Display {
         $active = array('', '', '', '');
         $active[$filter] = ' active';
         $params = getSessionParams();
-        //echo $page;
-
         $user = new User($_SESSION['URID']);
         $modes = $user->getModes(getSurvey());
 

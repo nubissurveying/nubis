@@ -11,6 +11,7 @@
   You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
   ------------------------------------------------------------------------
  */
+
 require_once("instruction.php");
 require_once("phpparser_bootstrap.php");
 
@@ -288,7 +289,7 @@ class XiCompiler {
         if ($template == "") {
             $template = "TTextTemplate";
         }
-        //echo ',hr>adding' . $name;
+        
         switch ($answertype) {
             case ANSWER_TYPE_NONE:
                 $anstext = "QUESTION_TYPE_NONE";
@@ -436,8 +437,7 @@ class XiCompiler {
 
         //$_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
 
-       $this->types_output[] = $str;
-       //echo '<hr>added' . $name;
+       $this->types_output[] = $str;       
     }
 
     function handleFills($text) {
@@ -452,7 +452,6 @@ class XiCompiler {
                 $filltext = strtr(FILL_MARKER . $this->handleFill($fill) . FILL_MARKER, array('\\' => '\\\\', '$' => '\$'));
                 $pattern = "/\\" . INDICATOR_FILL . preparePattern($fillref) . "/i";
                 $text = preg_replace($pattern, $filltext, $text);
-                //echo 'NOW: ' . $text . "<br/>";
             }
             $cnt++;
 
@@ -475,7 +474,6 @@ class XiCompiler {
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
 
-        //echo '<BR/>' . $rule;
         $rule = includeText($rule, $excluded);
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
 
@@ -517,7 +515,7 @@ class XiCompiler {
             $fillcall = str_replace(" . ])", "]", $fillcall);
         }
         /* return result */
-        //echo $fillclass . "<hr>";
+
         // strip ending ;
         return substr($fillcall, 0, strlen($fillcall) - 1);
     }
@@ -532,7 +530,6 @@ class XiCompiler {
         // child nodes
         for ($i = 0; $i < sizeof($subs); $i++) {
 
-            //echo 'PPPPPPPPPPPPP';
             $subnode = $node->$subs[$i];
 
             // name node: this could be a variable
@@ -547,11 +544,7 @@ class XiCompiler {
                 // restore any dot notations!
                 $name = str_replace(TEXT_MODULE_DOT, ".", $name);
 
-                //echo '<br/>UPDATING NAME ' . $name;
-                //$var = new VariableDescriptive();
-
                 $var = $this->survey->getVariableDescriptiveByName(getBasicName($name)); // new VariableDescriptive();  
-                //echo "<hr>getting: " . $name . '----' . getBasicName($name); 
                 if (strtoupper($name) == VARIABLE_VALUE_NULL) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_NULL);
                     $node->$subs[$i] = $stmt;
@@ -578,9 +571,7 @@ class XiCompiler {
                 } else if ($var->getVsid() != "") {
 
                     $answertype = $var->getAnswerType();
-                    //echo '<hr>maybe: ' . $var->getName() . '---' . $answertype;
                     if (inArray($answertype, array(ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_RANK))) {
-                        //echo '<hr>LAST: ' . $var->getName();
                         $this->lastvar = $var;
                     }
 
@@ -594,7 +585,6 @@ class XiCompiler {
                     $node->$subs[$i] = $stmt;
                 } else if ($this->fillclass == true && startsWith($name, VARIABLE_VALUE_FILL)) {
 
-                    //echo $name . " <hr>";
                     $line = trim(str_ireplace(VARIABLE_VALUE_FILL, "", $name));
                     if ($line != "") {
                         $args = array();
@@ -606,7 +596,6 @@ class XiCompiler {
                                 $this->updateVariables($temp);
                                 if ($temp->value instanceof PHPParser_Node_Expr_MethodCall) {
                                     $args[] = $temp->value->args[0];
-                                    //print_r($temp->value->args[0]);
                                 }
 
                                 // a non-bracketed field
@@ -615,7 +604,6 @@ class XiCompiler {
                                     /* not a constant, which happens if the counter field does not exist */
                                     if (isset($temp->value->name)) {
                                         $args[] = $temp->value->name;
-                                        //print_r($temp->value->name->args[0]);
                                     }
                                 }
                             } catch (Exception $e) {
@@ -671,8 +659,6 @@ class XiCompiler {
                 /* get function name */
                 $namenode = $subnode->name;
                 $name = $namenode->getFirst();
-                //echo '<br/>FUNCTION  callll' . $name;
-                //
                 $name = str_replace(TEXT_MODULE_DOT, ".", $name);
 
                 // real function call
@@ -700,9 +686,7 @@ class XiCompiler {
                          * and change them to "[" . $this-getValue("field") . "]"
                          */
                         $answertype = $var->getAnswerType();
-                        //echo '<hr>maybe: ' . $var->getName() . '---' . $answertype;
                         if (inArray($answertype, array(ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_RANK))) {
-                            //echo '<hr>LAST: ' . $var->getName();
                             $this->lastvar = $var;
                         }
                         $args = array();
@@ -770,7 +754,6 @@ class XiCompiler {
                 // first time
                 if ($bracketnode == null) {
 
-                    //echo 'start' . $j . '----';
                     if (sizeof($args) > 1) {
 
                         // preserve quotes for associate array references
@@ -811,7 +794,6 @@ class XiCompiler {
                             $bracketnode = new PHPParser_Node_Expr_Concat($bracketnode, new PHPParser_Node_Expr_Concat($valuenode, new PHPParser_Node_Scalar_String(",")));
                         }
                     }
-                    //print_r($bracketnode);
                 }
             } else {
 
@@ -825,10 +807,7 @@ class XiCompiler {
                         $bracketnode = $valuenode;
                     }
                 } else {
-
-                    //echo 'there' . $j . '----';
                     //$bracketnode->right = $valuenode;
-                    //print_r($bracketnode);
                 }
             }
         }
@@ -949,9 +928,6 @@ class XiCompiler {
             $rule = substr($rule, 0, stripos($rule, "//"));
             $instruction->setRule($rule);
         }
-
-
-        //echo "<hr>" . $rgid . ": " . $rule;
 
         /* empty line */
         if ($rule == "") {
@@ -1085,7 +1061,6 @@ class XiCompiler {
                             $tofind = substr($mod, 0, stripos($mod, "."));
                             $section = $this->survey->getSectionByName($tofind);
                             if ($section->getName() == "") {
-                                //echo $tofind . '---';
                                 $this->addErrorMessage(Language::errorSectionNotFound($tofind));
                             }
                             $mod = substr($mod, stripos($mod, ".") + 1);
@@ -1140,8 +1115,6 @@ class XiCompiler {
 
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-
-        //echo '<BR/>' . $rule;
         $rule = includeText($rule, $excluded);
         
         $newxi = new XiCompiler($this->suid, $this->currentmode, $this->version);
@@ -1185,10 +1158,9 @@ class XiCompiler {
         if (endsWith($rule, ROUTING_IDENTIFY_INLINE)) {
             $inline = true;
             $pos = strripos($rule, ROUTING_IDENTIFY_INLINE);
-            //echo $pos;
             $rule = substr($rule, 0, $pos);
         }
-        //echo $rule;
+        
         // check for array
         $var = $this->survey->getVariableDescriptiveByName(getBasicName($rule)); // new VariableDescriptive(); 
         if ($var->isArray()) {
@@ -1201,25 +1173,21 @@ class XiCompiler {
 
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo $rule;
         $rule = includeText($rule, $excluded);
         $parser = new PHPParser_Parser(new PHPParser_Lexer);
         try {
 
             $stmtstemp = $parser->parse("<?php " . $rule . " ?>");
             // only one statement (no ; allowed in assignment right hand side)
-            //print_r($stmtstemp);
+            
             $stmttemp = new PHPParser_Node_Arg($stmtstemp[0]); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
             $this->updateVariables($stmttemp);
             $cleanup = false;
-            //print_r($stmttemp);
-            //print_r($stmttemp->value);
+            
             if ($stmttemp->value instanceof PHPParser_Node_Expr_MethodCall) {
                 $st = new PHPParser_Node_Expr_MethodCall($stmttemp->value->var, FUNCTION_XI_ASK);
                 $cleanup = true;
             } else if ($stmttemp->value instanceof PHPParser_Node_Expr_Concat) {
-                //echo $rule . "<br/>";
-                //print_r($stmttemp->value->args[0]);
                 $st = new PHPParser_Node_Expr_MethodCall($stmttemp->value, FUNCTION_XI_ASK);
             } else {
                 $rule = showModuleNotations($rule, TEXT_MODULE_DOT);
@@ -1280,12 +1248,11 @@ class XiCompiler {
         /* multi-line if */
 
         if (endsWith(strtoupper($rule), ROUTING_THEN) == false) {
-            //echo $this->cnt;
+
             $found = false;
             for ($cnt = ($this->cnt + 1); $cnt <= sizeof($this->instructions); $cnt++) {
                 if (isset($this->instructions[$cnt])) {
                     $text = trim($this->instructions[$cnt]->getRule());
-//echo $text . '---';
                     if (startsWith($text, "/*")) {
                         $this->skipComments($cnt, $cnt);
                     } else if (startsWith($text, "//")) {
@@ -1293,8 +1260,6 @@ class XiCompiler {
                     } else {
 
                         $rule .= " " . $text;
-                        //echo 'now: ' . $rule . "<hr>";
-                        //if ($pos > -1) {
                         if (endsWith(strtoupper($rule), ROUTING_THEN) == true) {
 
                             $this->cnt = $cnt;
@@ -1314,9 +1279,7 @@ class XiCompiler {
                 }
                 return;
             }
-            //echo 'RULE: ' . $rule . "<hr><hr>";
         }
-
 
         // exclude text
         $excluded = array();
@@ -1391,19 +1354,13 @@ class XiCompiler {
             }
         }
 
-
-        //echo $locate;
         // handle 1 in variable (set of enumerated reference)
         $find = array();
         $locate = '/' . PATTERN_ALPHANUMERIC . PATTERN_CASE_INSENSITIVE . LOGICAL_IN . PATTERN_ALPHANUMERIC . '/i'; // /i for case insensitive
-        //echo $locate . "<hr>";
         if (preg_match_all($locate, $rule, $find, PREG_SET_ORDER)) {
             foreach ($find as $found) {
-                //print_r($found);
                 $rule = $this->prepare(array($locate), array(FUNCTION_IN_ARRAY . "(" . $found[1] . ", explode('" . SEPARATOR_SETOFENUMERATED . "'," . $found[2] . "), 1)"), $rule, 1);
-                //echo $rule . "<hr>";
             }
-            //";
         }
 
         // replace [ and ] with ( and ), so the parser doesn't break
@@ -1421,9 +1378,8 @@ class XiCompiler {
 
             $parsestmts = $parser->parse("<?php " . $rule . " ?>");
             $ifstmt = $parsestmts[0]; // only one statement (no ; allowed in assignment right hand side)
-            //print_r($ifstmt);
-            // complex expression, then wrap in fake argument object
 
+            // complex expression, then wrap in fake argument object
             if ($ifstmt instanceof PHPParser_Node_Expr) { //$ifstmt instanceof PHPParser_Node_Expr_FuncCall || 
                 $ifstmt = new PHPParser_Node_Arg($ifstmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
                 $this->updateVariables($ifstmt);
@@ -1443,7 +1399,6 @@ class XiCompiler {
             return $ifstmt;
         } catch (PHPParser_Error $e) {
 
-            //echo $e->getMessage();
             if ($iftype == ROUTING_IDENTIFY_ELSEIF) {
                 $this->addErrorMessage(Language::errorElseIfInvalid());
             } else {
@@ -1619,8 +1574,6 @@ class XiCompiler {
         // determine min and max
         $bounds = preg_split("/ to /i", $rule);
         $counterplusstart = splitString("/:=/", $bounds[0]);
-
-        //print_r($excluded);
         $counterfield = includeText($counterplusstart[0], $excluded);
         $minimum = includeText($counterplusstart[1], $excluded);
         $maximum = includeText($bounds[1], $excluded);
@@ -1664,14 +1617,12 @@ class XiCompiler {
             $this->updateVariables($stmt);
             $min = $stmt;
 
-            //echo 'min: ' . $minimum;
             $stmts = $parser->parse("<?php " . $maximum . "?>");
             // only one statement (no ; allowed in loop maximum)
             $stmt = $stmts[0];
             $stmt = new PHPParser_Node_Arg($stmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
             $this->updateVariables($stmt);
             $max = $stmt;
-            //echo 'max: ' . $maximum;
 
             $stmts = $parser->parse("<?php " . $counterfield . "?>");
 
@@ -1680,7 +1631,6 @@ class XiCompiler {
             $stmt = new PHPParser_Node_Arg($stmt); // encapsulate in fake Argument object, since updateVariables looks only at children of entered node
             $this->updateVariables($stmt);
 
-            //print_r($stmt);
             if ($stmt->value instanceof PHPParser_Node_Expr_MethodCall) {
                 $counter = $stmt->value->var;
             } else {

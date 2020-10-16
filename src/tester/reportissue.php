@@ -161,7 +161,6 @@ class ReportIssue {
         $query .= "'" . $db->escapeString(getFromSessionParams('reportmode')) . "',";
         $query .= "'" . $db->escapeString(getFromSessionParams('reportversion')) . "'";
         $query .= ")";
-        //echo $query;
         $db->executeQuery($query);
 
         $returnStr = $this->showHeader(Language::messageSMSTitle());

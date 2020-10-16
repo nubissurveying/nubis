@@ -236,7 +236,6 @@ class User {
 
     function getModes($suid) {
         $access = unserialize(gzuncompress($this->getAccess()));
-        //print_r($access);
         $arr = $access[$suid];
         return array_keys($arr);
     }

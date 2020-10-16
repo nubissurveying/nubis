@@ -3861,7 +3861,141 @@ class Display {
         }
         $returnStr .= "});
             </script>";
-        //echo "<textarea rows=10 cols=200>" . $returnStr . "</textarea>";
+        return minifyScript($returnStr);
+    }
+    
+    function displayMultiDropdownUnchecking($mainid, $answer, $invalidsub) {
+        if ($invalidsub == "") {
+            return "";
+        }
+        $returnStr = "";
+        $uncheck = array();
+
+        // determine incompatible sets
+        $sets = explode(SEPARATOR_COMPARISON, $invalidsub);
+        foreach ($sets as $set) {
+            $setarray = explode(",", $set);
+
+            // skip if for example only '1': no counterpart specified
+            if (sizeof($setarray) != 2) {
+                continue;
+            } else {
+                $first = $setarray[0];
+                $second = $setarray[1];
+                $uncheck[$first] = $second;
+                $uncheck[$second] = $first;
+            }
+        }
+
+        // process
+        $returnStr .= "<script type='text/javascript'>";
+        $returnStr .= "var inconsistent = [];\r\n";
+        $returnStr .= "var previousvalues = '" . $answer . "';\r\n";
+        
+        // add inconsistent combinations
+        foreach ($uncheck as $k => $v) {
+            $karray = explode("-", $k); // in case of range
+            if (sizeof($karray) == 1) {
+                $karray[1] = $karray[0];
+            }
+            $varray = explode("-", $v); // in case of range
+            if (sizeof($varray) == 1) {
+                $varray[1] = $varray[0];
+            }
+            
+            $uncheckcode = $v;
+            $conditions = $k;
+            $returnStr .= "inconsistent['" . $k . "'] = '" . $v . "';\r\n";
+        }
+        
+        $returnStr .= "$('#" . $mainid . "').change( function(e) {\r\n;
+                            var values = $(this).val();\r\n
+                                    
+                            // no previous values selected, so nothing to uncheck\r\n
+                            if (previousvalues == '') {\r\n
+                                previousvalues = '' + values.join('" . SEPARATOR_SETOFENUMERATED . "');\r\n
+                                return;\r\n
+                            }\r\n
+                                    
+                            // no current values selected, so nothing to uncheck\r\n
+                            if (!values || values == '' || values.length == 0) {\r\n
+                                return;\r\n
+                            }\r\n
+                            
+                            // clear all currently selected values\r\n
+                            $('#" . $mainid . " option').removeAttr('selected');\r\n
+                            $('#" . $mainid . " option').prop('aria-checked', false);\r\n
+                            
+                            // create array of previous values
+                            previousvalues = previousvalues.split('" . SEPARATOR_SETOFENUMERATED . "');\r\n
+                                
+                            // less selected now than before, so uncheck\r\n
+                            //if (values.length < previousvalues.length) {\r\n
+                            //    previousvalues = '' + values.join('" . SEPARATOR_SETOFENUMERATED . "');\r\n
+                            //    return;\r\n
+                            //}\r\n
+                            
+                            // find out which value was added\r\n
+                            var newvalue = '';\r\n
+                            for (cnt = 0; cnt < values.length; cnt++) {\r\n
+                            
+                                var val = '' + values[cnt];\r\n
+                                if (previousvalues.indexOf(val) == -1) {\r\n
+                                    newvalue = val;\r\n
+                                    break;\r\n
+                                }\r\n
+                                
+                            }\r\n        
+                            
+                            // go through inconsistencies\r\n
+                            var toremove = [];\r\n
+                            for(let i in inconsistent) {\r\n
+                            
+                                var list = i.split('-');\r\n
+                                var unselect = inconsistent[i];\r\n
+                                var remove = 1;\r\n
+                                var withnew = 2;\r\n
+                                for (cnt1 = 0; cnt1 < list.length; cnt1++) {\r\n 
+                                
+                                    var checkval = list[cnt1];\r\n
+                                    if (checkval == newvalue) {\r\n
+                                        withnew = 1; // listing that contains the newly selected value\r\n
+                                    }\r\n
+                                    if (values.indexOf(checkval) == -1) {\r\n
+                                        remove = 2; // do not need to remove\r\n
+                                        break;\r\n
+                                    }\r\n
+                                }    \r\n                             
+                                
+                                // we need toremove\r\n
+                                if (withnew == 1 & remove == 1) {\r\n
+                                    var t = unselect.split('-');\r\n
+                                    for (cnt2 = 0; cnt2 < t.length; cnt2++) {\r\n
+                                        toremove.push(t[cnt2]);  \r\n                                      
+                                    }\r\n
+                                }\r\n
+                            }\r\n
+                            
+                            // create new list of values\r\n
+                            var toselect = [];\r\n
+                            for (cnt3 = 0; cnt3 < values.length; cnt3++) {\r\n
+                                var vl = values[cnt3];\r\n
+                                if (toremove.indexOf(vl) == -1) {\r\n
+                                    toselect.push(vl);\r\n
+                                    $('#" . $mainid . "_' + vl).prop('selected', true);\r\n
+                                    $('#" . $mainid . "_' + vl).prop('aria-checked', true);\r\n
+                                }\r\n
+                            }\r\n
+                            
+                            // update previous values\r\n
+                            previousvalues = '' + toselect.join('" . SEPARATOR_SETOFENUMERATED . "');\r\n
+                                
+                            // update display\r\n
+                            $('#" . $mainid . "').selectpicker('render');\r\n
+                            ";
+        
+        $returnStr .= "});
+            </script>";
         return minifyScript($returnStr);
     }
 
@@ -5343,7 +5477,7 @@ function inputmaskCallbackError() {
     }
 
     function stripWordQuotes($str) {
-//echo $str;
+
         // https://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
         return str_replace($this->chrmap, "", $str);
     }

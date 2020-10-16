@@ -51,7 +51,7 @@ class SysAdmin {
                     $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strlen($_SESSION['LASTPAGE']) - strlen("res")); // avoid form resubmit
                 }
             }
-            //echo '<br/><br/><br/> ' .  $_SESSION['LASTPAGE'] . '---|||||--';
+            
             switch ($_SESSION['LASTPAGE']) {
                 case 'sysadmin.sms': return $this->showSms();
                     break;
@@ -509,7 +509,6 @@ class SysAdmin {
         $id = loadvar('id');
         $objecttype = loadvar('objecttype');
         $sub = loadvar('sub');
-        //echo "hello" . $id . '----' . $objecttype . '----' . $sub;
 
         return $displaySysAdmin->showHistory($id, $sub);
     }
@@ -604,7 +603,6 @@ class SysAdmin {
         if (true || sizeof($files) > 0) {
 
             $selected = loadvar("iwers");
-            //echo $selected;
             if (!is_array($selected)) {
                 $selected = array($selected);
             }
@@ -788,7 +786,7 @@ class SysAdmin {
             $fromPosition = loadvar('fromPosition');
             $toPosition = loadvar('toPosition');
             $direction = loadvar('direction');
-            echo $fromPosition . '----' . $toPosition . '----' . $direction;
+
             if (is_array(loadvar('fromPosition'))) {
                 $arr = loadvar('fromPosition');
                 $fromPosition = $arr[0];
@@ -822,13 +820,11 @@ class SysAdmin {
             // backward direction: up
             if ($direction === "back") {
                 $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = position + 1 WHERE ($toPosition <= position AND position <= $fromPosition) and suid != $suid and position != 0 ORDER BY position DESC");
-                //echo "update " . Config::dbSurvey() . "_sections set position = position + 1 WHERE ($toPosition <= position AND position <= $fromPosition) and seid != $seid and position != 0 ORDER BY position DESC";
             }
             // Forward Direction: down
             else if ($direction === "forward") {
                 $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = position - 1 WHERE ($fromPosition <= position AND position <= $toPosition) and suid != $suid and position != 0 ORDER BY position ASC");
             }
-//echo $direction;
             $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = $aPosition where position=0");
         }
     }
@@ -1484,13 +1480,11 @@ class SysAdmin {
             // backward direction: up
             if ($direction === "back") {
                 $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = position + 1 WHERE ($toPosition <= position AND position <= $fromPosition) and suid=" . $_SESSION['SUID'] . " and seid != $seid and position != 0 ORDER BY position DESC");
-                //echo "update " . Config::dbSurvey() . "_sections set position = position + 1 WHERE ($toPosition <= position AND position <= $fromPosition) and seid != $seid and position != 0 ORDER BY position DESC";
             }
             // Forward Direction: down
             else if ($direction === "forward") {
                 $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = position - 1 WHERE ($fromPosition <= position AND position <= $toPosition) and suid=" . $_SESSION['SUID'] . " and seid != $seid and position != 0 ORDER BY position ASC");
             }
-//echo $direction;
             $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = $aPosition where suid=" . $_SESSION['SUID'] . " and position=0");
         }
     }
@@ -1806,7 +1800,6 @@ class SysAdmin {
             $direction = loadvar('direction');
             $aPosition = ($direction === "back") ? $toPosition + 1 : $toPosition - 1;
             $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = 0 where suid=" . $_SESSION['SUID'] . " and position=" . $toPosition);
-            //echo "update " . Config::dbSurvey() . "_variables set position = 0 where position=" . $toPosition;
             $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = $toPosition where suid=" . $_SESSION['SUID'] . " and vsid=" . $vsid);
 
             // backward direction: up
@@ -2640,7 +2633,7 @@ class SysAdmin {
         $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], "res"));
 
         if (sizeof($messages) > 0) {
-            //print_r($messages);
+
             $m = '<a data-keyboard="false" data-toggle="modal" data-target="#errorsModal">Show errors</a>';
             $content .= $displaySysAdmin->displayError(Language::messageFillRoutingNeedsFix() . " " . $m);
             $text = "";
@@ -2686,7 +2679,7 @@ class SysAdmin {
         $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], "res"));
 
         if (sizeof($messages) > 0) {
-            //print_r($messages);
+
             $m = '<a data-keyboard="false" data-toggle="modal" data-target="#errorsModal">Show errors</a>';
             $content .= $displaySysAdmin->displayError(Language::messageCheckRoutingNeedsFix() . " " . $m);
             $text = "";
@@ -5638,7 +5631,7 @@ class SysAdmin {
                     break;
             }
         }
-        //echo $content;
+
         return $displaySysAdmin->showBatchEditor($content, $variablecookievalue, $typecookievalue, $groupcookievalue, $sectioncookievalue);
     }
 
@@ -6653,7 +6646,7 @@ class SysAdmin {
 
                 $mess = $compiler->generateSetFills(array($var), false, false);
                 if (sizeof($mess) > 0) {
-                    //print_r($mess);
+
                     if (isset($variablemessages[$var->getName()])) {
                         $variablemessages[$var->getName()] = array_merge($variablemessages[$var->getName()], $mess);
                     } else {
@@ -6699,7 +6692,6 @@ class SysAdmin {
             $content .= $displaySysAdmin->displaySuccess(Language::messageToolsCheckOk());
         }
         $text = "";
-        //print_r($messages);
         foreach ($messages as $k => $v) {
 
             if (sizeof($v) == 0) {
@@ -7051,7 +7043,6 @@ class SysAdmin {
                     $ans = array($ans);
                 }
                 if (sizeof($ans) > 0) {
-                    //echo implode("~", $ans);
                     $user->setLanguages($surv, $k, implode("~", $ans));
                 }
             } else {

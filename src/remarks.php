@@ -31,10 +31,7 @@ class Remarks {
             while ($row = $db->getRow($result)) {
                 $remarks[] = $row;
             }
-            //echo '<br/><br/><br/>';
-            // echo $query;
-            // echo '<br/>';
-            //print_r($remarks);
+
             $this->remarksArray[$primkey] = $remarks;
         }
         return $remarks;
@@ -43,7 +40,6 @@ class Remarks {
     function addRemark($primkey, $remark, $urid) {
         global $db;
         $query = 'replace into ' . Config::dbSurvey() . '_remarks (primkey, remark, urid, ts) values (\'' . prepareDatabaseString($primkey) . '\', aes_encrypt(\'' . prepareDatabaseString($remark) . '\',\'' . Config::smsRemarkKey() . '\'), ' . $urid . ', \'' . date('Y-m-d H:i:s') . '\')';
-//      echo '<br/><br/><br/>' . $query;
         $db->executeQuery($query);
         if (isset($this->remarksArray[$primkey])) {
             unset($this->remarksArray[primkey]); //remove from array so getremarks re-reads it.
