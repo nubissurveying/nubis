@@ -53,10 +53,9 @@ class CustomTemplate extends TableTemplate {
         }
         
         /* build custom display */
-        $returnStr = $this->engine->replaceInlineFields($this->engine->replaceFills($template));
-        
+        $returnStr = $this->engine->replaceInlineFields($this->engine->replaceFills($template));        
         if ($pt != $this->group->getTemplate()) {
-            $returnStr = '</div>';
+            $returnStr .= '</div>';
         }
         
         return $returnStr;

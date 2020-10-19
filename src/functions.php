@@ -968,7 +968,7 @@ function getSurveyTemplate() {
     global $survey, $template;
 
     /* global template has been set! (via setting below, so no need to repeat) */
-    if (isSurveyTemplate($template)) {
+    if (isSurveyTemplate($template)) {           
         return $template;
     }
 
@@ -998,6 +998,8 @@ function getSurveyTemplate() {
                     $answer = loadvarSurvey(SESSION_PARAMS_ANSWER . $cnt);
                     if (isSurveyTemplate($answer)) {
                         $template = $answer;
+                        $_SESSION["PARAMS"][SESSION_PARAM_TEMPLATE] = $template;
+                        unset($_SESSION["PARAMS"][SESSION_PARAM_NEWTEMPLATE]);
                         return $answer;
                     }
                     break;

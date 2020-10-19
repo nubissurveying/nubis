@@ -587,6 +587,10 @@ body {
     cursor: not-allowed;
 }
 
+.uscic-row-cell-enumerated.disabled {
+    cursor: not-allowed;
+}
+
 .radio.uscic-radio-label-first-radio.disabled input {
     cursor: not-allowed;
 }
@@ -664,11 +668,21 @@ body {
     margin-top: 5px;
 }
 
+.uscic-row-cell-enumerated .radio {
+    margin-bottom: 0px;
+    margin-top: 5px;
+}
+
 .uscic-checkbox-box input[type="checkbox"] {
     cursor: pointer;
 }
 
 .uscic-table-row-cell-enumerated .checkbox {
+    margin-bottom: 0px;
+    margin-top: 5px;
+}
+
+.uscic-row-cell-enumerated .checkbox {
     margin-bottom: 0px;
     margin-top: 5px;
 }
@@ -794,7 +808,17 @@ body {
     cursor: pointer;
 }
 
+.uscic-row-cell-enumerated {
+    padding: 0px;
+    cursor: pointer;
+}
+
 .uscic-table-row-cell-enumerated div {
+    height: 100%;
+    vertical-align: middle;
+}
+
+.uscic-row-cell-enumerated div {
     height: 100%;
     vertical-align: middle;
 }
@@ -828,6 +852,16 @@ body {
 }
 
 /* use this to override bootstrap */
+.table tbody > tr > td.uscic-row-cell-enumerated {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.table tbody > tr > td.uscic-row-cell-enumerated div {
+    height: 100%;
+    vertical-align: middle;
+}
+
 .table tbody > tr > td.uscic-table-row-cell-enumerated {
     cursor: pointer;
     vertical-align: middle;
@@ -946,7 +980,7 @@ body {
 .table tbody > tr > td.uscic-table-row-cell-multicolumn div.form-group {
     margin-bottom: 7px;
     margin-top: 7px;
-    margin-left: 25%;
+    /*margin-left: 25%;*/
 }
 
 
@@ -1078,6 +1112,11 @@ th.uscic-table-row-cell-header-enumerated {
         padding-bottom: 0px;
     }
     
+    .table tbody > tr > td.uscic-row-cell-enumerated {
+        padding-top: 15px;
+        padding-bottom: 0px;
+    }
+    
     .tablesaw-cell-label {
         font-weight: normal;
         padding-top: 15px;
@@ -1178,6 +1217,11 @@ th.uscic-table-row-cell-header-enumerated {
     }
     
     .table tbody > tr > td.uscic-table-row-cell-enumerated {
+        padding-top: 15px;
+        padding-bottom: 0px;
+    }
+    
+    .table tbody > tr > td.uscic-row-cell-enumerated {
         padding-top: 15px;
         padding-bottom: 0px;
     }
@@ -1352,7 +1396,7 @@ th.uscic-table-row-cell-header-enumerated {
     }
 
     /* question color text */
-    .tablesaw-stack tbody tr:not(.uscic-table-row-enumerated-horizontal) td:first-child, .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-question-cell-enumerated,
+    .tablesaw-stack tbody tr:not(.uscic-table-row-enumerated-horizontal):not(.uscic-enumerated-row) td:first-child, .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-question-cell-enumerated,
     .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-cell-question-multicolumn {
         background-color: #c7e1fb;
     }
@@ -1362,6 +1406,10 @@ th.uscic-table-row-cell-header-enumerated {
     }
     
     .tablesaw-stack tbody tr td.uscic-table-row-cell-enumerated {
+        min-width: 100%;
+    }
+    
+    .tablesaw-stack tbody tr td.uscic-row-cell-enumerated {
         min-width: 100%;
     }
     
@@ -1396,6 +1444,10 @@ ul.dropdown-menu li.dropdown-header {
 }
 
 .table tbody > tr > td.uscic-table-row-cell-enumerated.disabled {
+    cursor: not-allowed;
+}
+
+.table tbody > tr > td.uscic-row-cell-enumerated.disabled {
     cursor: not-allowed;
 }
 

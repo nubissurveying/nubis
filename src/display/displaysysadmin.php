@@ -1956,7 +1956,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $defaultsurvey = $survey->getEnumeratedDisplay();
             $defaulttype = -1;
             if ($variable->getTyd() > 0) {
-                $type = $survey->getType($var->getTyd());
+                $type = $survey->getType($variable->getTyd());
                 $defaulttype = $type->getEnumeratedDisplay();
             }
             $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;

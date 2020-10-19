@@ -1198,7 +1198,7 @@ class DisplayQuestionBasic extends Display {
         $optioncodes = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
@@ -1212,9 +1212,9 @@ class DisplayQuestionBasic extends Display {
         $tableid = $var->getSeid() . '-' . $var->getVsid();
 
         if ($itemspercolumn != sizeof($orderedoptions)) {
-            $returnStr .= $this->displayTableSaw(); // include table saw
-            $returnStr .= "<table role='presentation' data-tablesaw-mode='stack' id='table-" . $tableid . "' >";
+            $returnStr .= $this->displayTableSaw(); // include table saw            
         }
+        $returnStr .= "<table role='presentation' data-tablesaw-mode='stack' id='table-" . $tableid . "' >";
 
         $textbox = $var->isEnumeratedTextbox();
         if ($textbox) {
@@ -1245,7 +1245,7 @@ class DisplayQuestionBasic extends Display {
             foreach ($splitup as $s) {
                 if (isset($s[$i])) {
                     $option = $s[$i];
-                    if (trim($option["label"] != "")) {
+                    if (trim($option["label"]) != "") {
                         $selected = ' aria-checked="false" ';
                         if ($option["code"] == $previousdata) {
                             $selected = ' CHECKED aria-checked="true"';
@@ -1281,9 +1281,9 @@ class DisplayQuestionBasic extends Display {
                             $returnStr .= '<td class="uscic-enumerated-column-padding">&nbsp;</td>';
                         }
                         if ($order == ORDER_LABEL_FIRST) {
-                            $returnStr .= '<td class="uscic-table-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-radio-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '"><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span></label>                        
+                            $returnStr .= '<td class="uscic-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-radio-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '"><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span></label>                        
                                             </td>
-                                                    <td class="uscic-table-row-cell-enumerated' . $disabled . '">
+                                                    <td class="uscic-row-cell-enumerated' . $disabled . '">
                                                     <div class="radio uscic-radio-label-first-radio' . $disabled . '">
 
                                                         <input ' . $role . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>
@@ -1294,7 +1294,7 @@ class DisplayQuestionBasic extends Display {
                             }
                             $returnStr .= '</td>';
                         } else {
-                            $returnStr .= '<td id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-enumerated' . $disabled . '"><div class="radio uscic-radio"><label class="uscic-radio-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">                                            
+                            $returnStr .= '<td id="cell' . $id . '_' . $option["code"] . '" class="uscic-row-cell-enumerated' . $disabled . '"><div class="radio uscic-radio"><label class="uscic-radio-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">                                            
                                                     <div class="uscic-radiobutton ' . $inlineclass . ' ' . '">
 
                                                         <input ' . $role . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=radio id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span>
@@ -1477,7 +1477,7 @@ class DisplayQuestionBasic extends Display {
         $optioncodes = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
@@ -1814,7 +1814,7 @@ class DisplayQuestionBasic extends Display {
         $optioncodes = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
@@ -1847,7 +1847,7 @@ class DisplayQuestionBasic extends Display {
         $this->addInlineFieldChecks($varname, $variable, $var, $ids);
         $label = $var->getEnumeratedLabel();
         foreach ($orderedoptions as $option) {
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $selected = ' aria-checked="false"';
                 if ($option["code"] == $previousdata) {
                     $selected = ' CHECKED aria-checked="true"';
@@ -2039,7 +2039,7 @@ class DisplayQuestionBasic extends Display {
         $optioncodes = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
@@ -2066,9 +2066,9 @@ class DisplayQuestionBasic extends Display {
         $tableid = $var->getSeid() . '-' . $var->getVsid();
 
         if ($itemspercolumn != sizeof($orderedoptions)) {
-            $returnStr .= $this->displayTableSaw(); // include table saw
-            $returnStr .= "<table role='presentation' data-tablesaw-mode='stack' id='table-" . $tableid . "' >";
+            $returnStr .= $this->displayTableSaw(); // include table saw            
         }
+        $returnStr .= "<table role='presentation' data-tablesaw-mode='stack' id='table-" . $tableid . "' >";
 
         $label = $var->getEnumeratedLabel();
         $dkrfna = $this->addDKRFNAButton(substr($realvarname, 0, strlen($realvarname) - 2), $var, $variable, false, '', $id);
@@ -2090,7 +2090,7 @@ class DisplayQuestionBasic extends Display {
             foreach ($splitup as $s) {
                 if (isset($s[$i])) {
                     $option = $s[$i];
-                    if (trim($option["label"] != "")) {
+                    if (trim($option["label"]) != "") {
 
                         switch ($label) {
                             case ENUMERATED_LABEL_INPUT_ONLY:
@@ -2129,7 +2129,7 @@ class DisplayQuestionBasic extends Display {
                         }
 
                         if ($order == ORDER_LABEL_FIRST) {
-                            $returnStr .= '<td class="uscic-table-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-checkbox-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '"><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span></label>
+                            $returnStr .= '<td class="uscic-row-cell-enumerated' . $disabled . '" id="cell' . $id . '_' . $option["code"] . '" ><label class="uscic-checkbox-label-first-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '"><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span></label>
                                         <script type="text/javascript">' . minifyScript('$( document ).ready(function() {
 
                                                 $("#' . $id . '_' . $option["code"] . '").click(function (e) {     
@@ -2154,7 +2154,7 @@ class DisplayQuestionBasic extends Display {
 
 
                                         </td>
-                                                <td class="uscic-table-row-cell-enumerated' . $disabled . '">
+                                                <td class="uscic-row-cell-enumerated' . $disabled . '">
                                                 <div class="checkbox uscic-checkbox-label-first-checkbox' . $disabled . '">
                                                 
                                                     <input ' . $role . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=checkbox id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '>
@@ -2163,7 +2163,7 @@ class DisplayQuestionBasic extends Display {
                                              </td>
                                             ';
                         } else {
-                            $returnStr .= '<td id="cell' . $id . '_' . $option["code"] . '" class="uscic-table-row-cell-enumerated' . $disabled . '"><div class="checkbox uscic-checkbox' . $inlineclass . ' ' . '">
+                            $returnStr .= '<td id="cell' . $id . '_' . $option["code"] . '" class="uscic-row-cell-enumerated' . $disabled . '"><div class="checkbox uscic-checkbox' . $inlineclass . ' ' . '">
                                         <div class="uscic-checkbox-box"><label class="uscic-checkbox-label' . $disabled . '" for="' . $id . '_' . $option["code"] . '">
                                                                                     
                                        <input ' . $role . $disabled . $dkrfnaclass . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $this->getErrorTextString($varname) . ' type=checkbox id=' . $id . '_' . $option["code"] . ' name=' . $varname . ' value=' . $option["code"] . $selected . '><span id="vsid_option' . $var->getVsid() . $option["code"] . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-answercode="' . $option["code"] . '" uscic-texttype="' . SETTING_OPTIONS . '" class="' . $this->inlineeditable . '">' . $this->applyFormatting($labelstr, $var->getAnswerFormatting()) . '</span>                                        
@@ -2270,7 +2270,7 @@ class DisplayQuestionBasic extends Display {
         $optioncodes = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
@@ -2665,7 +2665,7 @@ class DisplayQuestionBasic extends Display {
         $optioncodes = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
@@ -2706,7 +2706,7 @@ class DisplayQuestionBasic extends Display {
 
 
         foreach ($orderedoptions as $option) {
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $selected = ' aria-checked="false"';
                 if (inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
                     $selected = ' CHECKED aria-checked="true"';
@@ -3232,7 +3232,7 @@ class DisplayQuestionBasic extends Display {
         $labels = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[$option["code"]] = $id . '_' . $option["code"];
             }
 
@@ -4608,7 +4608,7 @@ $(window).resize(function() {
         $optioncodes = array();
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
@@ -4715,7 +4715,7 @@ $(window).resize(function() {
 
         $cnt = 0;
         foreach ($options as $option) {
-            if (trim($option["label"] != "")) {
+            if (trim($option["label"]) != "") {
                 $cnt++;
 
                 // check for optgroup entry
