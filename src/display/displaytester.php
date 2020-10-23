@@ -156,7 +156,7 @@ class DisplayTester extends Display {
             $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
             $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC(generateRandomPrimkey(8), Config::directLoginKey())) . '">';
             $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';            
-            
+            $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
             $returnStr .= '<input type=hidden name=' . POST_PARAM_SURVEY_EXECUTION_MODE . ' value="' . SURVEY_EXECUTION_MODE_TEST . '">';
             $returnStr .= '<span class="label label-default">' . Language::labelToolsTestSettings() . '</span>';
             $returnStr .= '<div class="well well-sm">';
