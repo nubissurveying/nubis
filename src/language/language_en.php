@@ -5251,6 +5251,10 @@ class Language extends LanguageBase {
         return 'No reported problems found';
     }
 
+    static function labelReportedFor() {
+        return 'Reported for';
+    }
+    
     static function labelReportedBy() {
         return 'Reported by';
     }

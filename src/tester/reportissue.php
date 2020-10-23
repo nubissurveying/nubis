@@ -66,8 +66,9 @@ class ReportIssue {
         $returnStr .= '                </div>
                 <div class="panel-body">';
         $returnStr .= $message;
+        $suid = getFromSessionParams('reportsuid');
         global $survey;
-        $issues = $survey->getReportedIssues();
+        $issues = $survey->getReportedIssues($suid);
 
         $returnStr .= '<div>
   <!-- Nav tabs -->
@@ -118,7 +119,7 @@ class ReportIssue {
                         "; //
 
             $returnStr .= "<br/><table id='issuetable' class='table table-bordered table-striped'><thead>";
-            $returnStr .= "<th>Reported by</th><th>" . Language::labelReportedOn() . "</th><th>" . Language::labelReportedCategory() . "</th><th>" . Language::labelReportedDescription() . "</th><th>" . Language::labelReportedMode() . "</th><th>" . Language::labelReportedLanguage() . "</th>";
+            $returnStr .= "<th valign=top>" . Language::labelReportedFor() . " for</th><th valign=top>" . Language::labelReportedBy() . "</th><th valign=top>" . Language::labelReportedOn() . "</th><th valign=top>" . Language::labelReportedCategory() . "</th><th valign=top>" . Language::labelReportedDescription() . "</th><th valign=top>" . Language::labelReportedMode() . "</th><th valign=top>" . Language::labelReportedLanguage() . "</th>";
             $returnStr .= "</thead><tbody>";
             $modes = Common::surveyModes();
             $languages = Language::getLanguagesArray();
@@ -126,6 +127,7 @@ class ReportIssue {
             foreach ($issues as $is) {
                 $us = new User($is['urid']);
                 $returnStr .= "<tr>";
+                $returnStr .= "<td>" . $is["displayed"] . "</td>";
                 $returnStr .= "<td>" . $us->getUsername() . "</td>";
                 $returnStr .= "<td>" . $is["ts"] . "</td>";
                 $returnStr .= "<td>" . $cats[$is["category"]] . "</td>";
@@ -162,6 +164,7 @@ class ReportIssue {
         $query .= "'" . $db->escapeString(getFromSessionParams('reportversion')) . "'";
         $query .= ")";
         $db->executeQuery($query);
+        //echo $query;
 
         $returnStr = $this->showHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';

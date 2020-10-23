@@ -500,6 +500,10 @@ class Language extends LanguageBase {
     static function errorNotArray($name) {
         return 'Variable ' . $name . ' is not an array';
     }
+    
+    static function errorInvalidExpression($name) {
+        return 'Invalid expression';
+    }
 
     static function errorArray($name) {
         return 'Variable ' . $name . ' is an array';
@@ -1180,6 +1184,10 @@ class Language extends LanguageBase {
     static function labelToolsImportType() {
         return 'Survey system';
     }
+    
+    static function labelToolsImportTypeBlaise() {
+        return 'Blaise';
+    }
 
     static function labelToolsImportTypeMMIC() {
         return 'MMIC';
@@ -1191,6 +1199,10 @@ class Language extends LanguageBase {
 
     static function labelToolsImportTarget() {
         return 'Import type';
+    }
+    
+    static function labelToolsImportSurvey() {
+        return 'Survey';
     }
 
     static function labelToolsImportTargetAdd() {
@@ -1592,6 +1604,10 @@ class Language extends LanguageBase {
 
     static function labelIfEmptyDefaultOrderPlaceholder() {
         return 'Question name';
+    }
+    
+    static function labelIfEmptyNoOptGroups() {
+        return 'If empty, no option groups';
     }
 
     static function labelIfEmptyColumnsPlaceholder() {
@@ -2037,6 +2053,10 @@ class Language extends LanguageBase {
     static function labelSkipVariablePostFix() {
         return 'Postfix';
     }
+    
+    static function labelVariableExternal() {
+        return 'Function';
+    }
 
     static function labelDataVisibility() {
         return 'Visibility';
@@ -2133,6 +2153,18 @@ class Language extends LanguageBase {
     static function labelTypeEditLayoutFormat() {
         return 'Format';
     }
+    
+    static function labelTypeEditLayoutDateDefault() {
+        return 'Default view';
+    }
+    
+    static function labelTypeEditLayoutDateTimeCollapse() {
+        return 'Collapse time picker';
+    }
+    
+    static function labelTypeEditLayoutDateTimeSideBySide() {
+        return 'Time picker next to date picker';
+    }
 
     static function labelTypeEditLayoutTimeFormat() {
         return 'Time format';
@@ -2169,6 +2201,10 @@ class Language extends LanguageBase {
     static function labelTypeEditEnumeratedColumns() {
         return 'Options per column';
     }
+    
+    static function labelTypeEditDropdownOptgroup() {
+        return 'Option groups';
+    }
 
     static function labelTypeEditLayoutOrientation() {
         return 'Orientation';
@@ -2197,9 +2233,17 @@ class Language extends LanguageBase {
     static function labelTypeEditLayoutTooltip() {
         return 'Tooltip';
     }
+    
+    static function labelTypeEditLayoutDot() {
+        return 'Mark if no value';
+    }
 
     static function labelTypeEditLayoutTextBox() {
         return 'Text box';
+    }
+    
+    static function labelTypeEditLayoutClickLabel() {
+        return 'Clickable label';
     }
 
     static function labelTypeRefactor() {
@@ -2240,6 +2284,10 @@ class Language extends LanguageBase {
 
     static function labelTypeEditAnswerFormatting() {
         return 'Answer formatting';
+    }
+    
+    static function labelTypeEditFooterDisplay() {
+        return 'Footer display';
     }
 
     static function labelTypeEditHeaderAlignment() {
@@ -2564,6 +2612,10 @@ class Language extends LanguageBase {
 
     static function labelTypeEditInteractiveID() {
         return 'Element ID';
+    }
+    
+    static function labelTypeEditFormatter() {
+        return 'Tooltip formatter';
     }
 
     static function labelTypeEditInteractiveInlineText() {
@@ -3507,6 +3559,10 @@ class Language extends LanguageBase {
     static function messageCheckerInvalidName() {
         return 'Please use only letters, numbers or underscores for the name and start the name with a letter.';
     }
+    
+    static function messageCheckerInvalidNameEnding() {
+        return 'Please make sure the name does not end with the sequence of an underscore, one or more numbers, and another underscore (e.g. "_a1_").';
+    }
 
     static function messageCheckerVariableExists($name) {
         return 'A variable with the name `' . $name . '` already exists.';
@@ -3941,6 +3997,14 @@ class Language extends LanguageBase {
     static function optionsSliderTextboxNo() {
         return 'No';
     }
+    
+    static function optionsClickLabelYes() {
+        return 'Yes';
+    }
+
+    static function optionsClickLabelNo() {
+        return 'No';
+    }
 
     static function optionsEnumeratedTextboxYes() {
         return 'Yes';
@@ -3971,6 +4035,14 @@ class Language extends LanguageBase {
     }
 
     static function optionsEnumeratedNo() {
+        return 'No';
+    }
+    
+    static function optionsFooterDisplayYes() {
+        return 'Yes';
+    }
+
+    static function optionsFooterDisplayNo() {
         return 'No';
     }
 
@@ -4104,6 +4176,18 @@ class Language extends LanguageBase {
 
     static function optionsDataInputMaskNo() {
         return 'No';
+    }
+    
+    static function optionsStoreInternal() {
+        return 'Internal';
+    }
+    
+    static function optionsStoreBoth() {
+        return 'Internal and external';
+    }
+
+    static function optionsStoreExternal() {
+        return 'External only';
     }
 
     static function optionsDataSkipYes() {
@@ -4621,6 +4705,10 @@ class Language extends LanguageBase {
 
     static function labelTypeEditOutputInputMask() {
         return 'Store input mask';
+    }
+    
+    static function labelTypeEditOutputLocationStore() {
+        return 'Store location';
     }
 
     static function labelTypeEditOutputSetOfEnumerated() {
@@ -5163,6 +5251,10 @@ class Language extends LanguageBase {
         return 'No reported problems found';
     }
 
+    static function labelReportedFor() {
+        return 'Reported for';
+    }
+    
     static function labelReportedBy() {
         return 'Reported by';
     }
@@ -6790,6 +6882,10 @@ class Language extends LanguageBase {
     static function installLabelDatabaseServer() {
         return 'Server';
     }
+    
+    static function installLabelDatabasePort() {
+        return 'Port';
+    }
 
     static function installLabelDatabaseName() {
         return 'Database name';
@@ -7202,6 +7298,10 @@ class Language extends LanguageBase {
     static function messageImportInvalidFile() {
         return 'invalid file selected.';
     }
+    
+    static function messageImportInvalidBlaiseFile() {
+        return 'invalid file selected (.bla and .inc only).';
+    }
 
     static function messageToolsImportNotOk($result) {
         return 'Import failed: ' . $result;
@@ -7476,6 +7576,10 @@ class Language extends LanguageBase {
     static function installLabelPerformanceUseMinify() {
         return 'Use script minification';
     }
+    
+    static function installLabelPerformanceAccessible() {
+        return 'Follow accessibility standards';
+    }
 
     static function installLabelPerformanceUseSerialize() {
         return 'Use serialized survey components';
@@ -7557,11 +7661,23 @@ class Language extends LanguageBase {
         return 'Desktop/laptop';
     }
     
+    static function optionsTooltipAlways() {
+        return 'Always';
+    }
+    
     static function optionsTooltipYes() {
-        return 'Yes';
+        return 'On drag and hover';
     }
     
     static function optionsTooltipNo() {
+        return 'Never';
+    }
+    
+    static function optionsMarkerYes() {
+        return 'Yes';
+    }
+    
+    static function optionsMarkerNo() {
         return 'No';
     }
     
@@ -7579,6 +7695,39 @@ class Language extends LanguageBase {
     static function textAssignmentError($name, $value) {
         return 'Invalid value assigned to variable ' . $name . ": " . $value . "";
     }
+    
+    static function labelAccessibleH1() {
+        return 'Survey';
+    }
+    
+    static function labelAccessibleOptions() {
+        return 'Options';
+    }
+    
+    static function labelAccessibleInput() {
+        return 'Answer';
+    }
+    
+    static function optionsDataCollapseYes() {
+        return 'Yes';
+    }
+
+    static function optionsDataCollapseNo() {
+        return 'No';
+    }
+    
+    static function optionsDataSideBySideYes() {
+        return 'Yes';
+    }
+
+    static function optionsDataSideBySideNo() {
+        return 'No';
+    }
+    
+    static function labelTypeEditValidationCallback() {
+        return 'On input error (Javascript)';
+    }
+    
 }
 
 ?>

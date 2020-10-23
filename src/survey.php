@@ -3858,9 +3858,12 @@ class Survey extends Component {
         return true;
     }
 
-    function getReportedIssues() {
+    function getReportedIssues($suid = "") {
         global $db;
-        $query = "select * from " . Config::dbSurvey() . "_issues where suid=" . $this->getSuid();
+        if ($suid == "") {
+            $suid = $this->getSuid();
+        }
+        $query = "select * from " . Config::dbSurvey() . "_issues where suid=" . $suid;
         $res = $db->selectQuery($query);
         $arr = array();
         if ($res) {
