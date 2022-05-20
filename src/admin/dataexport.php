@@ -142,79 +142,7 @@ class DataExport {
             "\xE2\x80\xB9", // U+2039 single left-pointing angle quotation mark
             "\xE2\x80\xBA", // U+203A single right-pointing angle quotation mark
         );
-    }
-
-    function DataExportOld($suid) {
-        global $db, $survey;
-        $this->db = $db;
-        $this->suid = $suid;
-        $this->survey = new Survey($this->suid);
-        $survey = $this->survey;
-        $this->variabledescriptives = array();
-
-        $this->setProperty(DATA_OUTPUT_MAINTABLE, Config::dbSurvey());
-        $this->setProperty(DATA_OUTPUT_MAINDATATABLE, Config::dbSurveyData());
-
-
-        /* set file names */
-        $this->setProperty(DATA_OUTPUT_FILENAME, $this->getProperty(DATA_OUTPUT_MAINTABLE));
-
-        /* set defaults */
-        $this->setProperty(DATA_OUTPUT_FILETYPE, FILETYPE_STATA);
-        $this->setProperty(DATA_OUTPUT_SURVEY, "");
-        $this->setProperty(DATA_OUTPUT_MODES, "");
-        $this->setProperty(DATA_OUTPUT_LANGUAGES, "");
-        $this->setProperty(DATA_OUTPUT_VERSIONS, "");
-        $this->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, PRIMARYKEY_YES);
-        $this->setProperty(DATA_OUTPUT_HIDDEN, DATA_NOTHIDDEN);
-        $this->setProperty(DATA_OUTPUT_CLEAN, DATA_DIRTY);
-        $this->setProperty(DATA_OUTPUT_INCLUDE_VALUE_LABEL_NUMBERS, VALUELABELNUMBERS_YES);
-        $this->setProperty(DATA_OUTPUT_FIELDNAME_CASE, FIELDNAME_LOWERCASE);
-        $this->setProperty(DATA_OUTPUT_INCLUDE_VALUE_LABELS, VALUELABEL_YES);
-        $this->setProperty(DATA_OUTPUT_VARIABLES_WITHOUT_DATA, VARIABLES_WITHOUT_DATA_YES);
-        $this->setProperty(DATA_OUTPUT_VALUELABEL_PREFIX, $this->getProperty(DATA_OUTPUT_MAINTABLE) . "_vl");
-        $this->setProperty(DATA_OUTPUT_VALUELABEL_WIDTH, VALUELABEL_WIDTH_FULL);
-        $this->setProperty(DATA_OUTPUT_ENCODING, "UTF-8");
-        $this->setProperty(DATA_OUTPUT_COMPLETED, INTERVIEW_NOTCOMPLETED);
-        $this->setProperty(DATA_OUTPUT_MARK_EMPTY, MARKEMPTY_IN_VARIABLE);
-        $this->setProperty(DATA_OUTPUT_KEEP_ONLY, DATA_KEEP_NO);
-        $this->setProperty(DATA_OUTPUT_CLEAN, DATA_CLEAN);
-        $this->setProperty(DATA_OUTPUT_TYPEDATA, DATA_REAL);
-        $this->setProperty(DATA_OUTPUT_VARLIST, "");
-        $this->setProperty(DATA_OUTPUT_TYPE, DATA_OUTPUT_TYPE_DATA_TABLE);
-        $this->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, "");
-        $this->setProperty(DATA_OUTPUT_FROM, "");
-        $this->setProperty(DATA_OUTPUT_TO, "");
-        $this->minprimkeylength = Config::getMinimumPrimaryKeyLength();
-        $this->maxprimkeylength = Config::getMaximumPrimaryKeyLength();
-
-        // https://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
-        $this->chrmap = array(
-            // Windows codepage 1252
-            "\xC2\x82", // U+0082⇒U+201A single low-9 quotation mark
-            "\xC2\x84", // U+0084⇒U+201E double low-9 quotation mark
-            "\xC2\x8B", // U+008B⇒U+2039 single left-pointing angle quotation mark
-            "\xC2\x91", // U+0091⇒U+2018 left single quotation mark
-            "\xC2\x92", // U+0092⇒U+2019 right single quotation mark
-            "\xC2\x93", // U+0093⇒U+201C left double quotation mark
-            "\xC2\x94", // U+0094⇒U+201D right double quotation mark
-            "\xC2\x9B", // U+009B⇒U+203A single right-pointing angle quotation mark
-            // Regular Unicode     // U+0022 quotation mark (")
-            // U+0027 apostrophe     (')
-            "\xC2\xAB", // U+00AB left-pointing double angle quotation mark
-            "\xC2\xBB", // U+00BB right-pointing double angle quotation mark
-            "\xE2\x80\x98", // U+2018 left single quotation mark
-            "\xE2\x80\x99", // U+2019 right single quotation mark
-            "\xE2\x80\x9A", // U+201A single low-9 quotation mark
-            "\xE2\x80\x9B", // U+201B single high-reversed-9 quotation mark
-            "\xE2\x80\x9C", // U+201C left double quotation mark
-            "\xE2\x80\x9D", // U+201D right double quotation mark
-            "\xE2\x80\x9E", // U+201E double low-9 quotation mark
-            "\xE2\x80\x9F", // U+201F double high-reversed-9 quotation mark
-            "\xE2\x80\xB9", // U+2039 single left-pointing angle quotation mark
-            "\xE2\x80\xBA", // U+203A single right-pointing angle quotation mark
-        );
-    }
+    }    
 
     function setProperty($property, $value) {
         $this->properties[$property] = $value;
@@ -394,9 +322,8 @@ class DataExport {
                 } else {
                     $arr = array();
                 }
-                //$arr[strtoupper($d)] = $vd; // this needs to work to ensure we are getting the right array and putting it in $vars array
-                $arr[] = strtoupper($d); // this needs to work to ensure we are getting the right array and putting it in $vars array
-                //$vars[$key] = array("sectionposition" => $section->getPosition(), "seid" => $vd->getSeid(), "varposition" => $vd->getPosition(), "vsid" => $vd->getVsid(), "varname" => strtoupper($vd->getName()), "vars" => $arr);
+                
+                $arr[] = strtoupper($d); // this needs to work to ensure we are getting the right array and putting it in $vars array                
                 $vars[$key] = array("order" => $section->getPosition() . $vd->getSeid() . $vd->getPosition() . $vd->getVsid(), "vars" => $arr);
             }
         }
@@ -585,7 +512,6 @@ class DataExport {
 
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         set_time_limit(0);
-        //ini_set('memory_limit', Config::dataExportMemoryLimit());
 
         /* set arrays */
         if (trim($this->getProperty(DATA_OUTPUT_MODES)) != "") {
@@ -608,7 +534,6 @@ class DataExport {
         $this->setProperty(DATA_OUTPUT_FILENAME_CSV, $this->getProperty(DATA_OUTPUT_FILENAME) . "_remarks.csv");
 
         // declare stuff
-        //$survey = new Survey($this->suid);
         $primkeys = array();
         $vars = array();
 
@@ -778,7 +703,7 @@ class DataExport {
 
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         set_time_limit(0);
-// create table
+        // create table
         $create = "create table if not exists " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times  (
                 suid int(11) NOT NULL DEFAULT '1',
                 primkey varchar(150) NOT NULL,
@@ -796,7 +721,6 @@ class DataExport {
 
         $query = "delete from table " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times where suid=" . $this->suid;
         $this->db->executeQuery($query);
-        //// old non-group by compliant: $query = "REPLACE INTO " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times SELECT min(suid), primkey, begintime, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_times where suid=" . $this->suid . " group by primkey, begintime order by primkey asc";
         $query = "REPLACE INTO " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_consolidated_times SELECT min(suid) as suid, primkey, begintime, min(stateid) as stateid, min(variable) as variable, avg(timespent) as timespent, min(language) as language, min(mode) as mode, min(version) as version, min(ts) as ts FROM " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_times where suid=" . $this->suid . " group by primkey, begintime order by primkey asc";
         $this->db->executeQuery($query);
 
@@ -821,7 +745,6 @@ class DataExport {
         if ($this->db->getNumberOfRows($res) > 0) {
 
             while ($row = $this->db->getRow($res)) {
-                //if (is_numeric($row["primkey"])) {
 
                 /* no match on language, mode and version, then treat as never gotten */
                 if (!(sizeof($this->languages) == 0 || (sizeof($this->languages) > 0 && inArray($row["language"], $this->languages)))) {//
@@ -856,7 +779,6 @@ class DataExport {
                 if (trim($line) != "") {
                     $data .= trim($line) . "\n";
                 }
-                //}
             }
         }
 
@@ -887,8 +809,6 @@ class DataExport {
         $res = $this->db->selectQuery($select);
         if ($this->db->getNumberOfRows($res) > 0) {
             while ($row = $this->db->getRow($res)) {
-                //if (is_numeric($row["primkey"])) {
-
 
                 /* no match on language, mode and version, then treat as never gotten */
                 if (!(sizeof($this->languages) == 0 || (sizeof($this->languages) > 0 && inArray($row["language"], $this->languages)))) {//
@@ -915,7 +835,6 @@ class DataExport {
                 if (trim($line) != "") {
                     $data2 .= trim($line) . "\n";
                 }
-                //}
             }
         }
 
@@ -1250,8 +1169,6 @@ class DataExport {
         }
 
         $query = "select variablename" . $decrypt . " from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_processed_paradata where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extra . " group by variablename";
-
-        //exit;
         $res = $this->db->selectQuery($query);
         if ($res) {
             if ($this->db->getNumberOfRows($res) == 0) {
@@ -1311,7 +1228,6 @@ class DataExport {
 
         /* start writing files */
         $outputtype = strtolower($this->getProperty(DATA_OUTPUT_FILETYPE));
-        //$outputtype = FILETYPE_CSV;
         $this->asked = sprintf('%.0F', "8.988465625461158E307");
         if ($outputtype == FILETYPE_CSV) {
             $this->startCSVFile();
@@ -1550,7 +1466,6 @@ class DataExport {
         if ($this->db->getNumberOfRows($res) > 0) {
 
             while ($row = $this->db->getRow($res)) {
-                //if (is_numeric($row["primkey"])) {
 
                 /* no match on language, mode and version, then treat as never gotten */
                 if (!(sizeof($this->languages) == 0 || (sizeof($this->languages) > 0 && inArray($row["language"], $this->languages)))) {//
@@ -1602,7 +1517,6 @@ class DataExport {
                 if (trim($line) != "") {
                     $data .= trim($line) . "\n";
                 }
-                //}
             }
         }
 
@@ -1695,8 +1609,7 @@ class DataExport {
         if ($this->db->getNumberOfRows($res) > 0) {
 
             while ($row = $this->db->getRow($res)) {
-                //if (is_numeric($row["primkey"])) {
-
+                
                 /* no match on language, mode and version, then treat as never gotten */
                 if (!(sizeof($this->languages) == 0 || (sizeof($this->languages) > 0 && inArray($row["language"], $this->languages)))) {//
                     continue;
@@ -1808,7 +1721,6 @@ class DataExport {
             $answertype = $type->getAnswerType();
         }
 
-        //$label = $var->getSettingValueDirect(SETTING_DESCRIPTION, $this->getProperty(DATA_OUTPUT_FORMATMODE), $this->getProperty(DATA_OUTPUT_FORMATLANGUAGE)); //->getDescription();
         $label = $var->getDescription();
         $suid = $var->getSuid();
         $valueLabel = "";
@@ -1894,7 +1806,6 @@ class DataExport {
 
                 /* multi select dropdown */
                 case ANSWER_TYPE_MULTIDROPDOWN:
-                    //$valueLabel = $var->getSettingValueDirect(SETTING_OPTIONS, $this->getProperty(DATA_OUTPUT_FORMATMODE), $this->getProperty(DATA_OUTPUT_FORMATLANGUAGE)); //->getDescription();
                     $this->setofenumeratedvariables[$variablename] = 1;
                     if ($var->getOutputOptionsText() != "") {
                         $valueLabel = $var->getOutputOptionsText();
@@ -1909,9 +1820,6 @@ class DataExport {
                     if (is_array($options)) {
                         foreach ($options as $option) {
                             $code = $option["code"];
-                            //if (sizeof($optioncodes) > 0) {
-                            //    $optioncodes .= SEPARATOR_SETOFENUMERATED;
-                            //}
                             $optioncodes[] = $code;
                             $optionlabels[] = $this->prepareLabel(trim(strip_tags($option["label"])));
                             if ($code > $soem) {
@@ -2336,9 +2244,7 @@ class DataExport {
                 } else {
                     $arr = array();
                 }
-                //$arr[strtoupper($d)] = $vd; // this needs to work to ensure we are getting the right array and putting it in $vars array
                 $arr[] = strtoupper($d); // this needs to work to ensure we are getting the right array and putting it in $vars array
-                //$vars[$key] = array("sectionposition" => $section->getPosition(), "seid" => $vd->getSeid(), "varposition" => $vd->getPosition(), "vsid" => $vd->getVsid(), "varname" => strtoupper($vd->getName()), "vars" => $arr);
                 $vars[$key] = array("order" => $section->getPosition() . $vd->getSeid() . $vd->getPosition() . $vd->getVsid(), "vars" => $arr);
 
                 $vd = null;
@@ -2376,17 +2282,13 @@ class DataExport {
                 } else {
                     $arr = array();
                 }
-                //$arr[strtoupper($vd->getName())] = $vd;
                 $arr[] = strtoupper($vd->getName());
-                //$vars[$key] = array("sectionposition" => $section->getPosition(), "seid" => $vd->getSeid(), "varposition" => $vd->getPosition(), "vsid" => $vd->getVsid(), "varname" => strtoupper($vd->getName()), "vars" => $arr);
                 $vars[$key] = array("order" => $section->getPosition() . $vd->getSeid() . $vd->getPosition() . $vd->getVsid(), "vars" => $arr);
 
                 // no width set, so first time, then no data at all so we set width to 2
                 if (!isset($this->maxwidths[strtoupper($vd->getName())])) {
                     $this->maxwidths[strtoupper($vd->getName())] = 2;
                 }
-                //$vd = null;
-                //unset($vd);
             }
         }
 
@@ -2425,7 +2327,6 @@ class DataExport {
             $row = $this->db->getRow($res);
             $this->recordcount = $row["cnt"];
         } else {
-            //$query = "select distinct primkey from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_data where suid=" . $this->suid . " and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extracompleted . $extra;
             $query = "select primkey from " . $this->getProperty(DATA_OUTPUT_MAINDATATABLE) . "_data where suid=" . $this->suid . " and variablename='prim_key' and answer is not null and length(primkey) >= " . $this->minprimkeylength . " and length(primkey) <= " . $this->maxprimkeylength . $extracompleted . $extra;
             $res = $this->db->selectQuery($query);
             $this->recordcount = $this->db->getNumberOfRows($res);
@@ -2485,8 +2386,6 @@ class DataExport {
                 } else {
                     /* go through records */
                     while ($row = $this->db->getRow($res)) {
-
-                        //$record = new DataRecord($this->suid, $row["primkey"]);
                         $record = new DataRecord();
                         $record->setAllData(unserialize(gzuncompress($row["data_dec"])));
                         if ($outputtype == FILETYPE_CSV) {
@@ -2701,14 +2600,12 @@ class DataExport {
                 // don't add definition for value labels for summary string set of enumerated 
                 $tvar = $this->variables[$i];
                 if (isset($this->setofenumeratedvariables[$tvar]) || $this->valuelabels[$i] == "" || $this->getProperty(DATA_OUTPUT_INCLUDE_VALUE_LABELS) == VALUELABEL_NO) {
-                //if ($this->valuelabels[$i] == "" || $this->getProperty(DATA_OUTPUT_INCLUDE_VALUE_LABELS) == VALUELABEL_NO) {
                     for ($v = 0; $v < 33; $v++) {
                         $this->writeByte($this->recordbytes, 0);
                     }
                 } else {
                     
                     $labelname = $this->getProperty(DATA_OUTPUT_VALUELABEL_PREFIX);                    
-                    //$labelname = $this->suid . "_" . $this->getProperty(DATA_OUTPUT_VALUELABEL_PREFIX);
                     $this->writeString($this->recordbytes, $labelname . $i, 33, $encoding);
                 }
             }
@@ -2951,12 +2848,6 @@ class DataExport {
                 $value = $this->getValue($primkey, $record, $fieldname);
             }
 
-            // old array handling
-            //if (inArray(strtoupper($fieldname), $this->arrayfields) && contains($fieldname, "[") == false) {
-            //    if ($value != null) {
-            //        $value = implode("-", flatten(unserialize(gzuncompress($value))));
-            //    }
-            //}
             // we have a value, then check for serialized array answer
             if ($value != null) {
 
@@ -2991,7 +2882,6 @@ class DataExport {
                 $vardes = $this->variabledescriptives[strtoupper($fieldname)];
             } else {
                 $vardes = $this->getVariableDescriptive($fieldname);
-                //$this->descriptives[] = $vardesc;
             }
             $setofenum = false;
             if (inArray($vardes->getAnswerType(), array(ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN))) {
@@ -3337,7 +3227,6 @@ class DataExport {
                 $fieldname = substr(($fieldname), 0, $last);
                 $value = $this->getValue($primkey, $record, $fieldname);
 
-                //if ($value != null && !inArray($value, array(ANSWER_DK, ANSWER_RF, ANSWER_NA))) {
                 if ($value != null && !inArray($value, array("", ANSWER_DK, ANSWER_RF, ANSWER_NA, $this->asked))) {
                     $arr = array();
                     if (contains($value, SEPARATOR_SETOFENUMERATED)) {

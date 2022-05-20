@@ -595,10 +595,8 @@ class SysAdmin {
 
         $communication = new Communication();
 
-        //load script in mysql (from /var/haalsi/scripts .. follow same directy structure
-        //filename + content in _communication
         $files = array();
-        $communication->getScriptFiles($files, '/var/haalsi/scripts');
+        $communication->getScriptFiles($files, '/pathtofileshere/');
         $displaySms = new DisplaySms();
         if (true || sizeof($files) > 0) {
 
@@ -2354,8 +2352,6 @@ class SysAdmin {
         $compiler = new Compiler($_SESSION['SUID'], getSurveyVersion($survey));
         $mess = $compiler->generateVariableDescriptives(array($var));
         $mess = $compiler->generateGetFills(array($var));
-
-        // TODO: FIX THAT USAGE OF * IN NUMERIC COMPARISON MEANS FILLNOVALUE AND USE ANOTHER SYMBOL FOR REFERENCING THAT VARIABLE ON SCREEN
         $mess = $compiler->generateInlineFields(array($var));
 
         /* update last page */

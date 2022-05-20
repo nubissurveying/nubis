@@ -427,7 +427,6 @@ class DisplaySysAdmin extends Display {
         $returnStr .= '<div id=sectiondiv class="col-xs-12 col-sm-9">';
 
         if ($_SESSION['VRFILTERMODE_SURVEY'] == 0) {
-            //$returnStr .= '<script>$("#sectiondiv").load("index.php",{ \'p\': \'sysadmin.survey.sections\', \'ajax\': \'smsajax\' } );</script>';
             $returnStr .= $this->showSections($survey->getSections());
             $returnStr .= '<a href="' . setSessionParams(array('page' => 'sysadmin.survey.addsection')) . '">' . Language::labelSectionsAddNew() . '</a>';
         } else if ($_SESSION['VRFILTERMODE_SURVEY'] == 1) {
@@ -437,7 +436,6 @@ class DisplaySysAdmin extends Display {
         } else if ($_SESSION['VRFILTERMODE_SURVEY'] == 3) {
             $returnStr .= $this->showGroups($survey->getGroups());
         } else {
-            //$returnStr .= '<script>$("#sectiondiv").load("index.php",{ \'p\': \'sysadmin.survey.sections\', \'ajax\': \'smsajax\' } );</script>';
             $returnStr .= $this->showSections($survey->getSections());
             $returnStr .= '<a href="' . setSessionParams(array('page' => 'sysadmin.survey.addsection')) . '">' . Language::labelSectionsAddNew() . '</a>';
         }
@@ -863,7 +861,6 @@ Q1
             if (!inArray($page, array("sysadmin.survey.editsettingsmode"))) {
                 $returnStr = '<form id=modeform method="post">';
                 $returnStr .= '<input type=hidden name=r value="' . setSessionsParamString($params) . '">';
-                //$returnStr .= $this->displayModesAdmin("surveymode", "surveymode", getSurveyMode(), "", $survey->getAllowedModes());
                 $returnStr .= $this->displayModesAdmin("surveymode", "surveymode", getSurveyMode(), "", implode("~", $user->getModes($survey->getSuid())));
                 $returnStr .= '<script type=text/javascript>
                     
@@ -902,7 +899,6 @@ Q1
                 /* language dropdown */
                 $returnStr .= '<form id=languageform method="post">';
                 $returnStr .= '<input type=hidden name=r value="' . setSessionsParamString($params) . '">';
-                //$returnStr .= $this->displayLanguagesAdmin("surveylanguage", "surveylanguage", getSurveyLanguage(), true, false, true, "", $survey->getAllowedLanguages(getSurveyMode(), false));
                 $returnStr .= $this->displayLanguagesAdmin("surveylanguage", "surveylanguage", getSurveyLanguage(), true, false, true, "", $user->getLanguages($survey->getSuid(), getSurveyMode()), false);
                 $returnStr .= '<script type=text/javascript>
                     
@@ -943,7 +939,6 @@ Q1
         $returnStr .= '<div class="btn-group">';
 
         $returnStr .= '<div class="btn-group">';
-        //$returnStr .= '<button class="btn btn-default' . $active[0] . ' dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" onclick="$(\'#vrfiltermode_survey\').val(0);$(\'#surveysidebar\').submit();">' . Language::labelSections() . '</button>';
         $returnStr .= '<button  title="' . Language::labelSections() . '" class="btn btn-default' . $active[0] . ' dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" onclick="$(\'#vrfiltermode_survey\').val(0);$(\'#surveysidebar\').submit();"><span class="glyphicon glyphicon-tasks"></span></button>';
 
         $returnStr .= '<ul class="dropdown-menu" role="menu">';
@@ -954,14 +949,10 @@ Q1
         $returnStr .= '</ul>';
         $returnStr .= '</div>';
 
-        //$returnStr .= '<button class="btn btn-default' . $active[2] . '" onclick="$(\'#vrfiltermode_survey\').val(2);$(\'#surveysidebar\').submit();">' . Language::labelTypes() . '</button>';
         $returnStr .= '<button title="' . Language::labelTypes() . '" class="btn btn-default' . $active[2] . '" onclick="$(\'#vrfiltermode_survey\').val(2);$(\'#surveysidebar\').submit();"><span class="glyphicon glyphicon-list-alt"></span></button>';
-
-        //$returnStr .= '<button  title="' . Language::labelGroups() . '" class="btn btn-default' . $active[3] . '" onclick="$(\'#vrfiltermode_survey\').val(3);$(\'#surveysidebar\').submit();">' . Language::labelGroups() . '</button>';
         $returnStr .= '<button  title="' . Language::labelGroups() . '" class="btn btn-default' . $active[3] . '" onclick="$(\'#vrfiltermode_survey\').val(3);$(\'#surveysidebar\').submit();"><span class="glyphicon glyphicon-th-large"></span></button>';
 
         $returnStr .= '<div class="btn-group">';
-        //$returnStr .= '<button class="btn btn-default' . $active[1] . ' dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" onclick="$(\'#vrfiltermode_survey\').val(1);$(\'#surveysidebar\').submit();">' . Language::labelSettings() . '</button>';
         $returnStr .= '<button  title="' . Language::labelSettings() . '" class="btn btn-default' . $active[1] . ' dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" onclick="$(\'#vrfiltermode_survey\').val(1);$(\'#surveysidebar\').submit();"><span class="glyphicon glyphicon-flash"></span></button>';
         $returnStr .= '<ul class="dropdown-menu" role="menu">';
         $returnStr .= '<li><a href="' . setSessionParams(array('page' => 'sysadmin.survey.editsettingsaccess', 'suid' => $survey->getSuid())) . '">' . Language::labelSettingsAccess() . '</a></li>';
@@ -1023,7 +1014,6 @@ Q1
         $returnStr .= '<ul class="dropdown-menu" role="menu">';
         $returnStr .= '<li><a ' . $active[0] . ' onclick="$(\'#vrfiltermode_section\').val(0);$(\'#sectionsidebar\').submit();">' . Language::labelVariables() . '</a></li>';
         $returnStr .= '<li><a ' . $active[1] . ' onclick="$(\'#vrfiltermode_section\').val(1);$(\'#sectionsidebar\').submit();">' . Language::labelRouting() . '</a></li>';
-        //$returnStr .= '<li><a ' . $active[3] . ' onclick="$(\'#vrfiltermode_section\').val(3);$(\'#sectionsidebar\').submit();">' . Language::labelGroups() . '</a></li>';
         $returnStr .= '</ul>';
 
         $tagclass = 'class="btn btn-default"';
@@ -1082,7 +1072,6 @@ Q1
 
     function showSurveyFooter($survey) {
         $returnStr = '</div>';
-        //$returnStr .= $this->showSurveySideBar($survey, $_SESSION['VRFILTERMODE_SURVEY']);
         $returnStr .= '</div>';
         $returnStr .= '</div></div>'; //container and wrap        
         $returnStr .= $this->showBottomBar();
@@ -1430,8 +1419,6 @@ Q1
                 $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
                 $returnStr .= '<tr ' . $style . ' id="' . $variable->getVsid() . '"><td style="display: none;">' . $cnt . '</td><td>';
                 $cnt++;
-                //$returnStr .= '<tr><td>';
-                //$returnStr .= '<a data-html="true" data-toggle="popover" data-content="<b>test</b>" href="' . setSessionParams(array('page' => 'sysadmin.survey.editvariable', 'vsid' => $variable->getVsid())) . '"><span class="glyphicon glyphicon-edit"></span></a>';
                 $content = '<a title="' . Language::linkEditTooltip() . '" href="' . setSessionParams(array('page' => 'sysadmin.survey.editvariable', 'vsid' => $variable->getVsid())) . '"><span class="glyphicon glyphicon-edit"></span></a>';
                 $content .= '&nbsp;&nbsp;<a title="' . Language::linkCopyTooltip() . '" href="' . setSessionParams(array('page' => 'sysadmin.survey.copyvariable', 'vsid' => $variable->getVsid())) . '"><span class="glyphicon glyphicon-copyright-mark"></span></a>';
 
@@ -1745,7 +1732,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         if (inArray($answertype, array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
             $returnStr .= "<input type=hidden name='" . SETTING_HIDDEN . "' value='" . HIDDEN_YES . "'>";
             $returnStr .= "<input type=hidden name='" . SETTING_KEEP . "' value='" . KEEP_ANSWER_NO . "'>";
-            //$returnStr .= "<input type=hidden name=keep value='" . ENCRYPTION_NO . "'>";
         } else {
             $returnStr .= "<tr><td>" . Language::labelTypeEditGeneralKeep() . "</td>";
             $returnStr .= "<td colspan=2>" . $this->displayIsKeep($var->getKeep(), $var->getTyd()) . "</td></tr>";
@@ -1791,7 +1777,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         /* header/footer setting */
         $returnStr .= $this->getVariableTopTab(2);
-        //$returnStr .= '<span class="label label-default">' . Language::labelSettingsPage() . '</span>';
         $returnStr .= '<div class="well">';
         $returnStr .= '<table width=100%>';
         $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelSettingsHeader() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=6 class="form-control autocompletebasic' . $tinymce . '" id="' . SETTING_PAGE_HEADER . '" name="' . SETTING_PAGE_HEADER . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getPageHeader(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
@@ -1823,8 +1808,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<table>";
             $returnStr .= '<tr><td>' . Language::labelTypeEditLayoutFormat() . '</td>';
             $returnStr .= "<td>" . $helpstart . '<input  style="width: 350px;" type="text" class="form-control autocompletebasic" name="' . SETTING_TIME_FORMAT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getTimeFormat(), ENT_QUOTES)) . '">' . $helpend . '</td></tr>';
-            //$returnStr .= '<tr><td>' . Language::labelTypeEditLayoutDateDefault() . '</td>';
-            //$returnStr .= "<td>" . $helpstart . '<input  style="width: 350px;" type="text" class="form-control autocompletebasic" name="' . SETTING_DATE_DEFAULT_VIEW . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getDateDefaultView(), ENT_QUOTES)) . '">' . $helpend . '</td></tr>';
             $returnStr .= '</table>';
             $returnStr .= '</div>';
         } else if ($answertype == ANSWER_TYPE_DATE) {
@@ -1937,8 +1920,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= '<span class="label label-default">' . Language::labelTypeEditLayoutEnumerated() . '</span>';
             $returnStr .= "<div class='well'>";
             $returnStr .= "<table>";
-            //$returnStr .= "<tr><td>" . Language::labelTypeEditLayoutEnumeratedTemplate() . "</td>";
-            //$returnStr .= "<td>" . $this->displayRankColumn(SETTING_RANK_COLUMN, $variable->getRankColumn(), true, $variable->getTyd()) . "</td></tr>";
             $returnStr .= "<tr><td>" . Language::labelTypeEditLayoutEnumeratedLabel() . "</td><td>" . $this->displayEnumeratedLabelRank(SETTING_ENUMERATED_LABEL, $variable->getEnumeratedLabel(), true, $variable->getTyd()) . "</td></tr>";
             $returnStr .= "<tr><td>" . Language::labelTypeEditEnumeratedRandomizer() . "</td>";
             $returnStr .= '<td><div class="input-group"><input placeholder="' . Language::labelIfEmptyDefaultOrderPlaceholder() . '" type="text" class="form-control autocompletebasic" name="' . SETTING_ENUMERATED_RANDOMIZER . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getEnumeratedRandomizer(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyDefaultOrder() . '</i></span></div></td></tr>';
@@ -2143,17 +2124,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<td>" . $helpstart . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $variable->getLabelCloseButton()) . $helpend . "</td></tr>";
 
         $returnStr .= '</table></div>';
-
-
-        /* $returnStr .= '<span class="label label-default">' . Language::labelTypeEditLayoutSection() . '</span>';
-          $returnStr .= "<div class='well'>";
-          $returnStr .= "<table>";
-          $returnStr .= "<tr><td>" . Language::labelTypeEditSectionHeader() . "</td>";
-          $returnStr .= "<td>" . $this->displaySectionHeader(SETTING_SHOW_SECTION_HEADER, $variable->getShowSectionHeader(), true, $variable->getTyd()) . "</td><td width=25><nobr/></td>
-          <td>" . Language::labelTypeEditSectionFooter() . "</td>";
-          $returnStr .= "<td>" . $this->displaySectionFooter(SETTING_SHOW_SECTION_FOOTER, $variable->getShowSectionFooter(), true, $variable->getTyd()) . "</td></tr>";
-          $returnStr .= '</table></div>';
-         */
         $returnStr .= '<span class="label label-default">' . Language::labelTypeEditLayoutProgressBar() . '</span>';
         $returnStr .= "<div class='well'>";
         $returnStr .= "<table>";
@@ -2234,13 +2204,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     function showEditVariableVerification($variable) {
         $returnStr .= '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editvariablevalidationres', 'vsid' => $variable->getVsid()));
-
-
         $returnStr .= $this->getVariableTopTab(1);
-//        $returnStr .= '<span class="label label-default">' . Language::labelTypeEditValidationResponse() . '</span>';
-
-
-
         $returnStr .= "<div class='well'>";
         $returnStr .= $this->displayComboBox();
         $returnStr .= "<table>";
@@ -2623,8 +2587,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr = '<form id="editform" method="post">';
         if ($var->getVsid() != "") {
             $returnStr .= $this->getVariableTopTab(5);
-
-//$returnStr .= '<span class="label label-default">' . Language::labelTypeEditOutput() . '</span>';
         }
         $helpstart = '<div class="input-group">';
         $message = Language::helpFollowSurvey();
@@ -2915,7 +2877,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
 
         $returnStr .= $this->getVariableTopTab(6);
-        //$returnStr .= '<span class="label label-default">' . Language::labelTypeEditInteractiveTexts() . '</span>';
         $returnStr .= '<div class="well">';
         $returnStr .= '<table>';
         $returnStr .= '<tr><td>' . Language::labelTypeEditInteractiveID() . '</td><td><div class="input-group"><input type="text" class="form-control autocompletebasic" name="' . SETTING_ID . '" value="' . convertHTLMEntities($variable->getID(), ENT_QUOTES) . '"><span class="input-group-addon"><i>Auto-generated if empty</i></span></div></td></tr>';
@@ -2957,7 +2918,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnUpdate() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_UPDATE, $variable->getOnUpdate()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnLanguageChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_LANGUAGE_CHANGE, $variable->getOnLanguageChange()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnModeChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_MODE_CHANGE, $variable->getOnModeChange()) . $helpend . "</td></tr>";
-        //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_VERSION_CHANGE, $variable->getOnVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -2972,7 +2932,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnUpdate() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_UPDATE, $variable->getClickUpdate()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnLanguageChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_LANGUAGE_CHANGE, $variable->getClickLanguageChange()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnModeChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_MODE_CHANGE, $variable->getClickModeChange()) . $helpend . "</td></tr>";
-        //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_VERSION_CHANGE, $type->getClickVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -3279,7 +3238,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<form method="post" id="variablesidebar">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editvariable'));
         $returnStr .= '<input type="hidden" name="vrfiltermode_variable" id="vrfiltermode_variable" value="' . $filter . '">';
-        //$returnStr .= '<div class="btn-group">';
         $returnStr .= '<div class="btn-group">';
         $variable = $survey->getVariableDescriptive($_SESSION['VSID']);
         $answertype = $variable->getAnswerType();
@@ -3427,7 +3385,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
             foreach ($types as $type) {
                 $returnStr .= '<tr><td>';
-                //$returnStr .= '<a data-html="true" data-toggle="popover" data-content="<b>test</b>" href="' . setSessionParams(array('page' => 'sysadmin.survey.editvariable', 'vsid' => $variable->getVsid())) . '"><span class="glyphicon glyphicon-edit"></span></a>';
                 $content = '<a id="' . $type->getTyd() . '_edit" title="' . Language::linkEditTooltip() . '" href="' . setSessionParams(array('page' => 'sysadmin.survey.edittype', 'tyd' => $type->getTyd())) . '"><span class="glyphicon glyphicon-edit"></span></a>';
                 $content .= '&nbsp;&nbsp;<a id="' . $type->getTyd() . '_copy" title="' . Language::linkCopyTooltip() . '" href="' . setSessionParams(array('page' => 'sysadmin.survey.copytype', 'tyd' => $type->getTyd())) . '"><span class="glyphicon glyphicon-copyright-mark"></span></a>';
 
@@ -3898,7 +3855,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         }
 
         /* header/footer setting */
-        //$returnStr .= '<span class="label label-default">' . Language::labelSettingsPage() . '</span>';
         $returnStr .= $this->getTypeTopTab(2);
         $returnStr .= '<div class="well">';
         $returnStr .= '<table width=100%>';
@@ -3931,8 +3887,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<table>";
             $returnStr .= '<tr><td>' . Language::labelTypeEditLayoutFormat() . '</td>';
             $returnStr .= "<td>" . $helpstart . '<input  style="width: 350px;" type="text" class="form-control autocompletebasic" name="' . SETTING_TIME_FORMAT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($type->getTimeFormat(), ENT_QUOTES)) . '">' . $helpend . '</td></tr>';
-            //$returnStr .= '<tr><td>' . Language::labelTypeEditLayoutDateDefault() . '</td>';
-            //$returnStr .= "<td>" . $helpstart . '<input  style="width: 350px;" type="text" class="form-control autocompletebasic" name="' . SETTING_DATE_DEFAULT_VIEW . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($type->getDateDefaultView(), ENT_QUOTES)) . '">' . $helpend . '</td></tr>';
             $returnStr .= '</table>';
             $returnStr .= '</div>';
         } else if ($answertype == ANSWER_TYPE_DATE) {
@@ -4049,8 +4003,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= '<span class="label label-default">' . Language::labelTypeEditLayoutEnumerated() . '</span>';
             $returnStr .= "<div class='well'>";
             $returnStr .= "<table>";
-            //$returnStr .= "<tr><td>" . Language::labelTypeEditLayoutEnumeratedTemplate() . "</td>";
-            //$returnStr .= "<td>" . $this->displayRankColumn(SETTING_RANK_COLUMN, $type->getRankColumn(), true) . "</td></tr>";
             $returnStr .= "<tr><td>" . Language::labelTypeEditLayoutEnumeratedLabel() . "</td><td>" . $this->displayEnumeratedLabelRank(SETTING_ENUMERATED_LABEL, $type->getEnumeratedLabel(), true) . "</td></tr>";
             $returnStr .= "<tr><td>" . Language::labelTypeEditEnumeratedRandomizer() . "</td>";
             $returnStr .= '<td><div class="input-group"><input placeholder="' . Language::labelIfEmptyDefaultOrderPlaceholder() . '" type="text" class="form-control autocompletebasic" name="' . SETTING_ENUMERATED_RANDOMIZER . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($type->getEnumeratedRandomizer(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyDefaultOrder() . '</i></span></div></td></tr>';
@@ -4250,15 +4202,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         $returnStr .= '</table></div>';
 
-        /* $returnStr .= '<span class="label label-default">' . Language::labelTypeEditLayoutSection() . '</span>';
-          $returnStr .= "<div class='well'>";
-          $returnStr .= "<table>";
-          $returnStr .= "<tr><td>" . Language::labelTypeEditSectionHeader() . "</td>";
-          $returnStr .= "<td>" . $this->displaySectionHeader(SETTING_SHOW_SECTION_HEADER, $type->getShowSectionHeader(), true) . "</td><td width=25><nobr/></td>
-          <td>" . Language::labelTypeEditSectionFooter() . "</td>";
-          $returnStr .= "<td>" . $this->displaySectionFooter(SETTING_SHOW_SECTION_FOOTER, $type->getShowSectionFooter(), true) . "</td></tr>";
-          $returnStr .= '</table></div>';
-         */
         $returnStr .= '<span class="label label-default">' . Language::labelTypeEditLayoutProgressBar() . '</span>';
         $returnStr .= "<div class='well'>";
         $returnStr .= "<table><tr><td>" . Language::labelTypeEditLayoutProgressBarShow() . "</td>";
@@ -4332,7 +4275,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.edittypeinteractiveres', 'tyd' => $type->getTyd()));
-        //$returnStr .= '<span class="label label-default">' . Language::labelTypeEditInteractiveTexts() . '</span>';
         $returnStr .= $this->getTypeTopTab(6);
         $returnStr .= '<div class="well">';
         $returnStr .= '<table>';
@@ -4374,7 +4316,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnUpdate() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_UPDATE, $type->getOnUpdate()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnLanguageChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_LANGUAGE_CHANGE, $type->getOnLanguageChange()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnModeChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_MODE_CHANGE, $type->getOnModeChange()) . $helpend . "</td></tr>";
-        //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_ON_VERSION_CHANGE, $type->getOnVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -4390,7 +4331,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnUpdate() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_UPDATE, $type->getClickUpdate()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnLanguageChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_LANGUAGE_CHANGE, $type->getClickLanguageChange()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnModeChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_MODE_CHANGE, $type->getClickModeChange()) . $helpend . "</td></tr>";
-        //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_VERSION_CHANGE, $type->getClickVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -4403,7 +4343,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
     function showEditTypeVerification($type) {
         $returnStr .= '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.edittypevalidationres', 'tyd' => $type->getTyd()));
-        //$returnStr .= '<span class="label label-default">' . Language::labelTypeEditValidationResponse() . '</span>';
         $returnStr .= $this->getTypeTopTab(1);
         $returnStr .= "<div class='well'>";
         $returnStr .= $this->displayComboBox();
@@ -4935,7 +4874,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $arr = Common::surveyTemplates();
             foreach ($groups as $group) {
                 $returnStr .= '<tr><td>';
-                //$returnStr .= '<a data-html="true" data-toggle="popover" data-content="<b>test</b>" href="' . setSessionParams(array('page' => 'sysadmin.survey.editvariable', 'vsid' => $variable->getVsid())) . '"><span class="glyphicon glyphicon-edit"></span></a>';
                 $content = '<a title="' . Language::linkEditTooltip() . '" href="' . setSessionParams(array('page' => 'sysadmin.survey.editgroup', 'gid' => $group->getGid())) . '"><span class="glyphicon glyphicon-edit"></span></a>';
                 $content .= '&nbsp;&nbsp;<a title="' . Language::linkCopyTooltip() . '" href="' . setSessionParams(array('page' => 'sysadmin.survey.copygroup', 'gid' => $group->getGid())) . '"><span class="glyphicon glyphicon-copyright-mark"></span></a>';
 
@@ -4999,7 +4937,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= $this->showEditGroupGeneral($group);
         }
 
-        //$returnStr .= '<div style="min-height: 50px;"></div>';
         $returnStr .= '<div style="min-height: 100px; max-height: 100%;"></div>';
         $returnStr .= $this->showGroupFooter($survey);
         return $returnStr;
@@ -5118,8 +5055,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         }
         /* header/footer setting */
         $returnStr .= $this->getGroupTopTab(2);
-        //$returnStr .= '<div class="well" style="background-color:white;">';
-        //$returnStr .= '<span class="label label-default">' . Language::labelSettingsPage() . '</span>';
         $returnStr .= '<div class="well">';
         $returnStr .= '<table width=100%>';
         $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelSettingsHeader() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=6 class="form-control autocompletebasic' . $tinymce . '" id="' . SETTING_PAGE_HEADER . '" name="' . SETTING_PAGE_HEADER . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getPageHeader(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
@@ -5144,7 +5079,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= '<tr><td>' . Language::labelGroupEditTableID() . '</td><td><div class="input-group"><input type="text" class="form-control" name="' . SETTING_GROUP_TABLE_ID . '" value="' . convertHTLMEntities($group->getTableID(), ENT_QUOTES) . '"><span class="input-group-addon"><i>Auto-generated if empty</i></span></div></td></tr>';
 
 
-            //if ($group->getTemplate() == TABLE_TEMPLATE_ENUMERATED) {
             $returnStr .= "<tr><td>" . Language::labelTypeEditHeaderAlignment() . "</td>";
             $returnStr .= "<td>" . $this->displayAlignment(SETTING_HEADER_ALIGNMENT, $group->getHeaderAlignment(), true) . "</td><td width=25><nobr/></td>            
                               <td>" . Language::labelTypeEditHeaderFormatting() . "</td>";
@@ -5153,7 +5087,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<td>" . $this->displayHeaderFixed($group->getHeaderFixed(), true) . "</td><td width=25><nobr/></td>            
                                <td>" . Language::labelTypeEditHeaderScrollDisplay() . "</td>";
             $returnStr .= '<td>' . $helpstart . '<input type="text" class="form-control" name="' . SETTING_HEADER_SCROLL_DISPLAY . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($group->getHeaderScrollDisplay(), ENT_QUOTES)) . '">' . $helpend . '</td></tr>';
-            //}
+            
             $returnStr .= "<tr><td>" . Language::labelGroupEditBordered() . "</td>";
             $returnStr .= "<td>" . $this->displayStriped(SETTING_GROUP_TABLE_BORDERED, $group->getTableBordered(), true) . "</td><td width=25><nobr/>";
             $returnStr .= "<td>" . Language::labelGroupEditCondensed() . "</td>";
@@ -5187,7 +5121,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
                 $returnStr .= "<td>" . $this->displayFooterDisplay(SETTING_FOOTER_DISPLAY, $group->getFooterDisplay(), true) . "</td>"
                         . "<td colspan=3><nobr/></td></tr>";
             }
-
 
             $returnStr .= '</table>';
             $returnStr .= '</div>';
@@ -5276,7 +5209,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         $returnStr .= "</form>";
-        //$returnStr .= "</div>";
         return $returnStr;
     }
 
@@ -5314,8 +5246,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editgroupvalidationres', 'gid' => $group->getGid()));
         $returnStr .= $this->getGroupTopTab(1);
-        //$returnStr .= '<div class="well" style="background-color:white;">';
-        //$returnStr .= '<span class="label label-default">' . Language::labelTypeEditValidationResponse() . '</span>';
         $returnStr .= "<div class='well'>";
         $returnStr .= $this->displayComboBox();
         $returnStr .= "<table>";
@@ -5397,22 +5327,8 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editgroupinteractiveres', 'gid' => $group->getGid()));
-        //$returnStr .= '<span class="label label-default">' . Language::labelTypeEditInteractiveTexts() . '</span>';
         $returnStr .= $this->getGroupTopTab(6);
         $returnStr .= '<div class="well">';
-        /*        $returnStr .= '<table>';
-          $returnStr .= '<tr><td>' . Language::labelTypeEditInteractiveInlineText() . '</td><td><textarea style="min-width: 600px; width: 100%; min-height: 100px;" class="form-control" name="' . SETTING_JAVASCRIPT_WITHIN_ELEMENT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getInlineJavascript(), ENT_QUOTES)) . '</textarea></td></tr>';
-          $returnStr .= '<tr><td>' . Language::labelTypeEditinteractivePageText() . '</td><td>' . $helpstart . '<textarea style="min-width: 600px; width: 100%; min-height: 100px;" class="form-control" name="' . SETTING_JAVASCRIPT_WITHIN_PAGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getPageJavascript(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-          $returnStr .= '<tr><td>' . Language::labelTypeEditInteractiveExtraJavascript() . '</td><td>' . $helpstart . '<textarea style="min-width: 600px; width: 100%;" rows=10 class="form-control" name="' . SETTING_SCRIPTS . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getScripts()), ENT_QUOTES) . '</textarea>' . $helpend . '</td></tr>';
-          $returnStr .= '</table></div>';
-
-          $returnStr .= '<span class="label label-default">' . Language::labelTypeEditInteractiveStyle() . '</span>';
-          $returnStr .= '<div class="well">';
-          $returnStr .= '<table>';
-          $returnStr .= '<tr><td>' . Language::labelTypeEditInteractiveInlineStyle() . '</td><td><textarea style="min-width: 600px; width: 100%; min-height: 80px;" class="form-control" name="' . SETTING_STYLE_WITHIN_ELEMENT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getInlineStyle(), ENT_QUOTES)) . '</textarea></td></tr>';
-          $returnStr .= '<tr><td>' . Language::labelTypeEditInteractivePageStyle() . '</td><td>' . $helpstart . '<textarea style="min-width: 600px; width: 100%; min-height: 80px;" class="form-control" name="' . SETTING_STYLE_WITHIN_PAGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getPageStyle(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-          $returnStr .= '</table></div>';
-         */
         $returnStr .= '<span class="label label-default">' . Language::labelTypeEditOnSubmit() . '</span>';
         $returnStr .= "<div class='well'>";
         $returnStr .= "<table>";
@@ -5440,7 +5356,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnUpdate() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_UPDATE, $group->getClickUpdate()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnLanguageChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_LANGUAGE_CHANGE, $group->getClickLanguageChange()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnModeChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_MODE_CHANGE, $group->getClickModeChange()) . $helpend . "</td></tr>";
-        //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_VERSION_CHANGE, $type->getClickVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -5491,9 +5406,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $helpstart = '<div class="input-group">';
         $message = Language::helpFollowSurvey();
         $helpend = '<span class="input-group-addon"><i>' . $message . '</i></span></div>';
-
-        //$returnStr .= '<div class="well" style="background-color:white;">';
-        //$returnStr .= '<span class="label label-default">' . Language::labelTypeEditAssistanceMessages() . '</span>';
         $user = new User($_SESSION['URID']);
         $tinymce = '';
         if ($user->hasHTMLEditor()) {
@@ -5646,7 +5558,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $group = $survey->getGroup($_SESSION['GID']);
 
         $returnStr .= '<div class="btn-group-sm">';
-        //$returnStr .= '<div class="btn-group-sm">';
         $returnStr .= '<button title="' . Language::linkEditTooltip() . '" class="btn btn-default dropdown-toggle" data-hover="dropdown" data-toggle="dropdown"><span class="glyphicon glyphicon-edit"></span></button>';
         $returnStr .= '<ul class="dropdown-menu" role="menu">';
         $returnStr .= '<li><a ' . $active[0] . ' onclick="$(\'#vrfiltermode_group\').val(0);$(\'#groupsidebar\').submit();">' . Language::labelGeneral() . '</a></li>';
@@ -5734,7 +5645,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
     function showSettingsFooter($survey) {
         $returnStr = '</div>';
         $returnStr .= $this->showSurveySideBar($survey, $_SESSION['VRFILTERMODE_SURVEY']);
-        //$returnStr .= $this->showSettingsSideBar($survey, $_SESSION['VRFILTERMODE_SETTING']);
         $returnStr .= '</div>';
         $returnStr .= '</div></div>'; //container and wrap        
         $returnStr .= $this->showBottomBar();
@@ -5790,8 +5700,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= $this->displayComboBox();
         $returnStr .= $this->displayAccessTypes($survey->getAccessType());
         $returnStr .= '</td></tr>';
-        //$returnStr .= "<tr><td>" . Language::labelSettingsAccessDevice() . "</td>";
-        //$returnStr .= "<td>" . $this->displayAccessDevice(SETTING_ACCESS_DEVICE, $survey->getAccessDevice()) . "</td></tr>";
 
         $returnStr .= "<tr><td>" . Language::labelTypeEditAccessReentry() . "</td>";
         $returnStr .= "<td>" . $this->displayAccessReentryAction(SETTING_ACCESS_REENTRY_ACTION, $survey->getAccessReentryAction()) . "</td></tr>";
@@ -5808,8 +5716,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
 
         $returnStr .= "</table>";
-        //$returnStr .= "<tr><td>" . Language::labelSettingsAccessReturn() . "</td>";
-        //$returnStr .= "<td>" . $this->displayAccessExit($survey->getSetting($survey->getSuid(), OBJECT_SURVEY, SETTING_ACCESS_EXIT)) . "</td></tr>";
         $returnStr .= "</div>";
         $returnStr .= '<span class="label label-default">' . Language::labelSettingsAccessTemporal() . '</span>';
         $returnStr .= '<div class="well">';
@@ -6167,7 +6073,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnUpdate() . "</td><td>" . $this->displayOnSubmit(SETTING_ON_UPDATE, $survey->getOnUpdate()) . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnLanguageChange() . "</td><td>" . $this->displayOnSubmit(SETTING_ON_LANGUAGE_CHANGE, $survey->getOnLanguageChange()) . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnModeChange() . "</td><td>" . $this->displayOnSubmit(SETTING_ON_MODE_CHANGE, $survey->getOnModeChange()) . "</td></tr>";
-        //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $this->displayOnSubmit(SETTING_ON_VERSION_CHANGE, $survey->getOnVersionChange()) . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -6182,7 +6087,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnUpdate() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_UPDATE, $survey->getClickUpdate()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnLanguageChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_LANGUAGE_CHANGE, $survey->getClickLanguageChange()) . $helpend . "</td></tr>";
         $returnStr .= "<tr><td>" . Language::labelTypeEditOnModeChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_MODE_CHANGE, $survey->getClickModeChange()) . $helpend . "</td></tr>";
-        //$returnStr .= "<tr><td>" . Language::labelTypeEditOnVersionChange() . "</td><td>" . $helpstart . $this->displayOnSubmit(SETTING_CLICK_VERSION_CHANGE, $type->getClickVersionChange()) . $helpend . "</td></tr>";
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -6345,8 +6249,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<option " . $selected . " value=" . $end . ">" . $name . "</option>";
         }
         $returnStr .= "</select></td></tr>";
-//<input type="text" class="form-control" name="' . SETTING_SURVEY_TEMPLATE . '" value="' . convertHTLMEntities($survey->getTemplate(), ENT_QUOTES) . '"></td></tr>';
-
         $user = new User($_SESSION['URID']);
         $tinymce = '';
         if ($user->hasHTMLEditor()) {
@@ -6597,7 +6499,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         }
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.test')) . '" class="list-group-item">' . Language::linkTester() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.issues')) . '" class="list-group-item">' . Language::linkReported() . '</a>';
-        //$returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.flood')) . '" class="list-group-item">' . Language::linkFlood() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.export')) . '" class="list-group-item">' . Language::linkExport() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.import')) . '" class="list-group-item">' . Language::linkImport() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.tools.clean')) . '" class="list-group-item">' . Language::linkCleaner() . '</a>';
@@ -6665,7 +6566,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         } else {
             $returnStr .= $this->displayInfo(Language::messageNoSurveysAvailable());
         }
-//END CONTENT
+        //END CONTENT
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
 
@@ -6807,13 +6708,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                 $returnStr .= ' <a onclick="$(\'#vrfiltermode_batch\').val(2);$(\'#batcheditorbar\').submit(); return false;" style="text-decoration:none;"><span class="label ' . $active[2] . '">' . Language::labelGroups() . '</span></a>';
             }
         }
-        /* if ($sectioncookievalue) {
-          if ($filter == 3) {
-          $returnStr .= ' <span class="label label-default">' . Language::labelSections() . '</span>';
-          } else {
-          $returnStr .= ' <a onclick="$(\'#vrfiltermode_batch\').val(3);$(\'#batcheditorbar\').submit(); return false;" style="text-decoration:none;"><span class="label ' . $active[3] . '">' . Language::labelSections() . '</span></a>';
-          }
-          } */
+        
         return $returnStr;
     }
 
@@ -6861,14 +6756,12 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= '<tr>';
             $returnStr .= "<th><nobr/></th>";
             $returnStr .= "<th>" . Language::labelTypeEditGeneralName() . "</th>";
-            //$returnStr .= "<th>" . Language::labelTypeEditGeneralDescription() . "</th>";
             $returnStr .= '</tr>';
 
             $returnStr .= $returnStr1;
 
             $returnStr .= '</table>';
             $returnStr .= $this->displayCookieScripts();
-            // TODO: ADD PAGE RELOAD HERE
 
             $returnStr .= "<script type=text/javascript>
                            function selectAll() {
@@ -7144,8 +7037,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<span class="label label-default">' . Language::labelSettingsPage() . '</span>';
         $returnStr .= '<div class="well">';
         $returnStr .= '<table width=100%>';
-        //$returnStr .= '<tr><td><input type=checkbox value=1 name=' . SETTING_SURVEY_TEMPLATE . '_checkbox /></td><td>' . Language::labelTypeEditLayoutTemplate() . '</td><td>';
-        //$returnStr .= '<input type="text" class="form-control" name="' . SETTING_SURVEY_TEMPLATE . '" value=""></td></tr>';
         $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_PAGE_HEADER . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelSettingsHeader() . '</td><td><textarea style="width: 100%;" rows=6 class="form-control" name="' . SETTING_PAGE_HEADER . '"></textarea></td></tr>';
         $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_PAGE_FOOTER . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelSettingsFooter() . '</td><td><textarea style="width: 100%;" rows=6 class="form-control" name="' . SETTING_PAGE_FOOTER . '"></textarea></td></tr>';
         $returnStr .= "</table>";
@@ -7270,42 +7161,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
-        /* group
-          $returnStr .= '<span class="label label-default">' . Language::labelSettingsTable() . '</span>';
-          $returnStr .= "<div class='well'>";
-
-          $returnStr .= "<table>";
-
-          $returnStr .= "<tr><td><input type=checkbox value=1 name=" . SETTING_HEADER_ALIGNMENT . "_checkbox /></td><td>" . Language::labelTypeEditHeaderAlignment() . "</td>";
-          $returnStr .= "<td>" . $this->displayAlignment(SETTING_HEADER_ALIGNMENT, '') . "</td></tr>
-          <tr><td><input type=checkbox value=1 name=" . SETTING_HEADER_FORMATTING . "_checkbox /></td>
-          <td>" . Language::labelTypeEditHeaderFormatting() . "</td>";
-          $returnStr .= "<td>" . $this->displayFormatting(SETTING_HEADER_FORMATTING, '') . "</td></tr>";
-          $returnStr .= "<tr><td><input type=checkbox value=1 name=" . SETTING_HEADER_FIXED . "_checkbox /></td><td>" . Language::labelTypeEditHeaderFixed() . "</td>";
-          $returnStr .= "<td>" . $this->displayHeaderFixed('') . "</td></tr>
-          <tr><td><input type=checkbox value=1 name=" . SETTING_HEADER_SCROLL_DISPLAY . "_checkbox /></td>
-          <td>" . Language::labelTypeEditHeaderScrollDisplay() . "</td>";
-          $returnStr .= '<td><input type="text" class="form-control" name="' . SETTING_HEADER_SCROLL_DISPLAY . '" value="' . '' . '"></td></tr>';
-
-
-
-          $returnStr .= "<tr><td><input type=checkbox value=1 name=" . SETTING_GROUP_TABLE_BORDERED . "_checkbox /></td><td>" . Language::labelGroupEditBordered() . "</td>";
-          $returnStr .= "<td>" . $this->displayStriped(SETTING_GROUP_TABLE_BORDERED, '') . "</td></tr><tr>";
-          $returnStr .= "<td><input type=checkbox value=1 name=" . SETTING_GROUP_TABLE_CONDENSED . "_checkbox /></td><td>" . Language::labelGroupEditCondensed() . "</td>";
-          $returnStr .= "<td>" . $this->displayStriped(SETTING_GROUP_TABLE_CONDENSED, '') . "</td></tr>";
-          $returnStr .= "<tr><td><input type=checkbox value=1 name=" . SETTING_GROUP_TABLE_HOVERED . "_checkbox /></td><td>" . Language::labelGroupEditHovered() . "</td>";
-          $returnStr .= "<td>" . $this->displayStriped(SETTING_GROUP_TABLE_HOVERED, '') . "</td></tr><tr>";
-          $returnStr .= "<td><input type=checkbox value=1 name=" . SETTING_GROUP_TABLE_STRIPED . "_checkbox /></td><td>" . Language::labelGroupEditStriped() . "</td>";
-          $returnStr .= "<td>" . $this->displayStriped(SETTING_GROUP_TABLE_STRIPED, '') . "</td></tr>";
-
-          $returnStr .= "<tr><td><input type=checkbox value=1 name=" . SETTING_TABLE_WIDTH . "_checkbox /></td><td>" . Language::labelTypeEditTableWidth() . "</td>";
-          $returnStr .= '<td><input type="text" class="form-control" name="' . SETTING_TABLE_WIDTH . '" value="' . '' . '"></td></tr><tr>';
-          $returnStr .= "<td><input type=checkbox value=1 name=" . SETTING_QUESTION_COLUMN_WIDTH . "_checkbox /></td><td>" . Language::labelTypeEditQuestionColumnWidth() . "</td>";
-          $returnStr .= '<td><input type="text" class="form-control" name="' . SETTING_QUESTION_COLUMN_WIDTH . '" value="' . '' . '"></td><td width=25><nobr/></td></tr>';
-
-          $returnStr .= '</table>';
-          $returnStr .= '</div>'; */
-
         $returnStr .= '<span class="label label-default">' . Language::labelTypeEditLayoutSlider() . '</span>';
         $returnStr .= "<div class='well'>";
         $returnStr .= "<table>";
@@ -7425,20 +7280,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '_checkbox /></td><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '"></textarea></td></tr>';
         $returnStr .= '</table>';
         $returnStr .= '</div>';
-
-        /* group */
-        /* $returnStr .= '<span class="label label-default">' . Language::labelGroup() . '</span>';
-          $returnStr .= "<div class='well'>";
-          $returnStr .= '<table width=100%>';
-          $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_EXCLUSIVE . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXCLUSIVE . '"></textarea></td></tr>';
-          $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_INCLUSIVE . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceInclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INCLUSIVE . '"></textarea></td></tr>';
-          $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_MINIMUM_REQUIRED . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMinimumRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_REQUIRED . '"></textarea></td></tr>';
-          $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_MAXIMUM_REQUIRED . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMaximumRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_REQUIRED . '"></textarea></td></tr>';
-          $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_EXACT_REQUIRED . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExactRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXACT_REQUIRED . '"></textarea></td></tr>';
-          $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceUniqueRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED . '"></textarea></td></tr>';
-          $returnStr .= '<tr><td valign=top><input type=checkbox value=1 name=' . SETTING_ERROR_MESSAGE_SAME_REQUIRED . '_checkbox /></td><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceSameRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_SAME_REQUIRED . '"></textarea></td></tr>';
-
-          $returnStr .= '</table></div>'; */
         $returnStr .= '</div>';
         $returnStr .= '</div>';
 
@@ -7576,7 +7417,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
             $returnStr .= '</table>';
             $returnStr .= $this->displayCookieScripts();
-            // TODO: ADD PAGE RELOAD HERE
             $returnStr .= "<script type=text/javascript>
                            function selectAllTypes() {
                             $('.selectedboxtype').prop('checked', true);
@@ -7715,7 +7555,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
             $returnStr .= '</table>';
             $returnStr .= $this->displayCookieScripts();
-            // TODO: ADD PAGE RELOAD HERE
             $returnStr .= "<script type=text/javascript>
                            function selectAllGroup() {
                             $('.selectedgroupbox').prop('checked', true);
@@ -8097,7 +7936,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "<form method='post' id='reload' name='reload'>";
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.batcheditor'));
         $returnStr .= "</form>";
-        // $(\"#reload\").submit();
         $returnStr .= '<form method="post">';
         $returnStr .= '<div class="well">';
         //$returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.batcheditor.copyvariableres', 'gid' => $group->getGid()));
@@ -8223,19 +8061,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "</div></div>";
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
-
-        /* $returnStr .= $this->getCodeMirror();
-          $returnStr .= '<script src="js/codemirror/mode/php/php.js"></script>';
-          $returnStr .= '<script type="text/javascript">
-          $(document).ready(function() {
-          //var editor1 = CodeMirror.fromTextArea(document.getElementById("variablestext"), {lineNumbers: true, mode: "application/x-php"});
-          //var editor2 = CodeMirror.fromTextArea(document.getElementById("typestext"), {lineNumbers: true, mode: "application/x-php"});
-          var editor3 = CodeMirror.fromTextArea(document.getElementById("routingtext"), {lineNumbers: true, mode: "application/x-httpd-php"});
-          });
-          </script>';
-
-          //var editor = CodeMirror.fromTextArea(document.getElementById("variables"), lineNumbers: true, matchBrackets: true, mode: "application/x-httpd-php", indentUnit: 4, indentWithTabs: true});
-         */
         $returnStr .= $this->showFooter(false);
         return $returnStr;
     }
@@ -8379,7 +8204,6 @@ $( ".uscic-form-control-admin" ).contextMenu({
         } else {
             $returnStr .= '<span class="label label-default">' . Language::labelToolsImportFile() . '</span>';
             $returnStr .= '<div class="well well-sm">';
-            //$returnStr .= "<textarea placeholder='Paste contents of export file here' class='form-control' style='min-width: 300px; width: 100%; min-height: 300px;' name='" . SETTING_IMPORT_TEXT . "'></textarea>";
             $returnStr .= '<div style="position:relative;"><a class="btn btn-primary" href="javascript:;">' . Language::buttonBrowse() . '
             <input type="file" style="position:absolute;z-index:2;top:0;left:0;filter: alpha(opacity=0);-ms-filter:\'progid:DXImageTransform.Microsoft.Alpha(Opacity=0)\';opacity:0;background-color:transparent;color:transparent;" name="' . SETTING_IMPORT_TEXT . '" size="40"  onchange=\'$("#upload-file-info").html($(this).val());\'>
         </a>

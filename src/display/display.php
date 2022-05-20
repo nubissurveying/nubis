@@ -5293,9 +5293,6 @@ function inputmaskCallbackError() {
         if (is_array(dbConfig::defaultCommunicationServer())) {
             $returnStr = '';
             $active = array('', '', '', '', '', '', '', '');
-            //if ($_SESSION['COMMSERVER'] == ''){ //init in index.php
-            //    $_SESSION['COMMSERVER'] = 0;
-            //}
             if (loadvar('commserver') != '') {
                 $_SESSION['COMMSERVER'] = loadvar('commserver');
             }

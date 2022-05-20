@@ -567,8 +567,7 @@ class XiCompiler {
                 } else if (strtoupper($name) == VARIABLE_VALUE_INARRAY) {
 
                     /* do nothing */
-
-                    //} else if ($var->setVariableDescriptive(getBasicName($name))) {
+                    
                 } else if ($var->getVsid() != "") {
 
                     $answertype = $var->getAnswerType();
@@ -576,12 +575,7 @@ class XiCompiler {
                         $this->lastvar = $var;
                     }
 
-                    // an array, but not an array statement
-                    //if ($var->isArray() == true) {
-                    //    $this->addErrorMessage(Language::errorArray(getBasicName($name)));
-                    //}
                     $args = array();
-                    //$args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String($name));
                     $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable($name), new PHPParser_Node_Name(array(FUNCTION_XI_GET_ANSWER)), $args);
                     $node->$nm = $stmt;
                 } else if ($this->fillclass == true && startsWith($name, VARIABLE_VALUE_FILL)) {
@@ -679,10 +673,7 @@ class XiCompiler {
                 } else {
 
                     // not a real function call, but a bracket statement
-                    //$var = new VariableDescriptive();
-
                     $var = $this->survey->getVariableDescriptiveByName(getBasicName($name)); // new VariableDescriptive();
-                    //if ($var->setVariableDescriptive(getBasicName($name))) {
 
                     if ($var->getVsid() != "") {
 
@@ -699,9 +690,6 @@ class XiCompiler {
                             $this->lastvar = $var;
                         }
                         $args = array();
-                        //$args[] = $this->handleBracketExpression($subnode, $name);
-                        //$stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable($name), new PHPParser_Node_Name(array(FUNCTION_XI_GET_ANSWER)), $args);
-                        //$stmt = new PHPParser_Node_Expr_Variable($name);
                         $stmt = new PHPParser_Node_Expr_MethodCall($this->handleBracketExpression($subnode, $name), new PHPParser_Node_Name(array(FUNCTION_XI_GET_ANSWER)), $args);
                         $node->$nm = $stmt; // $this->handleBracketExpression($subnode, $name)
                     } else {
@@ -1546,10 +1534,7 @@ class XiCompiler {
                         
                     } else {
 
-                        //$pos = strripos($text, ROUTING_IDENTIFY_DO);
                         $rule .= " " . $text;
-
-                        //if ($pos > -1) {
                         if (endsWith(strtoupper($rule), ROUTING_IDENTIFY_DO) == true) {
                             $this->cnt = $cnt;
                             $rgidafter = $this->instructions[$cnt]->getRgid();

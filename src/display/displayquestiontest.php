@@ -49,10 +49,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
             }
         }    
 
-//        $returnStr .= $this->engine->getDisplayed();
         $this->padding = true;
-//      $returnStr .= 'SMS balk hier!'; 
-//      $returnStr .= parent::showLanguage();               
         return $returnStr;
     }
 
@@ -63,8 +60,6 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
     public function showNavBar() {
 
         $returnStr = $this->getHeader();
-//language
-
         $rgid = $this->engine->getRgid();
         $variablenames = $this->getRealVariables(explode("~", $this->engine->getDisplayed()));        
         $variablenamesfull = $this->engine->getDisplayed();
@@ -112,7 +107,6 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
         }
         
         if (getSurveyModeAllowChange() == MODE_CHANGE_RESPONDENT_ALLOWED) {
-            //$allowed = explode("~", $survey->getAllowedModes());
             if (sizeof($allowedmodes) > 1) {
 
                 $template = $this->engine->getTemplate();
@@ -127,7 +121,6 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
                         if ($key == $current) {
                             $check = ' <span class="glyphicon glyphicon-ok"></span>';
                         }
-                        //$returnStr .= '<li><a href=# onclick=\'document.getElementById("r").value="' . setSessionsParamString(array_merge(array(SESSION_PARAM_LASTACTION => $this->engine->getLastSurveyAction(), SESSION_PARAM_SURVEY => $survey->getSuid(), SESSION_PARAM_PRIMKEY => $this->primkey, SESSION_PARAM_RGID => $rgid, SESSION_PARAM_VARIABLES => $variablenames, SESSION_PARAM_GROUP => $template, SESSION_PARAM_MODE => $current, SESSION_PARAM_VERSION => getSurveyVersion(), SESSION_PARAM_LANGUAGE => getSurveyLanguage(), SESSION_PARAM_TIMESTAMP => time(), SESSION_PARAM_SEID => $this->engine->getSeid(), SESSION_PARAM_MAINSEID => $this->engine->getMainSeid()), array(SESSION_PARAM_NEWMODE => $key))) . '"; document.getElementById("navigation").value="' . NAVIGATION_MODE_CHANGE . '"; $("#form").submit(); \'>' . $mode . $check . '</a></li>';
                         $returnStr .= '<li><a href=# onclick=\'document.getElementById("r").value="' . setSessionsParamString(array_merge(array(SESSION_PARAM_SURVEY => $survey->getSuid(), SESSION_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), SESSION_PARAM_RGID => $rgid, SESSION_PARAM_VARIABLES => $variablenames, SESSION_PARAM_GROUP => $template, SESSION_PARAM_MODE => getSurveyMode(), SESSION_PARAM_LANGUAGE => getSurveyLanguage(), SESSION_PARAM_TEMPLATE => getSurveyTemplate(), SESSION_PARAM_TIMESTAMP => time(), SESSION_PARAM_SEID => $this->engine->getSeid(), SESSION_PARAM_MAINSEID => $this->engine->getMainSeid()), array(SESSION_PARAM_NEWMODE => $key))) . '"; document.getElementById("navigation").value="' . addslashes(Language::buttonUpdate()) . '"; ' . $clickmode . ' document.getElementById("form").submit(); \'>' . $mode . $check . '</a></li>';
                     }
                 }
@@ -136,8 +129,6 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
         }
 
         if (getSurveyLanguageAllowChange() == LANGUAGE_CHANGE_RESPONDENT_ALLOWED) {
-
-            //$allowed = explode("~", $survey->getAllowedLanguages(getSurveyMode()));
             if (sizeof($allowedlanguages) > 1) {
                 $returnStr .= '<li class="dropdown">';
                 $returnStr .= '   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Language <b class="caret"></b></a><ul class="dropdown-menu">';                
@@ -153,7 +144,6 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
                 }
                 $returnStr .= '</ul></li>';
             }
-            //end language
         }
 
         $user = new User($_SESSION['URID']);
@@ -200,14 +190,12 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.test', 'suid' => $this->engine->getSuid()));
-        //$returnStr .= '<input type=hidden name="' . POST_PARAM_LANGUAGE . '" value="' . getSurveyLanguage() . '">';
         $returnStr .= '<input type=hidden name="' . POST_PARAM_SE . '" value="' . USCIC_SMS . '">';
         $returnStr .= '</form>';
         $returnStr .= '<script>';
         $returnStr .= '$(document).ready(function(){ $("form:first").submit(); }); ';
         $returnStr .= '</script></body><html>';
         return $returnStr;
-//        return '<a href="' . setSessionParams(array('page' => 'interviewer.surveycompleted', 'primkey' => $this->engine->primkey, 'suid' => $this->engine->getSuid())) . '&se=' . addslashes(USCIC_SMS) . '"><span class="glyphicon glyphicon-wrench"></span> ' . Language::linkBackToSMS() . '</a>';
     }
 
     function showCompletedSurvey() {
@@ -216,7 +204,6 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
         $returnStr .= '<form method="post" action="index.php">';
 
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.tools.test', 'suid' => $this->engine->getSuid()));
-        //$returnStr .= '<input type=hidden name="' . POST_PARAM_LANGUAGE . '" value="' . getSurveyLanguage() . '">';
         $returnStr .= '<input type=hidden name="' . POST_PARAM_SE . '" value="' . USCIC_SMS . '">';
         $returnStr .= '</form>';
         $returnStr .= '<script>';

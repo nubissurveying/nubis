@@ -533,7 +533,7 @@ class Install {
             $message = '<div class="alert alert-danger">' . Language::installWarning() . '</div>';
             return $this->getContent("setup", $message);
         } else {
-// TODO: FINISH ADDING POST SETTINGS TO THE CONFIG, ADD SAMPLE SETTINGS AND ANYTHING ELSE MISSING FROM THE SETUP WIZARD
+
             /* test db */
             
             $db = new Database();
