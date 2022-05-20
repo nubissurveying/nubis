@@ -97,13 +97,6 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 </tr>
 
 <tr>
-<td>BrowserDetect</td>
-<td><a target="_blank" href="https://github.com/sinergi/php-browser-detector">https://github.com/sinergi/php-browser-detector</a></td>
-<td>MIT License</td>
-<td>Not provided</td>
-</tr>
-
-<tr>
 <td>Calculator.js</td>
 <td><a target="_blank" href="http://codepen.io/GianNipitella/pen/vNjqyE">http://codepen.io/GianNipitella/pen/vNjqyE</a></td>
 <td>Not provided</td>
@@ -275,7 +268,7 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 <td>MobileDetect</td>
 <td><a target="_blank" href="https://github.com/serbanghita/Mobile-Detect">https://github.com/serbanghita/Mobile-Detect</a></td>
 <td>MIT License (custom)</td>
-<td>2.8.17</td>
+<td>2.8.37</td>
 </tr>
 
 <tr>

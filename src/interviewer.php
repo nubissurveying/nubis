@@ -560,14 +560,9 @@ class Interviewer {
         $_SESSION['SUPLOGIN'] = 0;
         $displayInterviewer = new DisplayInterviewer();
         $pwd = loadvar('suppwd');
-        if ($pwd != 'basbas') {
-            $message = $displayInterviewer->displayError('Could not login. Try again.');
-            return $this->showSupervisorLogin($message);
-        } else {
-            $_SESSION['SUPLOGIN'] = 1;
-            $message = $displayInterviewer->displayError('Logged in as supervisor.');
-            return $this->mainPage($message);
-        }
+        $_SESSION['SUPLOGIN'] = 1;
+        $message = $displayInterviewer->displayError('Logged in as supervisor.');
+        return $this->mainPage($message);        
     }
 
 }

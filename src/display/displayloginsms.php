@@ -55,6 +55,33 @@ class DisplayLoginSMS extends Display {
         </div>
         ';
     }
+    
+    public function showSysadminKey() {
+        $extra2 = '<link href="js/formpickers/css/bootstrap-formhelpers.min.css" rel="stylesheet">
+                  <link href="css/uscicadmin.css" rel="stylesheet">
+                  <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">';
+        $returnStr = $this->showHeader(Language::messageSMSTitle(), $extra2);
+        $returnStr .= '<div id = "wrap">';
+        $returnStr .= '<div class = "container"><p>';
+        $returnStr .= '<center><table style = "width:300px"><tr><td><form method="post" autocomplete="off">';
+        $returnStr .= '<h2>' . Language::messageSMSTitle() . '</h2>';
+        //if ($message != '') {
+            $returnStr .= '<span class = "label label-warning">' . Language::headerSysadminLocked() . '</span><br/><br/>';
+        //}
+        $returnStr .= Language::messageSysadminLocked();
+        $returnStr .= '<br/><br/>';
+        if ($message != "") {
+            $returnStr .= "<input type=hidden name=" . POST_PARAM_SE . " value=" . USCIC_SMS . " />";
+        }
+        $returnStr .= '<input type = "text" class = "form-control" name = "sk" placeholder = "' . Language::labelSysadminKey() . '" autofocus>';
+        $returnStr .= '<button class = "btn btn-lg btn-default btn-block" type = "submit">' . Language::buttonSubmit() . '</button>';
+        $returnStr .= '</form></td></tr></table></center>';
+        $returnStr .= '</p></div> <!--/container-->';
+        $returnStr .= '</div>';
+        $returnStr .= $this->showBottomBar();
+        $returnStr .= $this->showFooter();
+        return $returnStr;
+    }
 
 }
 

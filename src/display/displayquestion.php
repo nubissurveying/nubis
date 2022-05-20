@@ -929,7 +929,7 @@ class DisplayQuestionBasic extends Display {
 
         $returnStr .= $this->displayEndBody();
 
-        if ($this->lastparse == true) {
+        if ($this->lastparse == true && function_exists("lastParse")) {
             $result = lastParse($result);
         }
 
@@ -1525,9 +1525,9 @@ class DisplayQuestionBasic extends Display {
 
         if ($order == ORDER_LABEL_FIRST) {
             $nolabels = "data-tablesaw-postappend"; // always postappend
-            if ($var->isTableMobileLabels() == false) {                
+            if ($var->isTableMobileLabels() == false) {
                 $nolabels = "data-tablesaw-no-labels";
-            }            
+            }
             $returnStr .= '<table role="presentation" data-tablesaw-firstcolumn ' . $nolabels . ' data-tablesaw-mode="stack" id="table_' . $var->getName() . '" class="tablesaw tablesaw-stack table ' . $bordered . ' uscic-table-enumerated-horizontal">';
         } else {
             $nolabels = "data-tablesaw-postappend";
@@ -4170,24 +4170,36 @@ $(window).resize(function() {
                   $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_INTEGER, "true"), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_INTEGER));
                   } */
                 $tocall = $this->engine->getFill($variable, $var, SETTING_ANSWERTYPE_CUSTOM);
-                $parameters = array();
-                if (stripos($tocall, '(') !== false) {
-                    $parameters = rtrim(substr($tocall, stripos($tocall, '(') + 1), ')');
+                $parametersout = array();
+                $removed = array();
+                $test = excludeText($tocall, $removed);
+                if (stripos($test, '(') !== false) {
+                    $parameters = rtrim(substr($tocall, stripos($test, '(') + 1), ')');
                     $parameters = preg_split("/[\s,]+/", $parameters);
+                    foreach ($parameters as $p) {
+                        $removed = array();
+                        $pt = excludeText($p, $removed);
+                        if (stripos($pt, '(') === false) { // no function calls as parameters
+                            $parametersout[] = (string) $p;
+                        }
+                    }
+
                     $tocall = substr($tocall, 0, stripos($tocall, '('));
                 }
 
                 // add error string as parameter if we need it
-                $parameters[] = $this->getErrorTextString($varname);
+                $parametersout[] = $this->getErrorTextString($varname);
 
                 if (function_exists($tocall)) {
-                    try {
-                        $f = new ReflectionFunction($tocall);
-                        $returnStr .= $fieldsetstart;
-                        $returnStr .= $f->invoke($variable, $parameters);
-                        $returnStr .= $fieldsetend;
-                    } catch (Exception $e) {
-                        
+                    if (inArray($tocall, getAllowedCustomAnswerFunctions()) && !inArray($tocall, getForbiddenCustomAnswerFunctions())) {
+                        try {
+                            $f = new ReflectionFunction($tocall);
+                            $returnStr .= $fieldsetstart;
+                            $returnStr .= $f->invoke($variable, $parametersout);
+                            $returnStr .= $fieldsetend;
+                        } catch (Exception $e) {
+                            
+                        }
                     }
                 }
         }
@@ -4281,7 +4293,7 @@ $(window).resize(function() {
                 $variablecheck = trim($variable); // old: str_replace(" ", "", $variable); (variable names can't have spaces, so trim better to deal with list containing spaces between variables
                 // variable that is also shown on screen
                 if (isset($displaynumbers[strtoupper($variablecheck)])) {
-                    
+
                     $variable = $variablecheck;
                     $var = $this->engine->getVariableDescriptive($variable);
                     if (!inArray($var->getAnswerType(), array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
@@ -4329,7 +4341,7 @@ $(window).resize(function() {
             }
             $sm = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_SMALLER));
             if ($sm != "") {
-                
+
                 $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_SETOFENUM_COMPARISON_SMALLER, $this->getAnswerList($sm)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_SMALLER));
             }
         } else if (inArray($at, array(ANSWER_TYPE_CUSTOM, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_INTEGER, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_SLIDER, ANSWER_TYPE_KNOB))) {
@@ -4355,7 +4367,7 @@ $(window).resize(function() {
             }
             $sm = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_SMALLER));
             if ($sm != "") {
-                
+
                 $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_COMPARISON_SMALLER, $this->getAnswerList($sm)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_SMALLER));
             }
         }
@@ -4405,8 +4417,8 @@ $(window).resize(function() {
                     $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_COMPARISON_GREATER_EQUAL_TO_DATETIME, $this->getAnswerList($geq)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_GREATER_EQUAL_TO));
                 }
             }
-            
-            $gr = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_GREATER));            
+
+            $gr = trim($this->engine->getFill($variable, $var, SETTING_COMPARISON_GREATER));
             if ($gr != "") {
                 if ($answertype == ANSWER_TYPE_TIME) {
                     $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_COMPARISON_GREATER_TIME, $this->getAnswerList($gr)), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_COMPARISON_GREATER));
@@ -4497,7 +4509,7 @@ $(window).resize(function() {
         $value = "";
         if ($value != "") {
             $current = $value;
-        } else {            
+        } else {
             global $survey;
             $current = floor($this->progressbarwidth * $this->engine->getProgress($survey->getProgressBarType()));
         }
@@ -4687,15 +4699,15 @@ $(window).resize(function() {
 
         if ($inline == false) {
             if ($multiple == "") {
-                $returnStr .= $inputgroupstart . $pretext . '<select ' . $role . $linkedto . ' data-size="' . (sizeof($options) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick ' . $dkrfnaclass . '">';
+                $returnStr .= $inputgroupstart . $pretext . '<select ' . $role . $linkedto . ' data-size="' . (sizeof($orderedoptions) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick ' . $dkrfnaclass . '">';
             } else {
-                $returnStr .= $inputgroupstart . $pretext . '<select ' . $role . $linkedto . ' data-size="' . sizeof($options) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' name="' . $name . '"' . ' id="' . $id . '"' . ' ' . $multiple . ' class="selectpicker show-tick ' . $dkrfnaclass . '">';
+                $returnStr .= $inputgroupstart . $pretext . '<select ' . $role . $linkedto . ' data-size="' . sizeof($orderedoptions) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' name="' . $name . '"' . ' id="' . $id . '"' . ' ' . $multiple . ' class="selectpicker show-tick ' . $dkrfnaclass . '">';
             }
         } else {
             if ($multiple == "") {
-                $returnStr .= '<select ' . $role . $linkedto . ' data-size="' . (sizeof($options) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-singledropdown-inline ' . $dkrfnaclass . '">';
+                $returnStr .= '<select ' . $role . $linkedto . ' data-size="' . (sizeof($orderedoptions) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-singledropdown-inline ' . $dkrfnaclass . '">';
             } else {
-                $returnStr .= '<select ' . $role . $linkedto . ' data-size="' . (sizeof($options) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-multipledropdown-inline ' . $dkrfnaclass . '">';
+                $returnStr .= '<select ' . $role . $linkedto . ' data-size="' . (sizeof($orderedoptions) + 1) . '" ' . $inlinestyle . ' ' . $inlinejavascript . ' ' . $multipleheader . $this->getErrorTextString($name) . ' id="' . $id . '"' . ' name="' . $name . '"' . ' ' . $multiple . ' class="selectpicker show-tick uscic-multipledropdown-inline ' . $dkrfnaclass . '">';
             }
         }
         $returnStr .= $empty;
@@ -4714,7 +4726,7 @@ $(window).resize(function() {
         }
 
         $cnt = 0;
-        foreach ($options as $option) {
+        foreach ($orderedoptions as $option) {
             if (trim($option["label"]) != "") {
                 $cnt++;
 
@@ -4772,11 +4784,11 @@ $(window).resize(function() {
                     });
                     
                     $(window).load(function() {
-                        $("#' .$id . '").trigger("updatecomplete");
+                        $("#' . $id . '").trigger("updatecomplete");
                     });
                 </script>';
         $returnStr .= minifyScript($str);
-        
+
         if ($multiple != "" && $var->isInputMaskEnabled()) {
             $returnStr .= $this->displayMultiDropdownUnchecking($id, $previousdata, $var->getInvalidSubSelected());
         }

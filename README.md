@@ -12,7 +12,7 @@ NubiS is a complete data collection tool that has been developed by the team beh
 
 NubiS runs on any server, pc, laptop or netbook as well as on android tablets or smartphones. The NubiS system includes all the traditional modes of data collection like self-administered, face-to-face, and telephone interviewing. NubiS can also collect continuous information from smartphones, tablets or other external devices like accelerometers, GPS devices, blood pressure meters and other biomedical devices. This information can be combined with survey data and for example used to prompt or ask questions to respondents.
 
-NubiS has been extensively used in a wide variety of data collection projects both within and outside of the US. It is the software of choice for the Understanding America Study and has been employed in several large scale longitudinal surveys as well as a variety of other projects (a sample listing can be found <a target="_blank" href="https://cesr.usc.edu/nubis/content/previous-work">here</a>). To see NubiS in action please just click <a target="_blank" href="http://cesrusc.org/demo/survey.html">here</a> to open the demo.
+NubiS has been extensively used in a wide variety of data collection projects both within and outside of the US. It is the software of choice for the Understanding America Study and has been employed in several large scale longitudinal surveys as well as a variety of other projects (a sample listing can be found <a target="_blank" href="https://cesr.usc.edu/nubis/content/previous-work">here</a>). To see NubiS in action please just click <a target="_blank" href="http://96.127.53.23/demo/survey.html">here</a> to open the demo.
 
 Lastly, please note that NubiS comes bundled with third party software. None of them impose any restrictions on usage EXCEPT FOR Highcharts, which is free to use for academic/non-profit usage only. The following third party software is bundled:
 <br/><br/>
@@ -90,22 +90,8 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 </tr>
 
 <tr>
-<td>Bootstrap-touchspin</td>
-<td><a target="_blank" href="https://github.com/istvan-ujjmeszaros/bootstrap-touchspin">https://github.com/istvan-ujjmeszaros/bootstrap-touchspin</a></td>
-<td>Apache License, Version 2.0</td>
-<td>3.0.0</td>
-</tr>
-
-<tr>
 <td>Bootstrap-wysiwyg</td>
 <td><a target="_blank" href="http://github.com/mindmup/bootstrap-wysiwyg">http://github.com/mindmup/bootstrap-wysiwyg</a></td>
-<td>MIT License</td>
-<td>Not provided</td>
-</tr>
-
-<tr>
-<td>BrowserDetect</td>
-<td><a target="_blank" href="https://github.com/sinergi/php-browser-detector">https://github.com/sinergi/php-browser-detector</a></td>
 <td>MIT License</td>
 <td>Not provided</td>
 </tr>
@@ -282,7 +268,7 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 <td>MobileDetect</td>
 <td><a target="_blank" href="https://github.com/serbanghita/Mobile-Detect">https://github.com/serbanghita/Mobile-Detect</a></td>
 <td>MIT License (custom)</td>
-<td>2.8.17</td>
+<td>2.8.37</td>
 </tr>
 
 <tr>
@@ -311,13 +297,6 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 <td><a target="_blank" href="https://github.com/nikic/PHP-Parser">https://github.com/nikic/PHP-Parser</a></td>
 <td>Custom (no restrictions on usage)</td>
 <td>Not provided</td>
-</tr>
-
-<tr>
-<td>roundSlider</td>
-<td><a target="_blank" href="https://roundsliderui.com/">https://roundsliderui.com/</a></td>
-<td>MIT license</td>
-<td>1.3.3</td>
 </tr>
 
 <tr>

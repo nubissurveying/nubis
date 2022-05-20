@@ -284,7 +284,7 @@ class Data {
         $db->executeQuery($create);
 
         // old non-group by compliant: $query = "REPLACE INTO " . Config::dbSurveyData() . "_consolidated_times SELECT suid, primkey, begintime, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . Config::dbSurveyData() . "_times where suid=" . $suid . " group by primkey, begintime order by primkey asc";
-        $query = "REPLACE INTO " . Config::dbSurveyData() . "_consolidated_times SELECT min(suid) as suid, primkey, begintime, min(stateid) as stateid, min(variable) as variable, avg(timespent) as timespent, min(language) as language, min(mode) as mode, min(version) as version, min(ts) as ts FROM " . Config::dbSurveyData() . "_times where suid=" . $suid . " group by primkey, begintime order by primkey asc";
+        $query = "REPLACE INTO " . Config::dbSurveyData() . "_consolidated_times SELECT min(suid) as suid, primkey, begintime, min(stateid) as stateid, min(variable) as variable, avg(timespent) as timespent, min(language) as language, min(mode) as mode, min(version) as version, min(ts) as ts FROM " . Config::dbSurveyData() . "_times where suid=" . $suid . " group by primkey, (CONVERT_TZ(begintime,'UTC','America/Vancouver')), rgid";
         $db->executeQuery($query);
     }
 

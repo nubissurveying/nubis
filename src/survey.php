@@ -378,7 +378,7 @@ class Survey extends Component {
         if ($language != "") {
             $query .= " and language=" . prepareDatabaseString($language);
         }
-        //echo$query;
+        
         if ($result = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($result) > 0) {
                 $row = $db->getRow($result);
@@ -809,7 +809,7 @@ class Survey extends Component {
         $this->setSettingDirectly(USCIC_SURVEY, OBJECT_SURVEY, SETTING_REENTRY_LANGUAGE, $value, getSurveyMode(), 1); // language here is a dummy, never used        
     }
 
-    function getBackLanguage($mode) {
+    function getBackLanguage($mode = "") {
         $back = $this->getSettingDirectly(USCIC_SURVEY, OBJECT_SURVEY, SETTING_BACK_LANGUAGE, $mode)->getValue();
 
         // if empty, then try with default mode
@@ -826,7 +826,7 @@ class Survey extends Component {
         $this->setSettingDirectly(USCIC_SURVEY, OBJECT_SURVEY, SETTING_BACK_LANGUAGE, $value, getSurveyMode(), 1); // language here is a dummy, never used        
     }
 
-    function getChangeLanguage($mode) {
+    function getChangeLanguage($mode = "") {
         $languagechange = $this->getSettingDirectly(USCIC_SURVEY, OBJECT_SURVEY, SETTING_CHANGE_LANGUAGE, $mode)->getValue();
 
         // if empty, then try with default mode

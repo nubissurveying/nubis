@@ -34,7 +34,11 @@ class Database {
                     if (Config::dbPort() != "") {
                         $port = Config::dbPort();
                     }
-                    $this->db = @mysqli_connect(null, Config::dbUser(), Config::dbPassword(), null, $port);  //default mysql
+                    $server = Config::dbServer();
+                    if (strtolower($server) == "localhost") {
+                        $server = null;
+                    }
+                    $this->db = @mysqli_connect($server, Config::dbUser(), Config::dbPassword(), null, $port);  //default mysql
                     if ($this->db != null) {
                         if (mysqli_select_db($this->db, Config::dbName())) {
                             @mysqli_query($this->db, 'SET CHARACTER SET utf8;');

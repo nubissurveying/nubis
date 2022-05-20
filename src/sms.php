@@ -50,6 +50,22 @@ class SMS {
     }
 
     function getSysAdminMain() {
+
+        // check for pushed in sysadmin key
+        if (Config::smsSysadminKey() != "") {
+            
+            if (loadvar("sk") == Config::smsSysadminKey()) {
+                $_SESSION['SYSTEM_KEY'] = Config::smsSysadminKey();
+            }
+
+            if (isset($_SESSION['SYSTEM_KEY']) && $_SESSION['SYSTEM_KEY'] == Config::smsSysadminKey()) {
+                // we have the correct key
+            } else {
+                $displayLogin = new DisplayLoginSMS();
+                return $displayLogin->showSysadminKey();
+            }
+        }
+        
         $sysAdmin = new SysAdmin();
         return $sysAdmin->getPage();
     }

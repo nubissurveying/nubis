@@ -389,7 +389,6 @@ class Compiler {
 
                     //$setfillclasses[$rgid] = $this->printer->prettyPrint($stmts);
                     $setfillclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] = $this->printer->prettyPrint($stmts);
-
                 } else {
 
                     // no fill code, then remove
@@ -1065,7 +1064,7 @@ class Compiler {
 
         /* go through fills */
         foreach ($fills3 as $fill) {
-            
+
             /* not processed before */
             if ($fill != "") {
                 $classes['"' . strtoupper($fill) . '"'] = $this->addInlineField($fill);
@@ -1557,7 +1556,6 @@ class Compiler {
 
                     //$setfillclasses[$rgid] = $this->printer->prettyPrint($stmts);
                     $checkclasses[strtoupper($this->currentfillvariable) . getSurveyLanguage() . getSurveyMode()] = $this->printer->prettyPrint($stmts);
-
                 } else {
 
                     // no check code, then remove
@@ -2233,21 +2231,33 @@ class Compiler {
 
         // split off moveForward. part
 
-        $split = explode(".", $rule);
-
-        $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and rgid > " . $rgid . " and rule='" . $split[1] . "' order by rgid desc";
-
-        $targetrgid = "";
-
+        // split off moveBackward. part
         global $db;
+        $split = explode(".", $rule);
+        if (sizeof($split) == 2 && is_numeric($split[1])) {
+            $targetrgid = $split[1];
+        }
+        else {
+            
+            if (sizeof($split) == 2) {
+                $target = $split[1];
+            }
+            else {
+                unset($split[0]); // remove first
+                $target = implode(".", $split);
+            }
 
-        if ($result = $db->selectQuery($query)) {
+            $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $this->seid . " and rgid < " . $rgid . " and rule='" . $target . "' order by rgid desc";
+            $targetrgid = null;
 
-            if ($db->getNumberOfRows($result) > 0) {
+            if ($result = $db->selectQuery($query)) {
 
-                $row = $db->getRow($result);
+                if ($db->getNumberOfRows($result) > 0) {
 
-                $targetrgid = $row["rgid"];
+                    $row = $db->getRow($result);
+
+                    $targetrgid = $row["rgid"];
+                }
             }
         }
 
@@ -2331,21 +2341,33 @@ class Compiler {
 
         // split off moveBackward. part
 
-        $split = explode(".", $rule);
-
-        $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and rgid < " . $rgid . " and rule='" . $split[1] . "' order by rgid desc";
-
-        $targetrgid = null;
-
+        // split off moveBackward. part
         global $db;
+        $split = explode(".", $rule);
+        if (is_numeric($split[1])) {
+            $targetrgid = $split[1];
+        }
+        else {
+            
+            if (sizeof($split) == 2 && sizeof($split) == 2) {
+                $target = $split[1];
+            }
+            else {
+                unset($split[0]); // remove first
+                $target = implode(".", $split);
+            }
+            
+            $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $this->seid . " and rgid < " . $rgid . " and rule='" . $target . "' order by rgid desc";
+            $targetrgid = null;
 
-        if ($result = $db->selectQuery($query)) {
+            if ($result = $db->selectQuery($query)) {
 
-            if ($db->getNumberOfRows($result) > 0) {
+                if ($db->getNumberOfRows($result) > 0) {
 
-                $row = $db->getRow($result);
+                    $row = $db->getRow($result);
 
-                $targetrgid = $row["rgid"];
+                    $targetrgid = $row["rgid"];
+                }
             }
         }
 
@@ -3087,7 +3109,6 @@ class Compiler {
             $parsestmts = $parser->parse("<?php " . $rule . " ?>");
 
             $ifstmt = $parsestmts[0]; // only one statement (no ; allowed in assignment right hand side)
-
             // complex expression, then wrap in fake argument object
 
             if ($ifstmt instanceof PHPParser_Node_Expr) { //$ifstmt instanceof PHPParser_Node_Expr_FuncCall || 
@@ -3418,6 +3439,7 @@ class Compiler {
 
             // only one statement (no ; allowed in assignment right hand side)
             $stmt = new PHPParser_Node_Arg($stmts[0]);
+
             $this->updateVariables($stmt);
             $args[] = $stmt;
 
@@ -4089,7 +4111,6 @@ class Compiler {
 
         $db->executeQuery($query);
     }
-
 
     function addNext($from, $to) {
 
@@ -4824,7 +4845,6 @@ class Compiler {
                 if (startsWith($rule, "/*")) {
 
                     $this->skipComments($cnt, $cnt);
-
                 } else if (startsWith($rule, "//")) {
                     
                 } else if ($rule == "") {
@@ -4890,7 +4910,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -4925,7 +4944,6 @@ class Compiler {
             if (startsWith($rule, "*/")) {
 
                 $this->skipReverseComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -4958,7 +4976,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -4994,7 +5011,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5029,7 +5045,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5065,7 +5080,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-                
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5100,7 +5114,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5135,7 +5148,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5170,7 +5182,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5262,7 +5273,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5336,7 +5346,6 @@ class Compiler {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {
@@ -5494,7 +5503,12 @@ class Compiler {
             $subnode = $node->$nm;
 
             // name node: this could be a variable
-            if ($subnode instanceof PHPParser_Node_Name) {
+            if ($subnode instanceof PHPParser_Node_Expr_Eval) {
+                $this->addErrorMessage("Function call not allowed: eval");
+                $name = "INVALID";
+                $stmt = new PHPParser_Node_Scalar_String($name);
+                $node->$nm = $stmt;
+            } else if ($subnode instanceof PHPParser_Node_Name) {
 
                 $name = $subnode->getFirst();
 
@@ -5506,7 +5520,7 @@ class Compiler {
                 // restore any dot notations!
                 $name = str_replace(TEXT_MODULE_DOT, ".", $name);
                 $var = $this->survey->getVariableDescriptiveByName(getBasicName($name)); // new VariableDescriptive();  
-                
+
                 if (strtoupper($name) == VARIABLE_VALUE_NULL) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_NULL);
                     $node->$nm = $stmt;
@@ -5531,7 +5545,7 @@ class Compiler {
 
                     //} else if ($var->setVariableDescriptive(getBasicName($name))) {
                 } else if ($var->getVsid() != "") {
-                    
+
                     // check anything in name before any .
                     $nms = explode(".", $name);
                     for ($i = 0; $i < sizeof($nms) - 1; $i++) {
@@ -5539,18 +5553,17 @@ class Compiler {
                         $var = $this->survey->getVariableDescriptiveByName(getBasicName($nms[$i]));
                         if ($var->isArray() == false && contains("[", $nms[$i])) {
                             $this->addErrorMessage(Language::errorNotArray(strtolower(getBasicName($nms[$i]))));
-                        }
-                        else if ($var->isArray() == true && !contains("[", $nms[$i])) {
+                        } else if ($var->isArray() == true && !contains("[", $nms[$i])) {
                             $this->addErrorMessage(Language::errorVariableNoArrayIndex(strtolower(getBasicName($nms[$i]))));
                         }
                     }
-                    
+
                     $answertype = $var->getAnswerType();
 
                     if (inArray($answertype, array(ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_RANK))) {
                         $this->lastvar = $var;
                     }
-                    
+
                     // an array, but not an array statement
                     //if ($var->isArray() == true) {
                     //    $this->addErrorMessage(Language::errorArray(getBasicName($name)));
@@ -5673,10 +5686,10 @@ class Compiler {
             }
             // bit and call: things like secA[cnt].Q1
             else if ($subnode instanceof PHPParser_Node_Expr_BitwiseAnd) {
-                
+
                 $left = $subnode->left;
                 $right = $subnode->right;
-                
+
                 // this applies to assignments like sec1[cnt].Q1
                 if ($right instanceof PHPParser_Node_Expr_ConstFetch) {
                     $this->extranode = new PHPParser_Node_Scalar_String($right->name->parts[0]);
@@ -5687,15 +5700,15 @@ class Compiler {
                 }
                 // this applies to assignments like sec1[cnt].Q1[cnt]
                 else if ($right instanceof PHPParser_Node_Expr_FuncCall) {
-                                        
+
                     $n = getBasicName($right->name->parts[0]);
                     $tv = $this->survey->getVariableDescriptiveByName($n); // new VariableDescriptive();  
                     if ($tv->isArray() == false) {
-                        $this->addErrorMessage(Language::errorNotArray(strtolower($n)));                        
+                        $this->addErrorMessage(Language::errorNotArray(strtolower($n)));
                     }
                     $node1 = new PHPParser_Node_Scalar_String($right->name->parts[0]);
                     $args = $right->args;
-                    $concat = new PHPParser_Node_Expr_Concat($node1, new PHPParser_Node_Scalar_String("["));                    
+                    $concat = new PHPParser_Node_Expr_Concat($node1, new PHPParser_Node_Scalar_String("["));
                     $concat = new PHPParser_Node_Expr_Concat($concat, $this->getBrackets($args));
                     $concat = new PHPParser_Node_Expr_Concat($concat, new PHPParser_Node_Scalar_String("]"));
                     $this->extranode = $concat;
@@ -5706,7 +5719,7 @@ class Compiler {
                 }
                 // deal with things like sec1[cnt].Q1 == 2 and similar things
                 else {
-                    
+
                     $rightleft = $right->left;
                     if ($rightleft instanceof PHPParser_Node_Expr_ConstFetch) {
                         $this->extranode = new PHPParser_Node_Scalar_String($right->left->name->parts[0]);
@@ -5715,8 +5728,8 @@ class Compiler {
                         // TODO: add check for if variable is array
                         $node1 = new PHPParser_Node_Scalar_String($rightleft->name->parts[0]);
                         $args = $rightleft->args;
-                        $concat = new PHPParser_Node_Expr_Concat($node1, new PHPParser_Node_Scalar_String("["));                        
-                        $concat = new PHPParser_Node_Expr_Concat($concat, $this->getBrackets($args));                        
+                        $concat = new PHPParser_Node_Expr_Concat($node1, new PHPParser_Node_Scalar_String("["));
+                        $concat = new PHPParser_Node_Expr_Concat($concat, $this->getBrackets($args));
                         $concat = new PHPParser_Node_Expr_Concat($concat, new PHPParser_Node_Scalar_String("]"));
                         $this->extranode = $concat;
                     }
@@ -5730,10 +5743,10 @@ class Compiler {
                     $class = "";
                     if (class_exists("PHPParser_Node_" . $type)) {
                         $class = "PHPParser_Node_" . $type;
-                        $sr = new PHPParser_Node_Arg($subnode->right);                        
+                        $sr = new PHPParser_Node_Arg($subnode->right);
                         $this->updateVariables($sr);
                         $newnode = new $class($subnode->left->value, $sr->value);
-                        $node->$nm = $newnode;                        
+                        $node->$nm = $newnode;
                     } else {
                         $this->addErrorMessage(Language::errorInvalidExpression());
                         $node->$nm = $subnode; // used class doesn't exist, so we ignore it for now
@@ -5748,11 +5761,11 @@ class Compiler {
 
                 $left = new PHPParser_Node_Arg($subnode->left);
                 $right = new PHPParser_Node_Arg($subnode->right);
-                $this->updateVariables($left); 
+                $this->updateVariables($left);
                 $this->updateVariables($right);
                 $subnode->left = $left->value;
                 $subnode->right = $right->value;
-                $node-$nm = $subnode;
+                $node->$nm = $subnode;
             }
             // function call: there could be variables in there
             else if ($subnode instanceof PHPParser_Node_Expr_FuncCall) {
@@ -5766,12 +5779,21 @@ class Compiler {
                 $namenode = $subnode->name;
                 $name = $namenode->getFirst();
                 $name = str_replace(TEXT_MODULE_DOT, ".", $name);
-               
+
                 // real function call
                 if (function_exists($name)) {
-                    $args = $subnode->args;
-                    for ($j = 0; $j < sizeof($args); $j++) {                          
-                        $this->updateVariables($args[$j]);
+                    
+                    if (!inArray($name, getAllowedRoutingFunctions()) || inArray($name, getForbiddenRoutingFunctions())) {
+                        $this->addErrorMessage(Language::messageCheckerFunctionNotAllowed($name));
+                        $name = "INVALID";
+                        $stmt = new PHPParser_Node_Scalar_String($name);
+                        $node->$nm = $stmt;
+                    } else {
+
+                        $args = $subnode->args;
+                        for ($j = 0; $j < sizeof($args); $j++) {
+                            $this->updateVariables($args[$j]);
+                        }
                     }
                 } else {
 
@@ -5781,12 +5803,11 @@ class Compiler {
                         $var = $this->survey->getVariableDescriptiveByName(getBasicName($nms[$i]));
                         if ($var->isArray() == false && contains("[", $nms[$i])) {
                             $this->addErrorMessage(Language::errorNotArray(strtolower(getBasicName($nms[$i]))));
-                        }
-                        else if ($var->isArray() == true && !contains("[", $nms[$i])) {
+                        } else if ($var->isArray() == true && !contains("[", $nms[$i])) {
                             $this->addErrorMessage(Language::errorVariableNoArrayIndex(strtolower(getBasicName($nms[$i]))));
                         }
                     }
-                    
+
                     $var = $this->survey->getVariableDescriptiveByName(getBasicName($name)); // new VariableDescriptive();
                     //if ($var->setVariableDescriptive(getBasicName($name))) {
 
@@ -5804,9 +5825,9 @@ class Compiler {
                             $this->lastvar = $var;
                         }
                         $args = array();
-                        $funcnode = $this->handleBracketExpression($subnode, $name);                        
+                        $funcnode = $this->handleBracketExpression($subnode, $name);
                         if ($this->extranode != null) {
-                            
+
                             //$args[] = $funcnode;
                             //$args[] = $this->extranode;
                             // construct left hand side
@@ -6130,7 +6151,6 @@ class Compiler {
                             $bracketnode = new PHPParser_Node_Expr_Concat($bracketnode, new PHPParser_Node_Expr_Concat($valuenode, new PHPParser_Node_Scalar_String(",")));
                         }
                     }
-
                 }
             } else {
 
@@ -6444,7 +6464,6 @@ class Compiler {
                             $toprocess[] = $row1;
 
                             $previous = $row1["outerlooptimes"];
-
                         } else {
 
                             /* ignore anything following until we exited any nested loops */
@@ -6700,7 +6719,6 @@ class Compiler {
 
                     // jump to end one (equals the entry after the nested loop)
                     $j = $k - 1;
-                    
                 } else {
 
 

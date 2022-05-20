@@ -19,7 +19,7 @@ class SysAdmin {
     }
 
     function getPage() {
-//return 'yttttttttttttttttttt';
+
         if (getFromSessionParams('page') != null) {
             if (loadvar('updatesessionpage') != 2) {
                 $_SESSION['LASTPAGE'] = getFromSessionParams('page');
@@ -51,7 +51,7 @@ class SysAdmin {
                     $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strlen($_SESSION['LASTPAGE']) - strlen("res")); // avoid form resubmit
                 }
             }
-            
+
             switch ($_SESSION['LASTPAGE']) {
                 case 'sysadmin.sms': return $this->showSms();
                     break;
@@ -1972,12 +1972,80 @@ class SysAdmin {
                 $content = implode("<br/>", $checks);
                 return $this->showEditVariable($vsid, $content);
             }
-            
+
             $variable->setName(trim(loadvar(SETTING_NAME)));
             $variable->setDescription(loadvar(SETTING_DESCRIPTION));
             $variable->setQuestion(loadvarAllowHTML(SETTING_QUESTION));
             $variable->setAnswerType(loadvar(SETTING_ANSWERTYPE));
-            $variable->setAnswerTypeCustom(loadvar(SETTING_ANSWERTYPE_CUSTOM));
+
+            // check custom answer type
+            $tocall = str_replace('"', "'", trim(loadvar(SETTING_ANSWERTYPE_CUSTOM)));
+            if ($tocall != "" && $tocall != "settingfollowtype") {
+                $removed = array();
+                $test = excludeText($tocall, $removed);
+                if (stripos($test, '(') !== false) {
+                    $parameters = rtrim(substr($test, stripos($test, '(') + 1), ')');
+                    $parameters = preg_split("/[\s,]+/", $parameters);
+
+                    foreach ($parameters as $p) {
+                        $t = str_replace(INDICATOR_FILL, "", $p);
+                        $t = str_replace(INDICATOR_FILL_NOVALUE, "", $t);
+                        $vr = $survey->getVariableDescriptiveByName($t);
+                        if ($vr->getVsid() != "") {
+                            // variable reference ok
+                        } else if (is_numeric($t)) {
+                            // number ok
+                        } /*else if (startsWith($t, '"') && endsWith($t, '"')) {
+                            // quoted text ok
+                        } else if (startsWith($t, "'") && endsWith($t, "'")) {
+                            // quoted text ok
+                        } */
+                        else {
+                            if (stripos($t, '(') !== false) {
+                                $t = str_replace('(', '', $t);
+                                $t = str_replace(')', '', $t);
+                                $checks[] = "Parameter function call " . $t . " not allowed";
+                            } else {
+                                //$checks[] = $displaySysAdmin->displayError("Parameter '" . $t . "' must be a variable reference");
+                            }
+                        }
+                    }
+                    $tocheck = substr($test, 0, stripos($test, '('));
+                } else {
+                    $tocheck = $tocall;
+                }
+
+                // check against allowed custom answer functions
+                if (inArray($tocheck, getAllowedCustomAnswerFunctions()) && !inArray($tocheck, getForbiddenCustomAnswerFunctions())) {
+                    // ok
+                    $variable->setAnswerTypeCustom($tocall);
+                } else {
+                    $checks[] = Language::messageCheckerFunctionNotAllowed($tocheck);
+                }
+
+                if (sizeof($checks) > 0) {
+                    $content = $displaySysAdmin->displayError(implode("<br/>", $checks));
+                    return $displaySysAdmin->showEditVariable($vsid, $content);
+                }
+            } else {
+
+                // custom type specified, then must have custom answer function
+                if (loadvar(SETTING_ANSWERTYPE) == ANSWER_TYPE_CUSTOM) {
+                    if (loadvar(SETTING_TYPE) == -1) {
+                        $checks[] = $displaySysAdmin->displayError("Custom answer function must be specified");
+
+                        if (sizeof($checks) > 0) {
+                            $content = implode("<br/>", $checks);
+                            return $displaySysAdmin->showEditVariable($vsid, $content);
+                        }
+                    }
+                } 
+                // no value, then set to empty
+                else {
+                    $variable->setAnswerTypeCustom($tocall);
+                }
+            }
+            // end check custom answer type
 
             $user = new User($_SESSION['URID']);
             //if ($user->hasHTMLEditor()) {
@@ -3356,9 +3424,9 @@ class SysAdmin {
         $group->setExactRequired(loadvar(SETTING_GROUP_EXACT_REQUIRED));
         $group->setUniqueRequired(loadvar(SETTING_GROUP_UNIQUE_REQUIRED));
         $group->setSameRequired(loadvar(SETTING_GROUP_SAME_REQUIRED));
-        
+
         $group->setInputMaskCallback(loadvarAllowHTML(SETTING_INPUT_MASK_CALLBACK));
-        
+
         $group->save();
 
         $content = $displaySysAdmin->displaySuccess(Language::messageGroupChanged($group->getName()));
@@ -3539,8 +3607,7 @@ class SysAdmin {
 
         if (in_array($group->getTemplate(), array_keys(Common::surveyTableMultiColumnTables()))) {
             $group->setTableHeaders(loadvarAllowHTML(SETTING_TABLE_HEADERS));
-        }
-        else if (in_array($group->getTemplate(), array_keys(Common::surveyTableEnumTables()))) {
+        } else if (in_array($group->getTemplate(), array_keys(Common::surveyTableEnumTables()))) {
             $group->setFooterDisplay(loadvar(SETTING_FOOTER_DISPLAY));
         }
 
@@ -4375,7 +4442,59 @@ class SysAdmin {
         if ($tyd != '' || loadvar(SETTING_NAME) != "") {
             $type->setName(trim(loadvar(SETTING_NAME)));
             $type->setAnswerType(loadvar(SETTING_ANSWERTYPE));
-            $type->setAnswerTypeCustom(loadvar(SETTING_ANSWERTYPE_CUSTOM));
+
+            // check custom answer type
+            $tocall = str_replace('"', "'", trim(loadvar(SETTING_ANSWERTYPE_CUSTOM)));
+            if ($tocall != "") {
+                $removed = array();
+                $test = excludeText($tocall, $removed);
+                if (stripos($test, '(') !== false) {
+                    $parameters = rtrim(substr($test, stripos($test, '(') + 1), ')');
+                    $parameters = preg_split("/[\s,]+/", $parameters);
+
+                    foreach ($parameters as $p) {
+                        $t = str_replace(INDICATOR_FILL, "", $p);
+                        $t = str_replace(INDICATOR_FILL_NOVALUE, "", $t);
+                        $vr = $survey->getVariableDescriptiveByName($t);
+                        if ($vr->getVsid() != "") {
+                            // variable reference ok
+                        } else if (is_numeric($t)) {
+                            // number ok
+                        } /*else if (startsWith($t, '"') && endsWith($t, '"')) {
+                            // quoted text ok
+                        } else if (startsWith($t, "'") && endsWith($t, "'")) {
+                            // quoted text ok
+                        } */
+                        else {
+                            if (stripos($t, '(') !== false) {
+                                $t = str_replace('(', '', $t);
+                                $t = str_replace(')', '', $t);
+                                $checks[] = "Parameter function call " . $t . " not allowed";
+                            } else {
+                                //$checks[] = $displaySysAdmin->displayError("Parameter '" . $t . "' must be a variable reference");
+                            }
+                        }
+                    }
+                    $tocheck = substr($test, 0, stripos($test, '('));
+                } else {
+                    $tocheck = $tocall;
+                }
+
+                // check against allowed custom answer functions
+                if (inArray($tocheck, getAllowedCustomAnswerFunctions()) && !inArray($tocheck, getForbiddenCustomAnswerFunctions())) {
+                    // ok
+                    $type->setAnswerTypeCustom($tocall);
+                } else {
+                    $checks[] = Language::messageCheckerFunctionNotAllowed($tocheck);
+                }
+
+                if (sizeof($checks) > 0) {
+                    $content = $displaySysAdmin->displayError(implode("<br/>", $checks));
+                    return $displaySysAdmin->showEditType($tyd, $content);
+                }
+            }
+            // end check custom answer type
+
             $type->setOptionsText(loadvarAllowHTML(SETTING_OPTIONS));
             $type->setArray(loadvar(SETTING_ARRAY));
             $type->setKeep(loadvar(SETTING_KEEP));

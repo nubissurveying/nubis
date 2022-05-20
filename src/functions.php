@@ -271,7 +271,7 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
     if ($row = $db->getRow($r)) {
         ob_start();
         $code = unserialize(gzuncompress($row["engine"]));
-    } 
+    }
     // no compiled code found, create empty engine to continue
     else {
         if ($code == "") {
@@ -292,7 +292,7 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
 }";
         }
     }
-    
+
     // interpret compiled code
     eval($code);
 
@@ -968,7 +968,7 @@ function getSurveyTemplate() {
     global $survey, $template;
 
     /* global template has been set! (via setting below, so no need to repeat) */
-    if (isSurveyTemplate($template)) {           
+    if (isSurveyTemplate($template)) {
         return $template;
     }
 
@@ -1435,6 +1435,26 @@ function includeText($rule, $excluded) {
     return $rule;
 }
 
+function getFunctionParameterFunctionCalls($tocall) {
+    $arr = array();
+    if (stripos($tocall, '(') !== false) {
+        $start = substr($tocall, 0, stripos($tocall, '('));
+        $arr[] = $start;
+        $nothing = "";
+
+        // parameters check
+        $start = stripos($tocall, '(') + 1;
+        $end = strripos($tocall, ')');        
+        $parameters = excludeText(substr($tocall, $start, $end - $start), $nothing);
+        $parameters = preg_split("/[\s,]+/", $parameters);
+        foreach ($parameters as $p) {
+            $arr = array_merge($arr, getFunctionParameterFunctionCalls($p));
+        }
+    }
+
+    return $arr;
+}
+
 // Adapted from: http://stackoverflow.com/questions/8304191/regex-to-add-spacing-between-sentences-in-a-string-in-php
 function hideModuleNotations($rule, $replace) {
     return preg_replace(array('/[.](?![\s0-9$])/'), array($replace), $rule);
@@ -1863,6 +1883,13 @@ function getBasicName($name) {
     return $name;
 }
 
+function isArray($array) {
+    if (!is_array($array) || sizeof($array) == 0) {
+        return '2'; // false
+    }
+    return '1'; // true
+}
+
 function isArrayReference($name) {
 
     $pos = strrpos($name, ".");
@@ -1953,9 +1980,17 @@ function clearSession() {
     if (isset($_SESSION['URID'])) {
         $id = $_SESSION['URID'];
     }
+    $skey = "";
+    if (isset($_SESSION['SYSTEM_KEY'])) {
+        $skey = $_SESSION['SYSTEM_KEY'];
+    }
+
     $_SESSION = array();
     if ($id != "") {
         $_SESSION['URID'] = $id;
+    }
+    if ($skey != "") {
+        $_SESSION['SYSTEM_KEY'] = $skey;
     }
     session_write_close();
 }
@@ -2412,12 +2447,12 @@ function gen_password($length = 8) {
     $chars = "abcdefghijkmnpqrstuvwxyz123456";
     for ($i = 0; $i < $length; $i++) {
         $x = mt_rand(0, strlen($chars) - 1);
-        $password .= $chars{$x};
+        $password .= $chars[$x];
     }
     $chars = "23456789";
     for ($i = 0; $i < 2; $i++) {
         $x = mt_rand(0, strlen($chars) - 1);
-        $password .= $chars{$x};
+        $password .= $chars[$x];
     }
     return $password;
 }

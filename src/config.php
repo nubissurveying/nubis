@@ -84,6 +84,10 @@ class Config {
     
     /* ENCRYPTION */
     
+    static function smsSysadminKey() {
+        return dbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_SYSADMIN);
+    }
+    
     static function loginCodeKey() {
         return dbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_LOGINCODES);
     }

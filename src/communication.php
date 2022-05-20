@@ -84,7 +84,8 @@ class Communication {
                     $return.= ' ( ';
                     for ($j = 0; $j < $num_fields; $j++) {
                         $rowUp = addslashes($row[$j]);
-                        $rowUp = ereg_replace("\n", "\\n", $rowUp);
+                        //$rowUp = ereg_replace("\n", "\\n", $rowUp);
+                        $rowUp = str_replace(array("\n"), '\\n', $rowUp); // ereg_replace is out in php 7.0
                         if (isset($rowUp)) {
                             $return.= '"' . $rowUp . '"';
                         } else {

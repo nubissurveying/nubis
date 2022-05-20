@@ -1937,6 +1937,8 @@ class DataExport {
                         $valueLabel = $var->getOptionsText();
                         $options = $var->getOptions();
                     }
+                    
+                    $maxcode = "";
                     $valwidth = $this->getProperty(DATA_OUTPUT_VALUELABEL_WIDTH);
                     if ($var->getOutputValueLabelWidth() != "") {
                         $valwidth = $var->getOutputValueLabelWidth();
@@ -1948,6 +1950,9 @@ class DataExport {
                         if (is_array($options)) {
                             foreach ($options as $option) {
                                 $code = $option["code"];
+                                if ($maxcode == "" || $code > $maxcode) {
+                                    $maxcode = $code;
+                                }
                                 $lab = $this->prepareLabel(trim(strip_tags($option["label"])));
                                 $sn = strlen($code) + strlen($lab) + 1; //(one space)
                                 if ($sn > $so) {
@@ -1957,6 +1962,21 @@ class DataExport {
                             $labelset = true;
                         }
                         $width = $so; //$soem;
+                    }
+                    
+                    // check if maximum code is bigger than max short --> 32767
+                    if ($maxcode == "") { // not found max code yet
+                        foreach ($options as $option) {
+                            $code = $option["code"];
+                            if ($maxcode == "" || $code > $maxcode) {
+                                $maxcode = $code;
+                            }                            
+                        }
+                    }
+                    
+                    // code too high, use double instead
+                    if ($maxcode != "" && $maxcode > 32767) {
+                        $datatype = STATA_TYPE_DOUBLE;
                     }
 
                     break;
@@ -1974,20 +1994,35 @@ class DataExport {
                     $min = $var->getMinimum();
                     $max = $var->getMaximum();
 
+                    /* maximum is fill reference */
+                    if (!is_numeric($max)) {
+                        $max = ANSWER_RANGE_MAXIMUM;
+                    }
+                    /* minimum is fill reference */
+                    if (!is_numeric($min)) {
+                        $min = ANSWER_RANGE_MINIMUM;
+                    }
+                    
                     /* only for range */
                     if (contains($min, ".") || contains($max, ".")) {
                         /* treat as double */
                         $datatype = STATA_TYPE_DOUBLE;
                     } else {
-                        /* treat as short */
-                        $datatype = STATA_TYPE_SHORT;
+                        
+                        // out of range for short
+                        if ($min < -32768 || $max > 32768) {
+                            $datatype = STATA_TYPE_DOUBLE;
+                        }
+                        /* in range for short */
+                        else {
+                            $datatype = STATA_TYPE_SHORT;
+                        }
                     }
-
-                    /* maximum is fill reference */
-                    if (!is_numeric($max)) {
-                        $max = ANSWER_RANGE_MAXIMUM;
-                    }
+                    
                     $width = strlen($max);
+                    if (strlen($min) > $width) {
+                        $width = strlen($min);
+                    }
                 /* double */
                 case ANSWER_TYPE_DOUBLE:
                     $datatype = STATA_TYPE_DOUBLE;

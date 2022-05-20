@@ -438,7 +438,7 @@ class DisplayTranslator extends Display {
 
         /* language dropdown */
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
-        $default = $survey->getDefaultLanguage();
+        $default = $survey->getDefaultLanguage(getSurveyMode());
         if (!inArray($default, $langs)) {
             $langs[] = $default;
         }
@@ -2763,7 +2763,7 @@ class DisplayTranslator extends Display {
             $cl = getSurveyLanguage();
             $modes = $user->getModes(getSurvey());
             $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
-            $default = $current->getDefaultLanguage();
+            $default = $current->getDefaultLanguage(getSurveyMode());
             if (!inArray($default, $langs)) {
                 $langs[] = $default;
             }

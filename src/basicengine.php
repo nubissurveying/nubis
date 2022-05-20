@@ -176,7 +176,7 @@ class BasicEngine extends NubisObject {
         if (Config::useUnserialize()) {
             $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
         } else {
-            $q = "select getfills, inlinefields, setfills from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
+            $q = "select getfills, inlinefields, setfills, checks from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
         }
         $r = $db->selectQuery($q);
         $this->variabledescriptives = array();
@@ -367,16 +367,18 @@ class BasicEngine extends NubisObject {
                 } else {
                     $realfield = $this->getInlineField($field); // update in case of brackets
                     $fieldref = $field; //str_replace("[", "\[", str_replace("]", "\]", $field));
-
                     // only if in group we add inline fields
                     if ($temp != "") {
                         $previousdata = strtr($this->getAnswer($realfield), array('\\' => '\\\\', '$' => '\$'));
                         $variable = $this->getVariableDescriptive($field);
-                        $cnt = $displaynumbers[strtoupper($realfield)];
+                        $cnt = "";
+                        if (isset($displaynumbers[strtoupper($realfield)])) {
+                    	    $cnt = $displaynumbers[strtoupper($realfield)];
+						}
 
                         // we have a cnt, then this is a field being displayed!
                         if ($cnt != "") {
-                            
+
                             /* if radio/set of enumerated, then add error check if inline field filled out and option not checked */
                             $varname = SESSION_PARAMS_ANSWER . $cnt;
                             $id = $this->getFill($realfield, $variable, SETTING_ID);
@@ -384,7 +386,7 @@ class BasicEngine extends NubisObject {
                                 $id = $varname;
                             }
                             if (trim($enumid) != "") {
-                                $legend = "legend_" . str_replace("]", "", str_replace("[" , "", $enumid)); 
+                                $legend = "legend_" . str_replace("]", "", str_replace("[", "", $enumid));
                                 $replacetext = $this->display->showAnswer($cnt, $realfield, $variable, $previousdata, true, $enumid . "_" . $enumvalue, $legend);
                             } else {
                                 $replacetext = $this->display->showAnswer($cnt, $realfield, $variable, $previousdata, true);
@@ -471,11 +473,13 @@ class BasicEngine extends NubisObject {
     function getInlineField($variable) {
         if ($this->inlinefieldclasses) {
             $classextension = prepareClassExtension($variable);
-            $class = $this->loadInlineFieldClass(CLASS_INLINEFIELD . "_" . $classextension, $this->inlinefieldclasses['"' . strtoupper($variable) . '"']);
-            if ($class) {
-                $result = $class->getInlineField(strtoupper($variable));
-                if ($result != "") {
-                    return $result;
+            if (isset($this->inlinefieldclasses['"' . strtoupper($variable) . '"'])) {
+                $class = $this->loadInlineFieldClass(CLASS_INLINEFIELD . "_" . $classextension, $this->inlinefieldclasses['"' . strtoupper($variable) . '"']);
+                if ($class) {
+                    $result = $class->getInlineField(strtoupper($variable));
+                    if ($result != "") {
+                        return $result;
+                    }
                 }
             }
         }
@@ -520,19 +524,21 @@ class BasicEngine extends NubisObject {
         //}
 
         if ($this->getfillclasses) {
-            
-            $classextension = prepareClassExtension($variable);
-            $getfillclass = $this->loadGetFillClass(CLASS_GETFILL . "_" . $classextension, $this->getfillclasses['"' . strtoupper($variable) . '"']);
-            if ($getfillclass) {
 
-                if (Config::filling() == FILL_NO_SPACE_INSERT) {
-                    return $getfillclass->getFillValue();
-                } else if (Config::filling() == FILL_SPACE_INSERT_BEFORE) {
-                    return " " . $getfillclass->getFillValue();
-                } else if (Config::filling() == FILL_SPACE_INSERT_AFTER) {
-                    return $getfillclass->getFillValue() . " ";
-                } else if (Config::filling() == FILL_SPACE_INSERT_AROUND) {
-                    return " " . $getfillclass->getFillValue() . " ";
+            $classextension = prepareClassExtension($variable);
+            if (isset($this->getfillclasses['"' . strtoupper($variable) . '"'])) {
+                $getfillclass = $this->loadGetFillClass(CLASS_GETFILL . "_" . $classextension, $this->getfillclasses['"' . strtoupper($variable) . '"']);
+                if ($getfillclass) {
+
+                    if (Config::filling() == FILL_NO_SPACE_INSERT) {
+                        return $getfillclass->getFillValue();
+                    } else if (Config::filling() == FILL_SPACE_INSERT_BEFORE) {
+                        return " " . $getfillclass->getFillValue();
+                    } else if (Config::filling() == FILL_SPACE_INSERT_AFTER) {
+                        return $getfillclass->getFillValue() . " ";
+                    } else if (Config::filling() == FILL_SPACE_INSERT_AROUND) {
+                        return " " . $getfillclass->getFillValue() . " ";
+                    }
                 }
             }
         }
@@ -555,7 +561,7 @@ class BasicEngine extends NubisObject {
         ob_start();
         eval($fillclasscode);
         $contents = ob_get_clean();
-        
+
         if ($contents == "") {
             try {
                 $fillcl = new ReflectionClass($fillclass);
@@ -1699,12 +1705,14 @@ class BasicEngine extends NubisObject {
         $vardesc = $this->getVariableDescriptive($variablename);
         if ($vardesc->getStoreLocation() == STORE_LOCATION_BOTH || $vardesc->getStoreLocation() == STORE_LOCATION_EXTERNAL) {
             $tocall = $vardesc->getStoreLocationExternal();
-            if (function_exists($tocall)) {
-                try {
-                    $f = new ReflectionFunction($tocall);
-                    $f->invoke(STORE_EXTERNAL_SET, $this->getPrimaryKey(), $variablename, $answer, $dirty);
-                } catch (Exception $e) {
-                    
+            if (function_exists($tocall) && stripos($tocall, '(') !== false) { // don't allow parameters
+                if (inArray($tocall, getAllowedExternalStorageFunctions()) && !inArray($tocall, getForbiddenExternalStorageFunctions())) {
+                    try {
+                        $f = new ReflectionFunction($tocall);
+                        $f->invoke(STORE_EXTERNAL_SET, $this->getPrimaryKey(), $variablename, $answer, $dirty);
+                    } catch (Exception $e) {
+                        
+                    }
                 }
             }
 
@@ -1730,12 +1738,14 @@ class BasicEngine extends NubisObject {
         $vardesc = $this->getVariableDescriptive($variablename);
         if ($vardesc->getStoreLocation() == STORE_LOCATION_EXTERNAL && !inArray($variablename, Common::surveyCoreVariables())) {
             $tocall = $vardesc->getStoreLocationExternal();
-            if (function_exists($tocall)) {
-                try {
-                    $f = new ReflectionFunction($tocall);
-                    return $f->invoke(STORE_EXTERNAL_GET, $this->getPrimaryKey(), $variablename);
-                } catch (Exception $e) {
-                    
+            if (function_exists($tocall) && stripos($tocall, '(') !== false) { // don't allow parameters
+                if (inArray($tocall, getAllowedExternalStorageFunctions()) && !inArray($tocall, getForbiddenExternalStorageFunctions())) {
+                    try {
+                        $f = new ReflectionFunction($tocall);
+                        return $f->invoke(STORE_EXTERNAL_GET, $this->getPrimaryKey(), $variablename);
+                    } catch (Exception $e) {
+                        
+                    }
                 }
             }
             return null; // external failed
@@ -1976,43 +1986,40 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $db->executeQuery($query);
 
             $this->reset[$looprgid] = false;
-            $this->startLoop($current, $min, $loopstring, $counterfield, $loopactions[0]);
+            $this->startLoop($current, $min, $loopstring, $counterfield, $loopactions[0], $looprgid);
         }
         // maximum has been reached/exitfor --> end of for loop
         else if ($current > $max || $exitfor == 2) {
-            
+
             // nested loop we are exiting
             if ($outerloopcounters != "") {
 
                 // update outer counter IF LAST ACTION
                 if ($nextrgid < $looprgid) { // this doesn't work if nested loop is in e.g. an if inside the outer loop, since we return to the loop and then increment
-                    
                     // check if nested loop is the last action in the outer loop
                     // if yes, then do counter increment
-                    
                     // get loop actions of outer loop
                     $outeractions = explode("~", $this->getLoopActions($nextrgid));
-                    
+
                     // we have loop actions for this rgid, so we are going back to the outer loop
                     if (sizeof($outeractions) > 0) {
-                        
+
                         $last = $outeractions[sizeof($outeractions)];
-                        
+
                         // nested loop is last action
                         //if (true || $last == $looprgid) {
-                            $countertoincrement = end($oc);
-                            $now = $this->getAnswer($countertoincrement);
-                            $this->addAssignment($countertoincrement, $now, $nextrgid);
-                            $this->setAnswer($countertoincrement, $now + 1);
-                            //$outerrgids = explode("~", $outerlooprgids);
-                            //foreach ($outerrgids as $r) {
-                            //   $this->reset[$r] = true;
-                            //}
+                        $countertoincrement = end($oc);
+                        $now = $this->getAnswer($countertoincrement);
+                        $this->addAssignment($countertoincrement, $now, $nextrgid);
+                        $this->setAnswer($countertoincrement, $now + 1);
+                        //$outerrgids = explode("~", $outerlooprgids);
+                        //foreach ($outerrgids as $r) {
+                        //   $this->reset[$r] = true;
+                        //}
                         //}
                     }
                     // don't reset outer counter
                     $this->reset[$nextrgid] = false;
-                    
                 }
 
                 // allow reset of inner loop (for completely in memory looping (assignments) where we are exiting a nested loop to which we will come back again)!
@@ -2058,7 +2065,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             /* do next action */
             $this->doAction($nextrgid);
         } else { /* still inside loop */
-            
+
             // get last for loop action we did FOR THIS LOOP
             if ($outerloopcounters != "") {
                 $position = sizeof($oc);
@@ -2106,7 +2113,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         }
     }
 
-    function startLoop($current, $min, $loopstring, $counterfield, $action) {
+    function startLoop($current, $min, $loopstring, $counterfield, $action, $looprgid) {
         $current = $min;
         $this->setLoopString($loopstring . $current); // set loop string for progress bar
         $this->addAssignment($counterfield, "", $looprgid);
@@ -2135,7 +2142,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
     function setLoopRgid($rgid) {
         $this->state->setLoopRgid($rgid);
     }
-    
+
     function getLoopActions($looprgid) {
         global $db;
         $query = "select loopactions from " . Config::dbSurveyData() . "_loopdata where suid=" . prepareDatabaseString($this->getSuid()) . " and primkey='" . prepareDatabaseString($this->getPrimaryKey()) . "' and looprgid=" . prepareDatabaseString($looprgid);
@@ -2144,7 +2151,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $row = $db->getRow($res);
             return $row["loopactions"];
         }
-        
+
         // failed somehow
         return null;
     }
@@ -2449,7 +2456,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
             }
         }
-        
+
         // return result
         return implode("~", $grouplooparray);
     }
@@ -2911,7 +2918,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             $this->saveState(false);
 
                             /* if (language different from state AND not using last known language) OR (mode different from state AND not using last known language) OR (version different from state), then wipe fill texts */
-                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage() == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
+                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage(getSurveyMode()) == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
                                 $this->setFillTexts(array());
 
                                 /* indicate to redo any fills */
@@ -2950,7 +2957,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         else if (inArray($where, array(AFTER_COMPLETION_LAST_SCREEN, AFTER_COMPLETION_LAST_SCREEN_REDO))) {
 
                             /* if (language different from state AND not using last known language) OR (mode different from state AND not using last known language) OR (version different from state), then wipe fill texts */
-                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage() == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
+                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage(getSurveyMode()) == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
                                 $this->setFillTexts(array());
 
                                 /* indicate to redo any fills */
@@ -3083,7 +3090,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                             $this->saveState(false);
 
                             /* if (language different from state AND not using last known language) OR (mode different from state AND not using last known language) OR (version different from state), then wipe fill texts */
-                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage() == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
+                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage(getSurveyMode()) == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
                                 $this->setFillTexts(array());
 
                                 /* indicate to redo any fills */
@@ -3122,7 +3129,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                         else if (inArray($action, array(REENTRY_SAME_SCREEN, REENTRY_SAME_SCREEN_REDO_ACTION))) {
 
                             /* if (language different from state AND not using last known language) OR (mode different from state AND not using last known language) OR (version different from state), then wipe fill texts */
-                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage() == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
+                            if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getReentryLanguage(getSurveyMode()) == LANGUAGE_REENTRY_NO) || ($this->state->getMode() != getSurveyMode() && $this->survey->getReentryMode() == MODE_REENTRY_NO) || $this->state->getVersion() != getSurveyVersion()) {
                                 $this->setFillTexts(array());
 
                                 /* indicate to redo any fills */
@@ -3163,6 +3170,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                                     /* stop */
                                     return;
+                                } else {
+                                    $this->showQuestion($variablenames, $rgid, $groupname);
+                                    doExit();
                                 }
                             }
                         }
@@ -3305,7 +3315,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             foreach ($vars as $t) {
 
                 $cnt++;
-                
+
                 // if core variable, then always store internal
                 if (inArray($t, Common::surveyCoreVariables())) {
                     continue;
@@ -3392,7 +3402,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 /* if (language different from state AND update) OR (mode different from state AND update) OR (version different from state), then wipe fill texts */
                 $redo = false;
-                if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getBackLanguage() == LANGUAGE_BACK_YES) || ($this->state->getMode() != getSurveyMode() && $this->survey->getBackMode() == MODE_BACK_YES) || $this->state->getVersion() != getSurveyVersion()) {
+                if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getBackLanguage(getSurveyMode()) == LANGUAGE_BACK_YES) || ($this->state->getMode() != getSurveyMode() && $this->survey->getBackMode() == MODE_BACK_YES) || $this->state->getVersion() != getSurveyVersion()) {
                     $this->setFillTexts(array());
 
                     /* indicate to redo any fills */
@@ -3415,19 +3425,31 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 /* check for on submit function */
                 $onsubmit = $queryobject->getOnBack();
                 $tocall = $this->replaceFills($onsubmit);
-                $parameters = array();
-                if (stripos($tocall, '(') !== false) {
-                    $parameters = rtrim(substr($tocall, stripos($tocall, '(') + 1), ')');
+                $parametersout = array();
+                $removed = array();
+                $test = excludeText($tocall, $removed);
+                if (stripos($test, '(') !== false) {
+                    $parameters = rtrim(substr($tocall, stripos($test, '(') + 1), ')');
                     $parameters = preg_split("/[\s,]+/", $parameters);
+                    foreach ($parameters as $p) {
+                        $removed = array();
+                        $pt = excludeText($p, $removed);
+                        if (stripos($pt, '(') === false) { // no function calls as parameters
+                            $parametersout[] = (string) $p;
+                        }
+                    }
+
                     $tocall = substr($tocall, 0, stripos($tocall, '('));
                 }
 
                 if (function_exists($tocall)) {
-                    try {
-                        $f = new ReflectionFunction($tocall);
-                        $returnStr .= $f->invoke($parameters);
-                    } catch (Exception $e) {
-                        
+                    if (inArray($tocall, getAllowedOnChangeFunctions()) && !inArray($tocall, getForbiddenOnChangeFunctions())) {
+                        try {
+                            $f = new ReflectionFunction($tocall);
+                            $returnStr .= $f->invoke($parametersout);
+                        } catch (Exception $e) {
+                            
+                        }
                     }
                 }
 
@@ -3592,19 +3614,31 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
 
                 $tocall = $this->replaceFills($onsubmit);
-                $parameters = array();
-                if (stripos($tocall, '(') !== false) {
-                    $parameters = rtrim(substr($tocall, stripos($tocall, '(') + 1), ')');
+                $parametersout = array();
+                $removed = array();
+                $test = excludeText($tocall, $removed);
+                if (stripos($test, '(') !== false) {
+                    $parameters = rtrim(substr($tocall, stripos($test, '(') + 1), ')');
                     $parameters = preg_split("/[\s,]+/", $parameters);
+                    foreach ($parameters as $p) {
+                        $removed = array();
+                        $pt = excludeText($p, $removed);
+                        if (stripos($pt, '(') === false) { // no function calls as parameters
+                            $parametersout[] = (string) $p;
+                        }
+                    }
+
                     $tocall = substr($tocall, 0, stripos($tocall, '('));
                 }
 
                 if (function_exists($tocall)) {
-                    try {
-                        $f = new ReflectionFunction($tocall);
-                        $returnStr .= $f->invoke($parameters);
-                    } catch (Exception $e) {
-                        
+                    if (inArray($tocall, getAllowedOnChangeFunctions()) && !inArray($tocall, getForbiddenOnChangeFunctions())) {
+                        try {
+                            $f = new ReflectionFunction($tocall);
+                            $returnStr .= $f->invoke($parametersout);
+                        } catch (Exception $e) {
+                            
+                        }
                     }
                 }
 
@@ -3652,7 +3686,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 $cnt = 1;
 
                 foreach ($vars as $var) {
-                    
+
                     // next button
                     if ($_POST['navigation'] == $nextlabel) {
                         $vd = $this->getVariableDescriptive($var);
@@ -3728,19 +3762,31 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
 
                 $tocall = $this->replaceFills($onsubmit);
-                $parameters = array();
-                if (stripos($tocall, '(') !== false) {
-                    $parameters = rtrim(substr($tocall, stripos($tocall, '(') + 1), ')');
+                $parametersout = array();
+                $removed = array();
+                $test = excludeText($tocall, $removed);
+                if (stripos($test, '(') !== false) {
+                    $parameters = rtrim(substr($tocall, stripos($test, '(') + 1), ')');
                     $parameters = preg_split("/[\s,]+/", $parameters);
+                    foreach ($parameters as $p) {
+                        $removed = array();
+                        $pt = excludeText($p, $removed);
+                        if (stripos($pt, '(') === false) { // no function calls as parameters
+                            $parametersout[] = (string) $p;
+                        }
+                    }
+
                     $tocall = substr($tocall, 0, stripos($tocall, '('));
                 }
 
                 if (function_exists($tocall)) {
-                    try {
-                        $f = new ReflectionFunction($tocall);
-                        $returnStr .= $f->invoke($parameters);
-                    } catch (Exception $e) {
-                        
+                    if (inArray($tocall, getAllowedOnChangeFunctions()) && !inArray($tocall, getForbiddenOnChangeFunctions())) {
+                        try {
+                            $f = new ReflectionFunction($tocall);
+                            $returnStr .= $f->invoke($parametersout);
+                        } catch (Exception $e) {
+                            
+                        }
                     }
                 }
 
@@ -3861,7 +3907,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $update = false;
             foreach ($vars as $var) {
                 $answer = loadvarSurvey(SESSION_PARAMS_ANSWER . $cnt);
-                if (!is_array($answer) && trim($answer) != "" || (is_array($answer) && trim($answer[0]) != "")) {
+                if ((!is_array($answer) && trim($answer) != "") || (is_array($answer) && trim($answer[0]) != "")) {
                     $update = true;
                     break;
                 } else {
@@ -4158,7 +4204,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         // don't store if external only
         $realvariablenames = $this->display->getRealVariables(explode("~", $this->getDisplayed()));
         foreach ($realvariablenames as $t) {
-            
+
             // if core variable, then always store internal
             if (inArray($t, Common::surveyCoreVariables())) {
                 continue;
@@ -4312,7 +4358,6 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $query .= prepareDatabaseString($lang) . ",";
             $query .= prepareDatabaseString($mode) . ",";
             $query .= prepareDatabaseString($version) . ")";
-            //echo$query . "<br/>";
             $localdb->executeQuery($query);
         }
     }
@@ -4354,8 +4399,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             global $survey;
             $key = $survey->getDataEncryptionKey();
             if (is_array($ans)) {
-		$ans = gzcompress(serialize($ans));
-	     }
+                $ans = gzcompress(serialize($ans));
+            }
 
             $answer = '"' . prepareDatabaseString($ans) . '"';
             if ($key != "") {
@@ -4748,7 +4793,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
     function getFill($variable, $vardescriptive, $texttype = "question") {
         $array = $this->state->getFillText($variable);
-        
+
         //use text array if text array (if group statement)
         if ($array != null && sizeof($array) > 0) {
             switch ($texttype) {

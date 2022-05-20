@@ -3603,6 +3603,10 @@ class Language extends LanguageBase {
     static function messageCheckerFunctionNotExists($f) {
         return 'Function  `' . $f . '` does not exist.';
     }
+    
+    static function messageCheckerFunctionNotAllowed($f) {
+        return 'Function  `' . $f . '` not allowed.';
+    }
 
     /* options */
 
@@ -6827,8 +6831,10 @@ class Language extends LanguageBase {
         return 'Welcome to the NubiS setup wizard. Please just use the following steps to install and configure NuBiS.';
     }
 
-    static function installConfirmation() {
-        return 'NubiS has been successfully installed. Please just click \'Next >>\' to proceed to the login screen to setup your first survey. Your initial login is sysadmin/sysadmin.';
+     static function installConfirmation($syskey) {
+        return 'NubiS has been successfully installed. Please click \'Next >>\' to proceed to the login screen to setup your first survey.<br/><br/>'
+        . 'Your initial login is sysadmin/sysadmin. Change this after logging in.<br/><br/>The system administrator access key is "' . $syskey . '". '
+                . 'This key will need to be provided every time a system administrator account is used (see the System Administrator manual for further details). ';
     }
 
     static function installLabelWelcome() {
@@ -7728,6 +7734,22 @@ class Language extends LanguageBase {
         return 'On input error (Javascript)';
     }
     
+    static function headerSysadminLocked() {
+        return 'Sysadmin access restricted. Key required.';
+    }
+    
+    static function messageSysadminLocked() {
+        return 'Sysadmin access is restricted. Please provide the correct key below to continue. '
+        . 'If you need assistance, please contact your NubiS administrator.';
+    }
+    
+    static function buttonSubmit() {
+        return 'Submit';
+    }
+    
+    static function labelSysadminKey() {
+        return 'Key';
+    }
 }
 
 ?>

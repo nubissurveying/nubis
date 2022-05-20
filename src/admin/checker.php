@@ -36,9 +36,9 @@ class Checker {
             $messages[] = $this->display->displayError(Language::messageCheckerInvalidName());
             return $messages;
         }
-        
+
         $matches = array();
-        preg_match("/(_[0-9]+_\b){1}/", $name, $matches);        
+        preg_match("/(_[0-9]+_\b){1}/", $name, $matches);
         if (sizeof($matches) > 0) {
             $messages[] = $this->display->displayError(Language::messageCheckerInvalidNameEnding());
             return $messages;
@@ -95,7 +95,7 @@ class Checker {
         $fills1 = getReferences(implode(" ", $text), INDICATOR_FILL_NOVALUE);
         $fills2 = getReferences(implode(" ", $text), INDICATOR_INLINEFIELD_ANSWER);
         $fills3 = getReferences(implode(" ", $text), INDICATOR_INLINEFIELD_TEXT);
-        $fills = array_unique(array_merge($fills, $fills1, $fills2, $fills3));        
+        $fills = array_unique(array_merge($fills, $fills1, $fills2, $fills3));
         $messages = $this->checkReferences($fills);
         return $messages;
     }
@@ -103,7 +103,9 @@ class Checker {
     function checkVariable($var, $all = false) {
 
         // get answer type
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         $t = $var->getAnswerType();
+        $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
 
         // general        
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 0 || $all == true) {
@@ -227,7 +229,7 @@ class Checker {
                 case ANSWER_TYPE_RANGE:
                 /* fall through */
                 case ANSWER_TYPE_KNOB:
-                /* fall through */    
+                /* fall through */
                 case ANSWER_TYPE_SLIDER:
                     $text[] = $var->getErrorMessageRange();
                     break;
@@ -259,7 +261,7 @@ class Checker {
             $text[] = $var->getPageJavascript();
             $text[] = $var->getInlineJavascript();
             $text[] = $var->getScripts();
-            
+
             $text[] = $var->getOnBack();
             $text[] = $var->getOnNext();
             $text[] = $var->getOnDK();
@@ -296,8 +298,7 @@ class Checker {
             if (inArray($t, array(ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_RANK))) {
                 if ($var->getOptionsText() == "") {
                     $messages[] = Language::messageCheckerVariableNoOptionCodes();
-                }
-                else if ($var->getOptionsText() != SETTING_FOLLOW_TYPE) {
+                } else if ($var->getOptionsText() != SETTING_FOLLOW_TYPE) {
                     $options = explode("\r\n", $var->getOptionsText());
                     foreach ($options as $option) {
                         $t = splitString("/ /", $option, PREG_SPLIT_NO_EMPTY, 2);
@@ -314,6 +315,7 @@ class Checker {
         }
         // function reference check
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 6 || $all == true) {
+            $functions = array();
             $functions[] = $var->getOnBack();
             $functions[] = $var->getOnNext();
             $functions[] = $var->getOnDK();
@@ -327,30 +329,39 @@ class Checker {
                 if (stripos($f, '(') !== false) {
                     $f = substr($f, 0, stripos($f, '('));
                 }
-                if (!inArray(trim($f), array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {                    
+                if (!inArray(trim($f), array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
                     if (function_exists($f) == false) {
                         $messages[] = Language::messageCheckerFunctionNotExists($f);
-                    }
-                }
-            }
-        }
-        
-        if ($_SESSION['VRFILTERMODE_VARIABLE'] == 0 || $all == true) {
-            if ($t == ANSWER_TYPE_CUSTOM) {
-                $functions[] = $var->getAnswerTypeCustom();
-                foreach ($functions as $f) {
-                    if (stripos($f, '(') !== false) {
-                        $f = substr($f, 0, stripos($f, '('));
-                    }
-                    if (!inArray(trim($f), array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {                    
-                        if (function_exists($f) == false) {
-                            $messages[] = Language::messageCheckerFunctionNotExists($f);
+                    } else {
+                        if (!inArray($f, getAllowedOnChangeFunctions()) || inArray($f, getForbiddenOnChangeFunctions())) {
+                            $messages[] = Language::messageCheckerFunctionNotAllowed($f);
                         }
                     }
                 }
             }
         }
-        
+
+        if ($_SESSION['VRFILTERMODE_VARIABLE'] == 0 || $all == true) {
+            if ($t == ANSWER_TYPE_CUSTOM) {
+                $functions = array();
+                $functions[] = $var->getAnswerTypeCustom();
+                foreach ($functions as $f) {
+                    if (stripos($f, '(') !== false) {
+                        $f = substr($f, 0, stripos($f, '('));
+                    }
+                    if (!inArray(trim($f), array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
+                        if (function_exists($f) == false) {
+                            $messages[] = Language::messageCheckerFunctionNotExists($f);
+                        } else {
+                            if (!inArray($f, getAllowedCustomAnswerFunctions()) || inArray($f, getForbiddenCustomAnswerFunctions())) {
+                                $messages[] = Language::messageCheckerFunctionNotAllowed($f);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if ($var->hasType()) {
             $tempsurv = new Survey($var->getSuid());
             $temptype = $tempsurv->getType($var->getTyd());
@@ -486,7 +497,7 @@ class Checker {
                 case ANSWER_TYPE_RANGE:
                 /* fall through */
                 case ANSWER_TYPE_KNOB:
-                /* fall through */    
+                /* fall through */
                 case ANSWER_TYPE_SLIDER:
                     $text[] = $var->getErrorMessageRange();
                     break;
@@ -540,8 +551,31 @@ class Checker {
                 }
             }
         }
+        
+        if ($_SESSION['VRFILTERMODE_VARIABLE'] == 0 || $all == true) {
+            if ($t == ANSWER_TYPE_CUSTOM) {
+                $functions = array();
+                $functions[] = $var->getAnswerTypeCustom();
+                foreach ($functions as $f) {
+                    if (stripos($f, '(') !== false) {
+                        $f = substr($f, 0, stripos($f, '('));
+                    }
+                    if (!inArray(trim($f), array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
+                        if (function_exists($f) == false) {
+                            $messages[] = Language::messageCheckerFunctionNotExists($f);
+                        } else {
+                            if (!inArray($f, getAllowedCustomAnswerFunctions()) || inArray($f, getForbiddenCustomAnswerFunctions())) {
+                                $messages[] = Language::messageCheckerFunctionNotAllowed($f);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         // function reference check
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 6 || $all == true) {
+            $functions = array();
             $functions[] = $var->getOnBack();
             $functions[] = $var->getOnNext();
             $functions[] = $var->getOnDK();
@@ -555,6 +589,11 @@ class Checker {
                 if (!inArray(trim($f), array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
                     if (function_exists($f) == false) {
                         $messages[] = Language::messageCheckerFunctionNotExists($f);
+                    }
+                    else {
+                        if (!inArray($f, getAllowedOnChangeFunctions()) || inArray($f, getForbiddenOnChangeFunctions())) {
+                            $messages[] = Language::messageCheckerFunctionNotAllowed($f);
+                        }
                     }
                 }
             }
@@ -641,13 +680,18 @@ class Checker {
                     if (function_exists($f) == false) {
                         $messages[] = Language::messageCheckerFunctionNotExists($f);
                     }
+                    else {
+                        if (!inArray($f, getAllowedOnChangeFunctions()) || inArray($f, getForbiddenOnChangeFunctions())) {
+                            $messages[] = Language::messageCheckerFunctionNotAllowed($f);
+                        }
+                    }
                 }
             }
         }
 
         return $messages;
     }
-    
+
     function checkSurvey() {
         $survey = new Survey($this->suid);
         $text[] = $var->getPageHeader();
@@ -664,7 +708,7 @@ class Checker {
                     $r = str_replace(".", "||", $r);
                     $r = str_replace(",", "||", $r);
                     $r = str_replace(" ", "", $r);
-                    
+
                     // replace any operators
                     $r = str_replace("-", "||", $r);
                     $r = str_replace("+", "||", $r);
@@ -674,19 +718,18 @@ class Checker {
                     foreach ($explode as $e) {
                         if (trim($e) != "") {
                             if (!is_numeric($e)) {
-                                
+
                                 // check for _1_ for set of enum
-                                $v = $this->survey->getVariableDescriptiveByName(getBasicName($e));                                
+                                $v = $this->survey->getVariableDescriptiveByName(getBasicName($e));
                                 if (inArray($v->getAnswerType(), array(ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN))) {
                                     $e = preg_replace("/(_[0-9]+_(\b|\[)){1}/", "", $e);
                                 }
-                                
+
                                 // check for associative key
-                                $e = str_replace('"',"'", $e);
+                                $e = str_replace('"', "'", $e);
                                 if (startsWith($e, "'") && endswith($e, "'")) {
-                                                                    
-                                }
-                                else {
+                                    
+                                } else {
                                     if ($v->getVsid() == "") {
                                         $sec = $this->survey->getSectionByName($e);
                                         if ($sec->getSeid() == "") {

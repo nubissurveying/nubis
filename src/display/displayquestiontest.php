@@ -99,7 +99,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
         $user = new User($_SESSION['URID']);
         $allowedmodes = $user->getModes();
         $allowedlanguages = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
-        $default = $survey->getDefaultLanguage();
+        $default = $survey->getDefaultLanguage(getSurveyMode());
         $ut = "sysadmin";
         if ($user->getUserType() == USER_TRANSLATOR) {
             $ut = "translator";

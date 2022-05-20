@@ -694,8 +694,7 @@ class Display {
         $str .= 'String.prototype.replaceAll = function(strReplace, strWith) {
     // See http://stackoverflow.com/a/3561711/556609
     var esc = strReplace.replace(/[-\/\\^$*+?.()|[\]{}]/gi, \'\\$&\');
-    var reg = new RegExp(esc, \'ig\');
-    //alert(this.replace(reg, strWith));
+    var reg = new RegExp(esc, \'ig\');    
     return this.replace(reg, strWith);
 };';
 
@@ -4091,21 +4090,117 @@ class Display {
                     window.mousey = event.pageY;
                 });';
         }
+        
         $str .= '
                 $("html").click(function(event){
                     var name = "";
                     if (event.target.name) {
                         name = event.target.name;
                     }
+                    
                     logParadata("MC:"+event.pageX+":"+event.pageY+":"+event.which+":"+name);
                 });
-                $("html").keyup(function(event){
+
+                $("html").keyup(function(event){                        
                     var name = "";
                     if (event.target.name) {
                         name = event.target.name;
                     }
-                    logParadata("KE:"+event.keyCode+":"+name);
+                        
+                    // target
+                    if (name !== "") {
+                        
+                        // get node name
+                        var element = event.target.nodeName.toLowerCase();
+                            
+                        // ignore textbox and textarea, handled below
+                        if ((element === "input" && $(event.target).is("input:text")) || element === "textarea") {
+                            // do nothing
+                        }
+                        else {                            
+                            // log keystroke
+                            logParadata("KE:"+event.keyCode+":"+name);
+                        }
+                    }    
+                    else {
+                        logParadata("KE:"+event.keyCode+":"+name);
+                    }        
                 });
+                
+                // function to get difference
+		difference = function(value1, value2) {
+                    var output = [];
+                    for(i = 0; i < value2.length; i++) {
+                        if(value1[i] !== value2[i]) {
+                            output.push(value2[i]);
+                        }
+                    }
+                    return output.join("");
+                }
+
+                var beforevalue = "";
+                
+                // filter here to only register keystrokes for actual text input elements  
+                $("input[type=text], textarea").on("beforeinput", function(event){                    
+                    beforevalue = event.target.value;
+                });
+                
+                // log cut for actual text input elements
+                $("input[type=text], textarea").on("cut", function(event){ 
+                    var name = "";
+                    if (event.target.name) {
+                        name = event.target.name;
+                    }
+                    logParadata("CT:"+name);
+                });
+                
+                // log paste for actual text input elements
+                $("input[type=text], textarea").on("paste", function(event){ 
+                    var name = "";
+                    if (event.target.name) {
+                        name = event.target.name;
+                    }
+                    logParadata("PS:"+name);
+                });
+
+                $("input[type=text], textarea").on("input", function(event){                        
+                    var name = "";
+                    if (event.target.name) {
+                        name = event.target.name;
+                    }
+
+                    var newvalue = event.target.value;
+                    var diff = difference(beforevalue, newvalue);
+                    
+                    // new value is shorter than old value, assume backspace
+                    if (newvalue.length < beforevalue.length) {
+                        var keycode = 8; // backspace
+                        var removed = beforevalue.length - newvalue.length;
+                        
+                        // log backspace events equal to number of deletions
+                        // TODO: log what was deleted?
+                        for (cnt = 0; cnt < removed; cnt++) {
+                            logParadata("KE:"+keycode+":"+name);
+                        }
+                    }
+                    else if (diff != "") {
+                        
+                        // one character added
+                        if (diff.length == 1) {
+                            var keycode = diff.charCodeAt(0);
+                            logParadata("KE:"+keycode+":"+name);
+                        }    
+                        // multiple characters added (paste)
+                        else if (diff.length > 1) {
+                            for (cnt = 0; cnt < diff.length; cnt++) {
+                                var keycode = diff.charCodeAt(cnt);
+                                logParadata("KE:"+keycode+":"+name);
+                            }        
+                        }
+                    }                    
+
+                });
+
             });';
 
         if (Config::logParadataMouseMovement()) {
@@ -4136,7 +4231,7 @@ class Display {
             
             // function to log paradata
             function logParadata(para) {
-            //alert(para);
+                //alert(para);
                 $("#pid").val($("#pid").val() + "||" + compress(para + "=" + moment()));
                 //alert($("#pid").val().length);
                 // if length exceeds limit
@@ -4492,7 +4587,6 @@ function unmaskForm() {
 
 function inputMaskingSupported() {
     var ua = navigator.userAgent;
-    //alert(ua);
     //var androidchrome = ua.match(new RegExp("android.*chrome.*", "i")) !== null;
     var androidchrome = ua.match(new RegExp("android.*chrome.*", "i")) !== null;    
     if (androidchrome) {    
@@ -4939,7 +5033,7 @@ function inputmaskCallbackError() {
                                   
                                   var values = $(this).serialize();
                                   values += '&" . POST_PARAM_AJAX_LOAD . "=" . AJAX_LOAD . "';
-                                  //alert(values);
+                                  
                                   // Send the data using post
                                   var posting = $.post( $(this).attr('action'), values );
                                   

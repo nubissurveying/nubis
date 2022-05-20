@@ -1216,6 +1216,11 @@ th.uscic-table-row-cell-header-enumerated {
         font-weight: bold;
     }
     
+    /* question text no space above text */
+    .tablesaw-stack tbody tr:not(:first-child) .uscic-question-table-row {
+        margin-top: -20px;
+    }
+
     .table tbody > tr > td.uscic-table-row-cell-enumerated {
         padding-top: 15px;
         padding-bottom: 0px;
@@ -1395,10 +1400,16 @@ th.uscic-table-row-cell-header-enumerated {
         margin-top: 30px;
     }
 
-    /* question color text */
+    /* question color text and bolding */
     .tablesaw-stack tbody tr:not(.uscic-table-row-enumerated-horizontal):not(.uscic-enumerated-row) td:first-child, .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-question-cell-enumerated,
     .table-striped>tbody>tr:nth-child(odd) > td.uscic-table-row-cell-question-multicolumn {
         background-color: #c7e1fb;
+        font-weight: bold;
+    }
+    
+    /* non-bolding of answer option text */
+    .tablesaw-stack span.uscic-bold {
+        font-weight: normal;
     }
     
     .tablesaw-stack tbody tr td {

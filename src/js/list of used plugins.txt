@@ -283,15 +283,8 @@ Location: https://github.com/nikic/PHP-Parser
 Version: Not provided
 
 
-BrowserDetect:
-
-License: MIT license
-Location: https://github.com/sinergi/php-browser-detector
-Version: Not provided
-
-
 MobileDetecT:
 
 License: MIT license with some custom add-on text
 Location: https://github.com/serbanghita/Mobile-Detect
-Version: 2.8.17
+Version: 2.8.37

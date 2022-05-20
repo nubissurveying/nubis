@@ -42,10 +42,7 @@ class Progressbar {
         //$this->maxscreens = 0;
     }
 
-    //function getMaximumAddedEntries($looprgid) {
-    //}
-
-    function addEntry($seid, $seidrgid, $rgid, $loopstring, $ifrgid, $plus, $looprgid = "") {
+    function addEntry($seid, $seidrgid, $rgid, $loopstring, $ifrgid, $plus = "", $looprgid = "") {
 
         if ($seidrgid == "") {
             $seidrgid = 0;

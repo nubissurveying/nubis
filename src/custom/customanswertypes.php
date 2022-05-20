@@ -12,4 +12,6 @@
   ------------------------------------------------------------------------
  */
  
+/* ADD CUSTOM ANSWER TYPE FUNCTIONS FOR YOUR SURVEY BELOW */
+
 ?>

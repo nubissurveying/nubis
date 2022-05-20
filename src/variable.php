@@ -586,6 +586,7 @@ class Variable {
         return $this->version;
     }
 
+    /* unused */
     function getVariableDescriptive() {
         return $this->variabledescriptive;
     }

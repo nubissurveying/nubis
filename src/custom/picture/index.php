@@ -52,11 +52,11 @@ if ($id != '' && $fieldname != '') {
         }
     } else { //store
         $query = 'replace into ' . Config::dbSurveyData() . '_pictures (primkey, variablename, picture) VALUES (';
-        $query .= '"' . addslashes($id) . '", ';
-        $query .= '"' . addslashes($fieldname) . '", ';
-        //$query .= '"' . addslashes(base64_decode(implode("", $_POST))) . '") ';
+        $query .= '"' . prepareDatabaseString($id) . '", ';
+        $query .= '"' . prepareDatabaseString($fieldname) . '", ';
+        //$query .= '"' . prepareDatabaseString(base64_decode(implode("", $_POST))) . '") ';
 
-        $query .= 'AES_ENCRYPT("' . addslashes(base64_decode(implode("", $_POST))) . '", "' . Config::filePictureKey() . '")) ';
+        $query .= 'AES_ENCRYPT("' . prepareDatabaseString(base64_decode(implode("", $_POST))) . '", "' . Config::filePictureKey() . '")) ';
 
         $db->executeQuery($query);
     }

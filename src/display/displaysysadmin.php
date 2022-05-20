@@ -788,7 +788,7 @@ Q1
         return '';
     }
 
-    function showAnswerTypes($current, $type = -1) {
+    function showAnswerTypes($current = "", $type = -1) {
         /* see constants.php for full list */
 
         $array = Common::getAnswerTypes();
@@ -1708,9 +1708,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
         }
 
         if ($answertype == ANSWER_TYPE_CUSTOM) {
-            $returnStr .= '</td><td id="customanswer" style="display: block;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $var->getAnswerTypeCustom() . '"></td>';
+            $returnStr .= '</td><td id="customanswer" style="display: block;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $this->displayTextSettingValue($var->getAnswerTypeCustom()) . '"></td>';
         } else {
-            $returnStr .= '</td><td id="customanswer" style="display: none;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $var->getAnswerTypeCustom() . '"></td>';
+            $returnStr .= '</td><td id="customanswer" style="display: none;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $this->displayTextSettingValue($var->getAnswerTypeCustom()) . '"></td>';
         }
 
         $returnStr .= '</tr>';
@@ -3667,9 +3667,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         $answertype = $type->getAnswerType();
         if ($answertype == ANSWER_TYPE_CUSTOM) {
-            $returnStr .= '</td><td id="customanswer" style="display: block;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $type->getAnswerTypeCustom() . '"></td>';
+            $returnStr .= '</td><td id="customanswer" style="display: block;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $this->displayTextSettingValue($type->getAnswerTypeCustom()) . '"></td>';
         } else {
-            $returnStr .= '</td><td id="customanswer" style="display: none;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $type->getAnswerTypeCustom() . '"></td>';
+            $returnStr .= '</td><td id="customanswer" style="display: none;"><input type="text" placeholder="' . Language::labelCustomFunctionCall() . '" class="form-control autocompletebasic" name="' . SETTING_ANSWERTYPE_CUSTOM . '" value="' . $this->displayTextSettingValue($type->getAnswerTypeCustom()) . '"></td>';
         }
 
         $returnStr .= '</tr>';
@@ -6696,7 +6696,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         /* language dropdown */
         $langs = explode("~", $user->getLanguages($_SESSION['SUID'], getSurveyMode()));
-        $default = $survey->getDefaultLanguage();
+        $default = $survey->getDefaultLanguage(getSurveyMode());
         if (!inArray($default, $langs)) {
             $langs[] = $default;
         }
@@ -8624,7 +8624,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= $this->showFooter(false);
         return $returnStr;
     }
-
+    
 }
 
 ?>

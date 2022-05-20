@@ -763,7 +763,7 @@ class State extends NubisObject {
         $db->executeQuery('delete from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->suid) . ' and mainseid=' . prepareDatabaseString($this->mainseid) . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and primkey = "' . prepareDatabaseString($this->primkey) . '" and stateid=' . prepareDatabaseString($this->stateid));
     }
 
-    function deleteLastState($id) {
+    function deleteLastState() {
         global $db;
         $db->executeQuery('delete from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->suid) . ' and mainseid=' . prepareDatabaseString($this->mainseid) . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and primkey = "' . prepareDatabaseString($this->primkey) . '" order by stateid desc limit 1');
     }

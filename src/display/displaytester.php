@@ -177,7 +177,7 @@ class DisplayTester extends Display {
             $cl = getSurveyLanguage();
             $modes = $user->getModes(getSurvey());            
             $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
-            $default = $current->getDefaultLanguage();
+            $default = $current->getDefaultLanguage(getSurveyMode());
             if (!inArray($default, $langs)) {
                 //$langs[] = $default;
             }

@@ -145,7 +145,7 @@ class Action {
 
     function surveyEntry() {
         global $engine;        
-        if ($this->checkDateTime() == false) {
+        if (!isTestmode() && $this->checkDateTime() == false) {
 
             /* get whatever the language is (either post or default) and use it */
             $l = getSurveyLanguage();

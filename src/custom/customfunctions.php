@@ -30,6 +30,70 @@ function getDefaultCleanVariables() {
     );
 }
 
+// lists functions allowed to be used for routing function calls
+function getAllowedRoutingFunctions() {
+    return array(
+        "mt_rand",
+        "strpos",
+        "stripos",
+        "substr",
+        "isArray",
+        "inArray",
+        "is_null",
+        "is_numeric",
+        "explode",
+        "date",
+        "sizeof",
+        "shuffleArray",
+        "calcAge",
+        "strtotime",
+        "date",
+        "str",        
+        "cardinal",
+        "settingfollowtype",
+		"substring"
+		
+		/* DO NOT MODIFY the above; they are needed by the NubiS compiler */
+		/* ADD custom function names below */
+		
+    ); 
+}
+
+// lists functions NOT allowed to be used for routing function calls
+function getForbiddenRoutingFunctions() {
+    return array("assert", "pcntl_exec", "eval", "exec", "passthru", "shell_exec", "system", "proc_open", "popen", "curl_exec", "curl_multi_exec", "parse_ini_file", "show_source");
+}
+
+// lists functions allowed to be used for custom answer type function calls
+function getAllowedCustomAnswerFunctions() {
+    return array ("");
+}
+
+// lists functions NOT allowed to be used for custom answer type function calls
+function getForbiddenCustomAnswerFunctions() {
+    return array("assert", "pcntl_exec", "eval", "exec", "passthru", "shell_exec", "system", "proc_open", "popen", "curl_exec", "curl_multi_exec", "parse_ini_file", "show_source");
+}
+
+// lists functions allowed to be used for external storage function calls
+function getAllowedExternalStorageFunctions() {
+    return array ("handleExternalStorageExample");
+}
+
+// lists functions NOT allowed to be used for external storage function calls
+function getForbiddenExternalStorageFunctions() {
+    return array("assert", "pcntl_exec", "eval", "exec", "passthru", "shell_exec", "system", "proc_open", "popen", "curl_exec", "curl_multi_exec", "parse_ini_file", "show_source");
+}
+
+// lists functions allowed to be used in the interactive tab for PHP on form submit
+function getAllowedOnChangeFunctions() {
+    return array ("");
+}
+
+// lists functions NOT allowed to be used in the interactive tab for PHP on form submit
+function getForbiddenOnChangeFunctions() {
+    return array("assert", "pcntl_exec", "eval", "exec", "passthru", "shell_exec", "system", "proc_open", "popen", "curl_exec", "curl_multi_exec", "parse_ini_file", "show_source");
+}
+
 function calcAge($year, $month, $day) {
     if ($year == '') {
         return null;
@@ -379,5 +443,7 @@ function getYearFromDateTime($date) {
     $ex = explode("-", $date);
     return trim($ex[0]);
 }
+
+/* ADD CUSTOM FUNCTIONS FOR YOUR SURVEY BELOW */
 
 ?>

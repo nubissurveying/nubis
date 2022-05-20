@@ -593,7 +593,6 @@ class PaperGenerator {
 
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        //echo $rule;
         $rule = includeText($rule, $excluded);
 
         if ($this->type == 2 || $this->type == 3) {

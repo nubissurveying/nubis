@@ -18,7 +18,7 @@ class DisplayUsers extends DisplaySysAdmin {
         parent::__construct();
     }
 
-    function showUsers($message) {
+    function showUsers($message = "") {
         $returnStr = $this->showSysAdminHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
         $returnStr .= $this->showNavBar();
@@ -64,6 +64,7 @@ class DisplayUsers extends DisplaySysAdmin {
                                                 });
                                                 })';
         $returnStr .= "</script>";
+        
         if (sizeof($users) > 0) {
 
             $returnStr .= $this->displayDataTablesScripts(array("colvis", "rowreorder"));

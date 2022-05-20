@@ -530,7 +530,8 @@ class XiCompiler {
         // child nodes
         for ($i = 0; $i < sizeof($subs); $i++) {
 
-            $subnode = $node->$subs[$i];
+            $nm = $subs[$i];
+            $subnode = $node->$nm;
 
             // name node: this could be a variable
             if ($subnode instanceof PHPParser_Node_Name) {
@@ -547,22 +548,22 @@ class XiCompiler {
                 $var = $this->survey->getVariableDescriptiveByName(getBasicName($name)); // new VariableDescriptive();  
                 if (strtoupper($name) == VARIABLE_VALUE_NULL) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_NULL);
-                    $node->$subs[$i] = $stmt;
+                    $node->$nm = $stmt;
                 } else if (strtoupper($name) == VARIABLE_VALUE_DK) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_DK);
-                    $node->$subs[$i] = $stmt;
+                    $node->$nm = $stmt;
                 } else if (strtoupper($name) == VARIABLE_VALUE_RF) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_RF);
-                    $node->$subs[$i] = $stmt;
+                    $node->$nm = $stmt;
                 } else if (strtoupper($name) == VARIABLE_VALUE_NA) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_NA);
-                    $node->$subs[$i] = $stmt;
+                    $node->$nm = $stmt;
                 } else if (strtoupper($name) == VARIABLE_VALUE_RESPONSE) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_RESPONSE);
-                    $node->$subs[$i] = $stmt;
+                    $node->$nm = $stmt;
                 } else if (strtoupper($name) == VARIABLE_VALUE_EMPTY) {
                     $stmt = new PHPParser_Node_Scalar_String(VARIABLE_VALUE_EMPTY);
-                    $node->$subs[$i] = $stmt;
+                    $node->$nm = $stmt;
                 } else if (strtoupper($name) == VARIABLE_VALUE_INARRAY) {
 
                     /* do nothing */
@@ -582,7 +583,7 @@ class XiCompiler {
                     $args = array();
                     //$args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String($name));
                     $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable($name), new PHPParser_Node_Name(array(FUNCTION_XI_GET_ANSWER)), $args);
-                    $node->$subs[$i] = $stmt;
+                    $node->$nm = $stmt;
                 } else if ($this->fillclass == true && startsWith($name, VARIABLE_VALUE_FILL)) {
 
                     $line = trim(str_ireplace(VARIABLE_VALUE_FILL, "", $name));
@@ -614,7 +615,7 @@ class XiCompiler {
                             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($line));
                         }
                         $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable($this->currentfillvariable), new PHPParser_Node_Name(array(FUNCTION_XI_GET_FILL_TEXT_BY_LINE)), $args);
-                        $node->$subs[$i] = $stmt;
+                        $node->$nm = $stmt;
                     }
                 } else {
 
@@ -622,7 +623,7 @@ class XiCompiler {
                         $vc = $this->lastvar->getOptionCodeByAcronym($name);
                         if ($vc > 0) {
                             $stmt = new PHPParser_Node_Scalar_String($vc);
-                            $node->$subs[$i] = $stmt;
+                            $node->$nm = $stmt;
                         } else {
 
                             /* fill that is not present (or something else), then return the
@@ -632,7 +633,7 @@ class XiCompiler {
                                 $this->messages[] = $this->addErrorMessage(Language::errorVariableNotFound($name));
                             }
                             $stmt = new PHPParser_Node_Scalar_String($name);
-                            $node->$subs[$i] = $stmt;
+                            $node->$nm = $stmt;
                         }
                     } else {
 
@@ -643,7 +644,7 @@ class XiCompiler {
                             $this->messages[] = $this->addErrorMessage(Language::errorVariableNotFound($name));
                         }
                         $stmt = new PHPParser_Node_Scalar_String($name);
-                        $node->$subs[$i] = $stmt;
+                        $node->$nm = $stmt;
                     }
                 }
             }
@@ -663,9 +664,17 @@ class XiCompiler {
 
                 // real function call
                 if (function_exists($name)) {
-                    $args = $subnode->args;
-                    for ($j = 0; $j < sizeof($args); $j++) {
-                        $this->updateVariables($args[$j]);
+                    if (!inArray($name, getAllowedRoutingFunctions()) || inArray($name, getForbiddenRoutingFunctions())) {
+                        $this->addErrorMessage(Language::messageCheckerFunctionNotAllowed($name));
+                        $name = "INVALID";
+                        $stmt = new PHPParser_Node_Scalar_String($name);
+                        $node->$nm = $stmt;
+                    } else {
+
+                        $args = $subnode->args;
+                        for ($j = 0; $j < sizeof($args); $j++) {
+                            $this->updateVariables($args[$j]);
+                        }
                     }
                 } else {
 
@@ -694,14 +703,14 @@ class XiCompiler {
                         //$stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable($name), new PHPParser_Node_Name(array(FUNCTION_XI_GET_ANSWER)), $args);
                         //$stmt = new PHPParser_Node_Expr_Variable($name);
                         $stmt = new PHPParser_Node_Expr_MethodCall($this->handleBracketExpression($subnode, $name), new PHPParser_Node_Name(array(FUNCTION_XI_GET_ANSWER)), $args);
-                        $node->$subs[$i] = $stmt; // $this->handleBracketExpression($subnode, $name)
+                        $node->$nm = $stmt; // $this->handleBracketExpression($subnode, $name)
                     } else {
 
                         /* fill that is not present (or something else), then return the
                          * text representation of whatever was inputted
                          */
                         $stmt = new PHPParser_Node_Scalar_String($name);
-                        $node->$subs[$i] = $stmt;
+                        $node->$nm = $stmt;
 
                         if (!inArray($name, array("true", "false"))) {
                             $this->messages[] = $this->addErrorMessage(Language::errorVariableNotFound($name));

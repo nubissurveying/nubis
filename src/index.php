@@ -74,7 +74,7 @@ if ((isset($_POST[POST_PARAM_RESET_EXTERNAL]) && is_Numeric($_POST[POST_PARAM_RE
 }
 
 //ts: used for test from sms!
-if ((isset($_POST[POST_PARAM_RESET_TEST]) && is_Numeric($_POST[POST_PARAM_RESET_TEST])) || (isset($_GET[POST_PARAM_RESET_TEST]) && is_Numeric($_GET[POST_PARAM_RESET_TEST]))) { //reset session!
+if ((isset($_POST[POST_PARAM_RESET_TEST]) && is_numeric($_POST[POST_PARAM_RESET_TEST])) || (isset($_GET[POST_PARAM_RESET_TEST]) && is_numeric($_GET[POST_PARAM_RESET_TEST]))) { //reset session!
     clearSession(); // resets session, but keeps session id
     $param = '';
     foreach ($_POST as $key => $value) {
@@ -83,6 +83,7 @@ if ((isset($_POST[POST_PARAM_RESET_TEST]) && is_Numeric($_POST[POST_PARAM_RESET_
         }
     }
     $param = rtrim($param, '&');
+    $_SESSION["URID"] = $urid;
     header('Location: index.php?' . $param);
     exit;
 }
@@ -113,10 +114,9 @@ if (!isset($_SESSION['COMMSERVER'])) {
 if (loadvar(POST_PARAM_SMS_AJAX) != SMS_AJAX_CALL) { // not sms ajax call
     if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
 
-        if (isset($_SESSION['REQUEST_IN_PROGRESS']) && $_SESSION['REQUEST_IN_PROGRESS'] == 1) {        
+        if (isset($_SESSION['REQUEST_IN_PROGRESS']) && $_SESSION['REQUEST_IN_PROGRESS'] == 1) {
             $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = 1;
-        }
-        else {
+        } else {
 
             $_SESSION['REQUEST_IN_PROGRESS'] = 1;
             $_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'] = null;
@@ -127,7 +127,7 @@ if (loadvar(POST_PARAM_SMS_AJAX) != SMS_AJAX_CALL) { // not sms ajax call
 
 require_once('globals.php');
 if (loadvar('r') != '') {
-    
+
     // if real request (not second submitted one while first is still running), load session information
     if (!isset($_SESSION['PREVIOUS_REQUEST_IN_PROGRESS'])) {
         getSessionParamsPost(loadvar('r'));
@@ -139,6 +139,7 @@ if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
     $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
     $engine = null; // global $engine object            
 } else {
+
     $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
     $l = getSMSLanguage();
 

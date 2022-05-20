@@ -49,7 +49,7 @@ class Install {
                 return $this->showSetup($message);
                 break;
             case "finish":
-                return $this->finish();
+                return $this->finish($message);
                 break;
             default:
                 return $this->showSetup();
@@ -541,7 +541,7 @@ class Install {
                 $message = '<div class="alert alert-danger">' . Language::installWarningDatabase() . '</div>';
                 return $this->getContent("setup", $message);
             } else {
-                
+                $syskey = $this->generateSysadminKey();
                 $file = fopen("conf.php", "w");
             $str = '<?php
 
@@ -581,7 +581,8 @@ $configuration = array(
         CONFIGURATION_ENCRYPTION_DIRECT => "' . loadvar("encryptiondirect") . '",
         CONFIGURATION_ENCRYPTION_LAB => "' . loadvar("encryptionlab") . '",
         CONFIGURATION_ENCRYPTION_COMMUNICATION => "' . loadvar("encryptioncommunication") . '",    
-        CONFIGURATION_ENCRYPTION_FILE => "' . loadvar("encryptionfile") . '"
+        CONFIGURATION_ENCRYPTION_FILE => "' . loadvar("encryptionfile") . '",
+        CONFIGURATION_ENCRYPTION_SYSADMIN => "' . $syskey . '"
     ),
     CONFIGURATION_DATETIME => array(
         CONFIGURATION_DATETIME_TIMEZONE => "' . loadvar("timezone") . '",
@@ -630,13 +631,13 @@ $configuration = array(
                 $query = "REPLACE INTO `" . loadvar("databasetablename") . "_users` (`urid`, `status`, `name`, `username`, `password`, `usertype`, usersubtype, `sup`, `filter`, `regionfilter`, `testmode`, `communication`, `settings`, `access`, `lastdata`, `ts`) VALUES
                 (1, 1, 'Sysadmin', 'sysadmin', aes_encrypt('sysadmin','" . loadvar("encryptionadmin") . "'), 4, 1, NULL, 1, 0, 0, 2, 0x613a313a7b733a31303a226e6176696e6272656164223b733a313a2231223b7d, NULL, NULL, '2014-04-12 00:20:49');";
                 $db->executeQuery($query);
-                return $this->getContent("finish");
+                return $this->getContent("finish", $syskey);
             }
         }
     }
 
-    function finish() {
-        $returnStr = '<br/><div class="alert alert-success">' . Language::installConfirmation() . '</div><br/><br/>';
+    function finish($syskey) {
+        $returnStr = '<br/><div class="alert alert-success">' . Language::installConfirmation($syskey) . '</div><br/><br/>';
         $returnStr .= "<form method=post>"; 
         $returnStr .= "<input type=hidden name=" . POST_PARAM_FULLRESET . " value='1' />";
         $returnStr .= "<input type=hidden name=" . POST_PARAM_SE . " value='" . USCIC_SMS . "' />";
@@ -799,7 +800,17 @@ $configuration = array(
         $chars = "abcdefghijklmnopqrstuvwxyz123456*&#!*1234567890";
         for ($i = 0; $i < $length; $i++) {
             $x = mt_rand(0, strlen($chars) - 1);
-            $str .= $chars{$x};
+            $str .= $chars[$x];
+        }
+        return $str;
+    }
+    
+    function generateSysadminKey($length = 16) {
+        $str = "";
+        $chars = "abcdefghijklmnopqrstuvwxyz1234567890";
+        for ($i = 0; $i < $length; $i++) {
+            $x = mt_rand(0, strlen($chars) - 1);
+            $str .= $chars[$x];
         }
         return $str;
     }
