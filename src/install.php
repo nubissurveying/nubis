@@ -436,8 +436,8 @@ class Install {
         <td>' . Language::installLabelPerformanceAccessible() . '</td>
         <td>
             <select class="selectpicker show-tick" name="performanceaccessible" />
-            <option selected value="1">' . Language::installLabelYes() . '</option>
-            <option value="2">' . Language::installLabelNo() . '</option>            
+            <option value="1">' . Language::installLabelYes() . '</option>
+            <option selected value="2">' . Language::installLabelNo() . '</option>            
             </td>
         </tr>
         </table> 
