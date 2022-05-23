@@ -2817,6 +2817,8 @@ class VariableDescriptive extends Component {
 
     function setTyd($tyd) {
         $this->variabledescriptive["tyd"] = $tyd;
+        global $survey;
+        $this->type = $survey->getType($this->getTyd());
     }
 
     function hasType() {

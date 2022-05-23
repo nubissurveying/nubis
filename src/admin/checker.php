@@ -123,6 +123,7 @@ class Checker {
                     break;
             }
         }
+        
         // verification
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 1 || $all == true) {
             switch ($t) {
@@ -166,6 +167,7 @@ class Checker {
                 $text[] = $var->getComparisonSmaller();
             }
         }
+        
         // display
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 2 || $all == true) {
             $text[] = $var->getPageHeader();
@@ -191,6 +193,7 @@ class Checker {
                     break;
             }
         }
+        
         // assistance
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 3 || $all == true) {
             $text[] = $var->getEmptyMessage();
@@ -249,11 +252,13 @@ class Checker {
                     break;
             }
         }
+        
         // fill
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 4 || $all == true) {
             $text[] = $var->getFillText();
             $text[] = $var->getFillCode();
         }
+        
         // interactive
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 6 || $all == true) {
             $text[] = $var->getInlineStyle();
@@ -272,6 +277,7 @@ class Checker {
             $text[] = $var->getOnModeChange();
             $text[] = $var->getOnVersionChange();
         }
+        
         // navigation
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 7 || $all == true) {
             $text[] = $var->getKeyboardBindingBack();
@@ -291,7 +297,6 @@ class Checker {
         $fills3 = getReferences(implode(" ", $text), INDICATOR_INLINEFIELD_TEXT);
         $fills = array_unique(array_merge($fills, $fills1, $fills2, $fills3));
         $messages = $this->checkReferences($fills);
-
 
         // options text format check
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 0 || $all == true) {
