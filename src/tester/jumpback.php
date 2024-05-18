@@ -41,7 +41,7 @@ class JumpBack {
     
     function getStates($suid, $prim, $stateid) {
         global $db;
-        $query = "select stateid, displayed from " . Config::dbSurveyData() . "_states where suid=" . $suid . " and primkey='" . $prim . "' and displayed != '' and stateid < " . $stateid;       
+        $query = "select stateid, displayed from " . Config::dbSurveyData() . "_states where suid=" . prepareDatabaseString($suid) . " and primkey='" . prepareDatabaseString($prim) . "' and displayed != '' and stateid < " . prepareDatabaseString($stateid);
         $res = $db->selectQuery($query);
         $array = array();
         if ($res) {
@@ -119,7 +119,7 @@ class JumpBack {
         $suid = getFromSessionParams('jumpsuid');
         $prim = getFromSessionParams('jumpprimkey');
         $jumpto = loadvar("jumpto");
-        $query = "delete from " . Config::dbSurveyData() . "_states where suid=" . $suid . " and primkey='" . $prim . "' and stateid > " . $jumpto;
+        $query = "delete from " . Config::dbSurveyData() . "_states where suid=" . prepareDatabaseString($suid) . " and primkey='" . prepareDatabaseString($prim) . "' and stateid > " . prepareDatabaseString($jumpto);
         $db->executeQuery($query);        
 
         $returnStr = "<html><head></head><body>";

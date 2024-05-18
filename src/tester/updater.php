@@ -170,6 +170,7 @@ class Updater {
         $cnt = loadvar("cnt");
         $r = $this->engine->getAnswer(loadvar("updatevariable" . $cnt));
         $this->engine->setAnswer(loadvar("updatevariable" . $cnt), loadvar("answer" . $cnt), $this->engine->getDirty(loadvar("updatevariable" . $cnt)));
+        $this->engine->getState()->saveState();
         $this->update();
     }
 
