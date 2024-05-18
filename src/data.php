@@ -61,7 +61,7 @@ class Data {
         global $db, $survey;
         $decrypt = "screen as screen_dec";
         if ($survey->getDataEncryptionKey() != "") {
-            $decrypt = "aes_decrypt(screen, '" . $survey->getDataEncryptionKey() . "') as screen_dec";
+            $decrypt = "aes_decrypt(screen, '" . prepareDatabaseString($survey->getDataEncryptionKey()) . "') as screen_dec";
         }
         $query = "select $decrypt from " . Config::dbSurveyData() . "_screendumps where suid=" . prepareDatabaseString($suid) . " and primkey='" . prepareDatabaseString($id) . "' order by ts asc";
         $res = $db->selectQuery($query);
