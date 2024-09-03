@@ -52,7 +52,7 @@ class Action {
                     $login = new Login($this->phpid);
                     if ($login->checkSMSAccess()) {
                         $urid = $_SESSION['URID'];                        
-                        $logactions->addAction('', $urid, "loggedin", USCIC_SMS);
+                        $logactions->addAction('', $urid, "loggedin", USCIC_SMS, '1', false);
                         $sms = new SMS($urid, $this->phpid);
                         return $sms->getPage();
                     } else {
@@ -60,12 +60,12 @@ class Action {
                         endSession();
                         session_start();
                         session_regenerate_id(true);
-                        $logactions->addAction('', '', "loginempty", USCIC_SMS);
+                        $logactions->addAction('', '', "loginempty", USCIC_SMS, '1', false);
                         $login = new Login(session_id());
                         return $login->getSMSLoginScreen(Language::messageCheckUsernamePassword());
                     }
                 } else {
-                    $logactions->addAction('', '', "loginempty", USCIC_SMS);
+                    $logactions->addAction('', '', "loginempty", USCIC_SMS, '1', false);
                     $login = new Login($this->phpid);
                     return $login->getSMSLoginScreen(Language::messageEnterUsernamePassword());
                 }
@@ -78,7 +78,7 @@ class Action {
                     endSession();
                     session_start();
                     session_regenerate_id(true);
-                    $logactions->addAction('', '', "loginempty", USCIC_SMS);
+                    $logactions->addAction('', '', "loginempty", USCIC_SMS, '1', false);
                     $login = new Login(session_id());
                     return $login->getSMSLoginScreen(Language::messageCheckUsernamePassword());
                 }
@@ -198,7 +198,8 @@ class Action {
             if ($loggedin["count"] == 0) {
 
                 /* we don't have active session, so take the template we can get */
-                global $survey;                
+                global $survey;  
+                
                 require_once("display/templates/displayquestion_" . getSurveyTemplate() . ".php");
 
                 // we don't have an active session, so fall back to whatever was passed along as language in post OR is the default language
@@ -213,14 +214,15 @@ class Action {
                 $_SESSION['PRIMKEY'] = $primkey;
                 if ($primkey != '' && strlen($primkey) < 20) { // make sure primkey is not encrypted!
                     //check!!!!!!
+                    
                     $login = new Login($this->phpid);
                     if ($login->checkAccess()) {
                         $primkey = $_SESSION['PRIMKEY'];
                         $logactions->addAction($primkey, '', "loggedin", USCIC_SURVEY, 1);
 
                         // pass along primkey to load correct engine!
-                        $engine = loadEngine(getSurvey(), $primkey, $this->phpid, getSurveyVersion(), getSurveySection(getSurvey(), $primkey));
-                        $engine->setFirstForm(true);
+                        $engine = loadEngine(getSurvey(), $primkey, $this->phpid, getSurveyVersion(), getSurveySection(getSurvey(), $primkey));                        
+                        $engine->setFirstForm(true);                        
                         return $engine->getNextQuestion();
                     } else {
                         // incorrect login..start new session
@@ -279,7 +281,7 @@ class Action {
                     require_once('language_en.php'); // fall back on english language file
                 }
 
-                // pass along primkey to load correct engine!
+                // pass along primkey to load correct engine!                
                 $engine = loadEngine(getSurvey(), $loggedin["primkey"], $this->phpid, getSurveyVersion(), getSurveySection(getSurvey(), $loggedin["primkey"]));                
 
                 /* handle button click */

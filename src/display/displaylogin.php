@@ -98,7 +98,8 @@ class DisplayLogin extends Display {
 
         if (true) {
             if ($primkey != '') {
-                $returnStr .= '<form method="post" id="startform">';
+                
+                $returnStr .= '<form method="post" id="startform" action="index.php">';
                 $returnStr .= '<input type=hidden name="' . POST_PARAM_PRIMKEY . '" value="' . decryptC($primkey, Config::directLoginKey()) . '">';
                 $returnStr .= '<input type=hidden name="' . POST_PARAM_SUID . '" value="' . $survey->getSuid() . '">';
                 $returnStr .= '<input type=hidden name="' . POST_PARAM_LANGUAGE . '" value="' . loadvar(POST_PARAM_LANGUAGE) . '">';
@@ -108,6 +109,10 @@ class DisplayLogin extends Display {
                 if (loadvar(POST_PARAM_URID) != '') {
                     $_SESSION['URID'] = loadvar(POST_PARAM_URID);
                 }
+                if (loadvar(POST_PARAM_SYSTEM_KEY) != '') {
+                    $_SESSION['SYSTEM_KEY'] = decryptC(loadvar(POST_PARAM_SYSTEM_KEY), Config::directLoginKey());
+                }
+                
                 $returnStr .= '<div style="display: none;"><input type=submit></div>';
                 $returnStr .= '</form>';
                 $returnStr .= '<script>';

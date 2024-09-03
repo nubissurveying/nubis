@@ -74,14 +74,7 @@ class Config {
     static function defaultStartup() {
         return dbConfig::defaultStartup(); //default survey mode!
     }
-
-    /* SAMPLE */
-    
-    static function allowCommunication() {
-        return (DbConfig::getProperty(CONFIGURATION_SAMPLE, CONFIGURATION_SAMPLE_ALLOW_COMMUNICATION)) == 1; // 1=YES    
-    }
-    
-    
+  
     /* ENCRYPTION */
     
     static function smsSysadminKey() {
@@ -105,7 +98,11 @@ class Config {
     }
     
     static function smsCommunicationKey() {
-        return dbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_COMMUNICATION);
+        return dbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_COMMUNICATION_CONTENT);
+    }
+    
+    static function smsComponentKey() {
+        return dbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_COMMUNICATION_COMPONENT);
     }
 
     static function smsContactRemarkKey() {
@@ -139,7 +136,7 @@ class Config {
     
     /* DATE/TIME */
     static function timezone() {        
-        return dbConfig::getProperty(CONFIGURATION_DATETIME, CONFIGURATION_DATETIME_TIMEZONE);
+        return trim(dbConfig::getProperty(CONFIGURATION_DATETIME, CONFIGURATION_DATETIME_TIMEZONE));
     }
 
     static function usFormatSMS() {
@@ -189,7 +186,7 @@ class Config {
     }
     
     static function sessionAliveURL() {
-        return 'ajax/index.php?p=keepalive';
+        return 'ajax/index.php?k=' . encryptC(Config::ajaxAccessKey(), Config::smsComponentKey()) . '&p=keepalive';
     }
 
     static function sessionExpiredWarnPoint() {
@@ -302,12 +299,12 @@ class Config {
         return (DbConfig::getProperty(CONFIGURATION_PERFORMANCE, CONFIGURATION_PERFORMANCE_USE_TRANSACTIONS)) == 1; // 1=YES    
     }
     
-    function useAccessible () {
+    static function useAccessible () {
         return (DbConfig::getProperty(CONFIGURATION_PERFORMANCE, CONFIGURATION_PERFORMANCE_USE_ACCESSIBLE)) == 1; // 1=YES    
     }
     
     static function checkComponents() {
-        if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
+        if (isset($_SESSION['SYSTEM_ENTRY']) && $_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
             return true;
         }
         return false;
@@ -316,7 +313,7 @@ class Config {
     /* NUBIS SMS integration */
 
     static function smsUsage() {
-        if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
+        if (isset($_SESSION['SYSTEM_ENTRY']) && $_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
             return true;
         }
         return false; // change to false to not include PHP files related to SMS survey extensions when launching survey
@@ -324,19 +321,61 @@ class Config {
     
     /* OTHER */
     static function xiExtension() {
-        return true;
+        return false;
     }
     
     /* PREFIXING BEHAVIOR */
-    function prefixing() {
+    static function prefixing() {
         return PREFIXING_BRACKET_ONLY;
     }
     
     /* FILL BEHAVIOR */
-    function filling() {
+    static function filling() {
         return FILL_SPACE_INSERT_BEFORE;
     }
     
+    /* ERROR BEHAVIOR */
+    static function errorColor() {
+        return '#C09853';
+    }
+    
+    /* CALENDAR BEHAVIOR */
+    static function calendarKey() {
+        return DbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_CALENDAR);    
+    }
+    
+    /* PICTURE BEHAVIOR */        
+    static function pictureKey() {
+        return DbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_PICTURE);    
+    }
+
+    /* TESTER BEHAVIOR */        
+    static function testerKey() {
+        return DbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_TESTER);    
+    }
+
+    /* COMMUNICATION BEHAVIOR */
+    static function allowCommunication() {
+        return (DbConfig::getProperty(CONFIGURATION_SAMPLE, CONFIGURATION_SAMPLE_ALLOW_COMMUNICATION)) == 1; // 1=YES    
+    }
+    
+    static function communicationAccessKey() {
+        return DbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_COMMUNICATION_ACCESS);    
+    }
+    
+    /* UPLOAD BEHAVIOR */
+    static function allowUpload() {
+        return (DbConfig::getProperty(CONFIGURATION_SAMPLE, CONFIGURATION_SAMPLE_ALLOW_UPLOAD)) == 1; // 1=YES    
+    }
+    
+    static function uploadAccessKey() {
+        return DbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_COMMUNICATION_UPLOAD);    
+    }
+    
+    /* AJAX BEHAVIOR */    
+    static function ajaxAccessKey() {
+        return DbConfig::getProperty(CONFIGURATION_ENCRYPTION, CONFIGURATION_ENCRYPTION_COMMUNICATION_UPLOAD);    
+    }
 }
 
 ?>

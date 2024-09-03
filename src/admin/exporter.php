@@ -42,7 +42,7 @@ class Exporter {
         // create table statements
         if ($create == EXPORT_CREATE_YES) {
             foreach ($alltables as $export) {
-                $create = "SHOW CREATE TABLE " . Config::dbSurvey() . $export;
+                $create = "SHOW CREATE TABLE " . Config::dbSurvey() . prepareDatabaseString($export);
                 $rescreate = $db->selectQuery($create);
                 if ($rescreate) {
                     $row2 = $db->getRow($rescreate);
@@ -64,7 +64,7 @@ class Exporter {
             if (strtoupper($export) == strtoupper("_tracks") && $history != EXPORT_HISTORY_YES) {
                 continue;
             }
-            $query = 'select * from ' . Config::dbSurvey() . $export . ' where suid=' . $this->suid;
+            $query = 'select * from ' . Config::dbSurvey() . prepareDatabaseString($export) . ' where suid=' . prepareDatabaseString($this->suid);
             $result = $db->selectQuery($query);
             $num_fields = $db->getNumberOfFields($result);
             $fields = $db->getFields($result);
@@ -143,7 +143,7 @@ class Exporter {
             if (strtoupper($export) == strtoupper("_tracks")) {
                 continue;
             }
-            $query = 'select * from ' . Config::dbSurvey() . $export . ' where suid=' . $this->suid;
+            $query = 'select * from ' . Config::dbSurvey() . prepareDatabaseString($export) . ' where suid=' . prepareDatabaseString($this->suid);
             $result = $db->selectQuery($query);
             $num_fields = $db->getNumberOfFields($result);
             $fields = $db->getFields($result);

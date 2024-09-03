@@ -48,8 +48,10 @@ class VariableDescriptive extends Component {
     }
 
     function getVsid() {
-
-        return $this->variabledescriptive['vsid'];
+        if (isset($this->variabledescriptive['vsid'])) {
+            return $this->variabledescriptive['vsid'];
+        }
+        return "";
     }
 
     function setVsid($vsid) {
@@ -58,8 +60,10 @@ class VariableDescriptive extends Component {
     }
 
     function getName() {
-
-        return $this->variabledescriptive["variablename"];
+        if (isset($this->variabledescriptive['variablename'])) {
+            return $this->variabledescriptive['variablename'];
+        }
+        return "";
     }
 
     function setName($name) {
@@ -68,8 +72,9 @@ class VariableDescriptive extends Component {
     }
 
     function getSeid() {
-
-        return $this->variabledescriptive["seid"];
+        if (isset($this->variabledescriptive['seid'])) {
+            return $this->variabledescriptive['seid'];
+        }
     }
 
     function setSeid($seid) {
@@ -202,7 +207,7 @@ class VariableDescriptive extends Component {
 
     function getArray($default = true) {
 
-        /* variable level setting */       
+        /* variable level setting */
         $val = $this->getSettingValue(SETTING_ARRAY, $default);
         if (!inArray($val, array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
             return $val;
@@ -473,7 +478,7 @@ class VariableDescriptive extends Component {
 
         /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
-        }        
+        }
         global $survey;
         return $survey->getParadata($default);
     }
@@ -629,7 +634,7 @@ class VariableDescriptive extends Component {
         }
         return false;
     }
-    
+
     function getStoreLocation($default = true) {
 
         /* variable level setting */
@@ -652,14 +657,14 @@ class VariableDescriptive extends Component {
         /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
         }
-        global $survey;        
+        global $survey;
         return $survey->getStoreLocation($default);
     }
 
     function setStoreLocation($text) {
         $this->setSettingValue(SETTING_DATA_STORE_LOCATION, $text);
     }
-    
+
     function getStoreLocationExternal($default = true) {
 
         /* variable level setting */
@@ -1029,11 +1034,11 @@ class VariableDescriptive extends Component {
     function setIfEmpty($text) {
         $this->setSettingValue(SETTING_IFEMPTY, $text);
     }
-    
+
     function getIfErrorGroup() {
         return $this->iferrorgroup;
     }
-    
+
     function setIfErrorGroup($text) {
         $this->iferrorgroup = $text;
     }
@@ -1108,7 +1113,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_SCRIPTS, $value);
     }
 
-    function getOnNext() {
+    function getOnNext($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_ON_NEXT, $default);
@@ -1138,7 +1143,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_ON_NEXT, $value);
     }
 
-    function getOnBack() {
+    function getOnBack($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_ON_BACK, $default);
@@ -1168,7 +1173,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_ON_BACK, $value);
     }
 
-    function getOnDK() {
+    function getOnDK($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_ON_DK, $default);
@@ -1198,7 +1203,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_ON_DK, $value);
     }
 
-    function getOnRF() {
+    function getOnRF($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_ON_RF, $default);
@@ -1228,7 +1233,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_ON_RF, $value);
     }
 
-    function getOnNA() {
+    function getOnNA($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_ON_NA, $default);
@@ -1258,7 +1263,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_ON_NA, $value);
     }
 
-    function getOnUpdate() {
+    function getOnUpdate($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_ON_UPDATE, $default);
@@ -1377,9 +1382,8 @@ class VariableDescriptive extends Component {
     function setOnVersionChange($value) {
         $this->setSettingValue(SETTING_ON_VERSION_CHANGE, $value);
     }
-    
-    
-    function getClickNext() {
+
+    function getClickNext($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_NEXT, $default);
@@ -1409,7 +1413,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_NEXT, $value);
     }
 
-    function getClickBack() {
+    function getClickBack($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_BACK, $default);
@@ -1439,7 +1443,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_BACK, $value);
     }
 
-    function getClickDK() {
+    function getClickDK($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_DK, $default);
@@ -1469,7 +1473,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_DK, $value);
     }
 
-    function getClickRF() {
+    function getClickRF($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_RF, $default);
@@ -1499,7 +1503,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_RF, $value);
     }
 
-    function getClickNA() {
+    function getClickNA($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_NA, $default);
@@ -1529,7 +1533,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_NA, $value);
     }
 
-    function getClickUpdate() {
+    function getClickUpdate($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_UPDATE, $default);
@@ -1559,7 +1563,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_UPDATE, $value);
     }
 
-    function getClickLanguageChange() {
+    function getClickLanguageChange($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_LANGUAGE_CHANGE, $default);
@@ -1589,7 +1593,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_LANGUAGE_CHANGE, $value);
     }
 
-    function getClickModeChange() {
+    function getClickModeChange($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_MODE_CHANGE, $default);
@@ -1619,7 +1623,7 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_CLICK_MODE_CHANGE, $value);
     }
 
-    function getClickVersionChange() {
+    function getClickVersionChange($default = true) {
 
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_CLICK_VERSION_CHANGE, $default);
@@ -2812,7 +2816,10 @@ class VariableDescriptive extends Component {
     /* type functions */
 
     function getTyd() {
-        return $this->variabledescriptive["tyd"];
+        if (isset($this->variabledescriptive["tyd"])) {
+            return $this->variabledescriptive["tyd"];
+        }
+        return "";
     }
 
     function setTyd($tyd) {
@@ -2889,7 +2896,7 @@ class VariableDescriptive extends Component {
     function setEnumeratedCustom($value) {
         $this->setSettingValue(SETTING_ENUMERATED_CUSTOM, $value);
     }
-    
+
     function getEnumeratedcolumns($default = true) {
 
         /* variable level setting */
@@ -3047,7 +3054,7 @@ class VariableDescriptive extends Component {
     function setEnumeratedBordered($value) {
         $this->setSettingValue(SETTING_ENUMERATED_BORDERED, $value);
     }
-    
+
     function getComboboxOptGroup($default = true) {
 
         /* variable level setting */
@@ -3076,7 +3083,7 @@ class VariableDescriptive extends Component {
     function setComboboxOptGroup($value) {
         $this->setSettingValue(SETTING_DROPDOWN_OPTGROUP, $value);
     }
-    
+
     function getHeaderAlignment($default = true) {
 
         $val = $this->getSettingValue(SETTING_HEADER_ALIGNMENT, $default);
@@ -3179,7 +3186,7 @@ class VariableDescriptive extends Component {
             }
 
             $t = splitString("/ /", $option, PREG_SPLIT_NO_EMPTY, 2);
-            $code = trim($t[0]);            
+            $code = trim($t[0]);
             if (isset($t[1])) {
                 $labeltext = trim($t[1]);
             } else {
@@ -3240,7 +3247,7 @@ class VariableDescriptive extends Component {
         }
         return implode(", ", $labels);
     }
-    
+
     function clearOptions() {
         $this->options = null;
         unset($this->options);
@@ -3357,7 +3364,7 @@ class VariableDescriptive extends Component {
     function setEnumeratedTextBoxPostText($value) {
         $this->setSettingValue(SETTING_ENUMERATED_TEXTBOX_POSTTEXT, $value);
     }
-    
+
     function getEnumeratedLabel($default = true) {
 
         /* variable level setting */
@@ -3387,7 +3394,7 @@ class VariableDescriptive extends Component {
     function setEnumeratedLabel($value) {
         $this->setSettingValue(SETTING_ENUMERATED_LABEL, $value);
     }
-    
+
     function getEnumeratedClickLabel($default = true) {
 
         /* variable level setting */
@@ -3413,7 +3420,7 @@ class VariableDescriptive extends Component {
         global $survey;
         return $survey->getEnumeratedClickLabel($default);
     }
-    
+
     function isEnumeratedClickLabel() {
         if ($this->getEnumeratedClickLabel() == CLICK_LABEL_YES) {
             return true;
@@ -3425,6 +3432,43 @@ class VariableDescriptive extends Component {
         $this->setSettingValue(SETTING_ENUMERATED_CLICK_LABEL, $value);
     }
     
+    function getSetOfEnumeratedRanking($default = true) {
+
+        /* variable level setting */
+        $val = $this->getSettingValue(SETTING_SETOFENUMERATED_RANKING, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
+            return $val;
+        }
+
+        /* type level setting */
+        if ($val != SETTING_FOLLOW_GENERIC && $this->hasType()) {
+            if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+                return SETTING_FOLLOW_TYPE;
+            }
+            $val = $this->type->getSetOfEnumeratedRanking($default);
+            if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+                return $val;
+            }
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getSetOfEnumeratedRanking($default);
+    }
+
+    function isSetOfEnumeratedRanking($default = true) {
+        if ($this->getSetOfEnumeratedRanking() == SETOFENUMERATED_RANKING_YES) {
+            return true;
+        }
+        return false;
+    }
+
+    function setSetOfEnumeratedRanking($value) {
+        $this->setSettingValue(SETTING_SETOFENUMERATED_RANKING, $value);
+    }
+
     function getTableMobile($default = true) {
 
         /* variable level setting */
@@ -3450,7 +3494,7 @@ class VariableDescriptive extends Component {
         global $survey;
         return $survey->getTableMobile($default);
     }
-    
+
     function isTableMobile() {
         if ($this->getTableMobile() == GROUP_YES) {
             return true;
@@ -3460,8 +3504,8 @@ class VariableDescriptive extends Component {
 
     function setTableMobile($text) {
         $this->setSettingValue(SETTING_TABLE_MOBILE, $text);
-    }  
-    
+    }
+
     function getTableMobileLabels($default = true) {
 
         /* variable level setting */
@@ -3487,7 +3531,7 @@ class VariableDescriptive extends Component {
         global $survey;
         return $survey->getTableMobileLabels($default);
     }
-    
+
     function isTableMobileLabels() {
         if ($this->getTableMobileLabels() == MOBILE_LABEL_YES) {
             return true;
@@ -3741,6 +3785,7 @@ class VariableDescriptive extends Component {
         /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
         }
+
         global $survey;
         return $survey->getMinimum($default);
     }
@@ -3960,10 +4005,9 @@ class VariableDescriptive extends Component {
     function setInvalidSubSelected($value) {
         $this->setSettingValue(SETTING_INVALIDSUB_SELECTED, $value);
     }
-    
-    
+
     /* ranker functions */
-    
+
     function getRankColumn($default = true) {
 
         /* variable level setting */
@@ -4071,7 +4115,7 @@ class VariableDescriptive extends Component {
         global $survey;
         return $survey->getMaximumRanked($default);
     }
-    
+
     function setMinimumRanked($value) {
         $this->setSettingValue(SETTING_MINIMUM_RANKED, $value);
     }
@@ -4402,7 +4446,7 @@ class VariableDescriptive extends Component {
         global $survey;
         return $survey->getInputMaskPlaceholder($default);
     }
-    
+
     function getInputMaskCallback($default = true) {
 
         /* variable level setting */
@@ -4521,7 +4565,7 @@ class VariableDescriptive extends Component {
     function setDateTimeFormat($value) {
         $this->setSettingValue(SETTING_DATETIME_FORMAT, $value);
     }
-    
+
     function getDateDefaultView($default = true) {
 
         /* variable level setting */
@@ -4551,7 +4595,7 @@ class VariableDescriptive extends Component {
     function setDateDefaultView($value) {
         $this->setSettingValue(SETTING_DATE_DEFAULT_VIEW, $value);
     }
-    
+
     function getDateTimeCollapse($default = true) {
 
         /* variable level setting */
@@ -4581,7 +4625,7 @@ class VariableDescriptive extends Component {
     function setDateTimeCollapse($value) {
         $this->setSettingValue(SETTING_DATETIME_COLLAPSE, $value);
     }
-    
+
     function getDateTimeSideBySide($default = true) {
 
         /* variable level setting */
@@ -4611,7 +4655,6 @@ class VariableDescriptive extends Component {
     function setDateTimeSideBySide($value) {
         $this->setSettingValue(SETTING_DATETIME_SIDE_BY_SIDE, $value);
     }
-    
 
     /* access functions */
 
@@ -5006,9 +5049,9 @@ class VariableDescriptive extends Component {
     function setButtonFormatting($value) {
         $this->setSettingValue(SETTING_BUTTON_FORMATTING, $value);
     }
-    
+
     function getXiTemplate($default = true) {
-        
+
         /* variable level setting */
         $val = $this->getSettingValue(SETTING_GROUP_XI_TEMPLATE, $default);
         if (!inArray($val, array("", SETTING_FOLLOW_GENERIC, SETTING_FOLLOW_TYPE))) {
@@ -5574,8 +5617,9 @@ class VariableDescriptive extends Component {
     function setLabelCloseButton($value) {
         $this->setSettingValue(SETTING_CLOSE_BUTTON_LABEL, $value);
     }
-    
-    /* spinner functions */    
+
+    /* spinner functions */
+
     function getSpinner($default = true) {
 
         /* variable level setting */
@@ -5601,7 +5645,7 @@ class VariableDescriptive extends Component {
         global $survey;
         return $survey->getSpinner($default);
     }
-    
+
     function isSpinner() {
         if ($this->getSpinner() == SPINNER_YES) {
             return true;
@@ -5612,7 +5656,7 @@ class VariableDescriptive extends Component {
     function setSpinner($value) {
         $this->setSettingValue(SETTING_SPINNER, $value);
     }
-    
+
     function getSpinnerType($default = true) {
 
         /* variable level setting */
@@ -5642,7 +5686,7 @@ class VariableDescriptive extends Component {
     function setSpinnerType($value) {
         $this->setSettingValue(SETTING_SPINNER_TYPE, $value);
     }
-    
+
     function getSpinnerUp($default = true) {
 
         /* variable level setting */
@@ -5672,7 +5716,7 @@ class VariableDescriptive extends Component {
     function setSpinnerUp($value) {
         $this->setSettingValue(SETTING_SPINNER_UP, $value);
     }
-    
+
     function getSpinnerDown($default = true) {
 
         /* variable level setting */
@@ -5702,7 +5746,7 @@ class VariableDescriptive extends Component {
     function setSpinnerDown($value) {
         $this->setSettingValue(SETTING_SPINNER_DOWN, $value);
     }
-    
+
     function getSpinnerIncrement($default = true) {
 
         /* variable level setting */
@@ -5732,7 +5776,7 @@ class VariableDescriptive extends Component {
     function setSpinnerIncrement($value) {
         $this->setSettingValue(SETTING_SPINNER_STEP, $value);
     }
-    
+
     function getTextboxManual($default = true) {
 
         /* variable level setting */
@@ -5758,7 +5802,7 @@ class VariableDescriptive extends Component {
         global $survey;
         return $survey->getTextboxManual($default);
     }
-    
+
     function isTextboxManual() {
         if ($this->getTextboxManual() == MANUAL_YES) {
             return true;
@@ -5769,8 +5813,9 @@ class VariableDescriptive extends Component {
     function setTextboxManual($value) {
         $this->setSettingValue(SETTING_TEXTBOX_MANUAL, $value);
     }
-    
-    /* knob functions */    
+
+    /* knob functions */
+
     function getKnobRotation($default = true) {
 
         /* variable level setting */
@@ -5802,6 +5847,7 @@ class VariableDescriptive extends Component {
     }
 
     /* slider functions */
+
     function getSliderPreSelection($default = true) {
 
         /* variable level setting */
@@ -5821,7 +5867,7 @@ class VariableDescriptive extends Component {
             }
         }
 
-        /* survey level setting */ 
+        /* survey level setting */
         if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
         }
@@ -5832,7 +5878,7 @@ class VariableDescriptive extends Component {
     function setSliderPreSelection($value) {
         $this->setSettingValue(SETTING_SLIDER_PRESELECTION, $value);
     }
-    
+
     function getSliderFormater($default = true) {
 
         /* variable level setting */
@@ -5852,7 +5898,7 @@ class VariableDescriptive extends Component {
             }
         }
 
-        /* survey level setting */ 
+        /* survey level setting */
         if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
         }
@@ -5863,7 +5909,7 @@ class VariableDescriptive extends Component {
     function setSliderFormater($value) {
         $this->setSettingValue(SETTING_SLIDER_FORMATER, $value);
     }
-    
+
     function getTooltip($default = true) {
 
         /* variable level setting */
@@ -5990,7 +6036,7 @@ class VariableDescriptive extends Component {
     function setTextBoxLabel($value) {
         $this->setSettingValue(SETTING_SLIDER_TEXTBOX_LABEL, $value);
     }
-    
+
     function getTextBoxPostText($default = true) {
 
         /* variable level setting */
@@ -6132,6 +6178,7 @@ class VariableDescriptive extends Component {
             return SETTING_FOLLOW_GENERIC;
         }
         global $survey;
+
         return $survey->getShowProgressBar($default);
     }
 
@@ -6267,9 +6314,9 @@ class VariableDescriptive extends Component {
     function setFillCode($text) {
         $this->setSettingValue(SETTING_FILLCODE, $text);
     }
-    
+
     /* check functions */
-    
+
     function getCheckText() {
         return $this->getSettingValue(SETTING_CHECKTEXT);
     }
@@ -6286,7 +6333,7 @@ class VariableDescriptive extends Component {
     function setCheckText($text) {
         $this->setSettingValue(SETTING_CHECKTEXT, $text);
     }
-    
+
     function getCheckCode($default = true) {
         return $this->getSettingValue(SETTING_CHECKCODE, $default);
     }
@@ -6852,12 +6899,12 @@ class VariableDescriptive extends Component {
         }
         return true;
     }
-    
+
     function getValidateAssignment($default = true) {
         if ($this->getSettingValue(SETTING_VALIDATE_ASSIGNMENT, $default) != "") {
             return $this->getSettingValue(SETTING_VALIDATE_ASSIGNMENT, $default);
         }
-        
+
         /* type level setting */
         if ($val != SETTING_FOLLOW_GENERIC && $this->hasType()) {
             if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
@@ -6869,26 +6916,25 @@ class VariableDescriptive extends Component {
             }
         }
 
-        /* survey level setting */ 
+        /* survey level setting */
         if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
         }
         global $survey;
         return $survey->getValidateAssignment($default);
     }
-    
+
     function isValidateAssignment() {
         if ($this->getValidateAssignment() == VALIDATE_ASSIGNMENT_YES) {
             return true;
         }
         return false;
     }
-    
+
     function setValidateAssignment($value) {
         $this->setSettingValue(SETTING_VALIDATE_ASSIGNMENT, $value);
     }
 
-    
     function getErrorMessageRankMinimum($default = true) {
 
         /* variable level setting */
@@ -6978,7 +7024,7 @@ class VariableDescriptive extends Component {
     function setErrorMessageRankExact($text) {
         $this->setSettingValue(SETTING_ERROR_MESSAGE_EXACT_RANK, $text);
     }
-    
+
     /* generic functions */
 
     function move($suid, $seid, $copy = false) {
@@ -7005,16 +7051,16 @@ class VariableDescriptive extends Component {
         $this->setObjectName($vsid);
         $this->setVsid($vsid);
         $this->setSuid($suid);
-        $this->setSeid($seid);        
-        
+        $this->setSeid($seid);
+
         // check for type
         if ($this->hasType()) {
-            if ($oldsuid != $suid) {        
+            if ($oldsuid != $suid) {
                 $this->type->copy($suid);
                 $this->setTyd($this->type->getTyd());
             }
         }
-        
+
         $this->save();
     }
 
@@ -7055,15 +7101,15 @@ class VariableDescriptive extends Component {
         $row = $db->getRow($r);
         $pos = $row["max"] + 1;
         $this->setPosition($pos);
-        
+
         // check for type
         if ($types == true && $this->hasType()) {
-            if ($newsuid != "" && $oldsuid != $newsuid) {        
+            if ($newsuid != "" && $oldsuid != $newsuid) {
                 $this->type->copy($newsuid);
                 $this->setTyd($this->type->getTyd());
             }
         }
-        
+
         $this->save();
     }
 

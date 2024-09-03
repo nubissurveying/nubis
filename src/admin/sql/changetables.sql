@@ -764,3 +764,11 @@ ALTER TABLE `survey1_test_times` ADD `timespent2` INT(11) NULL DEFAULT NULL AFTE
 ALTER TABLE `survey1_test_times` ADD `begintime2` TIMESTAMP NULL DEFAULT NULL AFTER `begintime`;
 
 ALTER TABLE `survey1_test_times` ADD `endtime2` TIMESTAMP NULL DEFAULT NULL AFTER `endtime`;
+
+/* October 2022 */
+ALTER TABLE `survey1_surveys`  ADD `nurselab` INT(11) NULL DEFAULT NULL  AFTER `position`,  ADD `nursevision` INT(11) NULL DEFAULT NULL  AFTER `nurselab`,  ADD `nurseantropometrics` INT(11) NULL DEFAULT NULL  AFTER `nursevision`,  ADD `nursefollowup` INT(11) NULL DEFAULT NULL  AFTER `nurseantropometrics`,  ADD `nursedatasheet` INT(11) NULL DEFAULT NULL  AFTER `nursefollowup`;
+ALTER TABLE `survey1_respondents` CHANGE `schoolingyears` `schoolingyears` INT(11) NULL DEFAULT '0';
+ALTER TABLE `survey1_respondents` CHANGE `occupationalstatus` `occupationalstatus` INT(11) NULL DEFAULT '0';
+ALTER TABLE `survey1_respondents` CHANGE `consenttype` `consenttype` INT(11) NULL DEFAULT '0';
+ALTER TABLE `survey1_communication` ADD `datatype` INT(11) NOT NULL DEFAULT '1' AFTER `urid`;
+ALTER TABLE `survey1_communication` ADD `direction` INT(11) NOT NULL DEFAULT '1' AFTER `datatype`;

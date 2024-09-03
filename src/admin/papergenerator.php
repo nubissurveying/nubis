@@ -35,11 +35,11 @@ class PaperGenerator {
 
     function generate($seid, $nestingcounter = 1) {
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
-        global $db;        
+        global $db;
         set_time_limit(0);
         ini_set('memory_limit', '128M');
         $this->seid = $seid;
-        $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $this->seid . " order by rgid asc";
+        $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid) . " order by rgid asc";
         if ($rules = $db->selectQuery($q)) {
 
             if ($db->getNumberOfRows($rules) > 0) {
@@ -180,14 +180,17 @@ class PaperGenerator {
         $return = '';
         while ($i < $while_what) {
             preg_match($regexp, $str, $matches);
-            $string = $matches[0];
+            $string = "";
+            if (isset($matches[0])) {
+                $string = $matches[0];
+            }
             $return .= $string . $break;
             $str = substr($str, strlen($string));
             $i++;
         }
         return $return . $str;
     }
-    
+
     function addFrontDashes($num) {
         $front = '';
         for ($i = 1; $i <= 1; $i++) {
@@ -195,7 +198,7 @@ class PaperGenerator {
         }
         return $front;
     }
-    
+
     function addEndDashes($num) {
         $front = '';
         for ($i = 1; $i <= 1; $i++) {
@@ -258,7 +261,7 @@ class PaperGenerator {
 
             // ONLY if in group
             //if (sizeof($this->groups) > 0) {
-                $this->addSubGroup($node, $instruction);
+            $this->addSubGroup($node, $instruction);
             //} else { // ignore the subgroup statement
             //    $this->cnt = $this->findEndSubGroup($rgid);
             //}
@@ -290,12 +293,12 @@ class PaperGenerator {
             $this->nesting--;
         }
         // end do
-        else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {            
+        else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
             $this->addToStatements($this->addEndDashes($this->nesting) . "<div class='uscic-paperversion-enddo'>End of loop</div></div>", 3);
             $this->nesting--;
         }
         // end group
-        else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP)) {            
+        else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP)) {
             $this->addToStatements($this->addEndDashes($this->nesting) . "<div class='uscic-paperversion-endgroup'>End of group of questions</div></div>", 4);
             $this->nesting--;
         }
@@ -379,7 +382,12 @@ class PaperGenerator {
             uksort($fills, "compareLength");
             foreach ($fills as $fill) {
                 $fillref = str_replace("[", "\[", str_replace("]", "\]", $fill));
-                $filltext = strtr($this->getFieldFromFill($fill), array('\\' => '\\\\', '$' => '\$'));
+                
+                $tt = $this->getFieldFromFill($fill);
+                    if ($tt === null) {
+                        $tt = "";
+                    }
+                $filltext = strtr($tt, array('\\' => '\\\\', '$' => '\$'));
                 $pattern = "/\\" . INDICATOR_FILL . $fillref . "/i";
                 $text = preg_replace($pattern, $filltext, $text);
             }
@@ -427,7 +435,7 @@ class PaperGenerator {
         $index = -1;
         if (sizeof($matches) > 0 && isset($matches[0])) {
             $index = "";
-            if (isset($matches[0][0])) { 
+            if (isset($matches[0][0])) {
                 trim($matches[0][0], '[]');
             }
             if ($var->getFillText() != '') {
@@ -498,7 +506,7 @@ class PaperGenerator {
             $pos = strrpos($rule, ROUTING_IDENTIFY_INLINE);
             $rule = substr($rule, 0, $pos);
         }
-        
+
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
         $rule = includeText($rule, $excluded);
@@ -539,7 +547,7 @@ class PaperGenerator {
     }
 
     function addInspect(&$node, $instruction) {
-        
+
         $rule = trim($instruction->getRule());
         $rgid = trim($instruction->getRgid());
 
@@ -554,9 +562,8 @@ class PaperGenerator {
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
         $rule = includeText($rule, $excluded);
-        
-        $this->addToStatements("<div class='uscic-paperversion-inspect uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-inspect-condition'>Value of question '" . $rule . "' asked as question</div></div>", 1); 
-        
+
+        $this->addToStatements("<div class='uscic-paperversion-inspect uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-inspect-condition'>Value of question '" . $rule . "' asked as question</div></div>", 1);
     }
 
     function addSetFill(&$node, $instruction) {
@@ -574,10 +581,10 @@ class PaperGenerator {
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
         $rule = includeText($rule, $excluded);
-        
-        $this->addToStatements("<div class='uscic-paperversion-fill uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-fill-condition'>Fill code of question '" . $rule . "' executed</div></div>", 1); 
+
+        $this->addToStatements("<div class='uscic-paperversion-fill uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-fill-condition'>Fill code of question '" . $rule . "' executed</div></div>", 1);
     }
-    
+
     function addInspectSection(&$node, $instruction) {
 
         $rule = trim($instruction->getRule());
@@ -652,9 +659,8 @@ class PaperGenerator {
         if ($else == true) {
             $this->addToStatements("</div>" . $this->addEndDashes($this->nesting));
             $this->addToStatements("<div class='uscic-paperversion-if uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-if-condition'>" . $rule . "</div>" . $this->addFrontDashes($this->nesting), 1);
-        }
-        else {
-            $this->addToStatements("<div class='uscic-paperversion-if uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-if-condition'>" . $rule . "</div>" . $this->addFrontDashes($this->nesting), 1); 
+        } else {
+            $this->addToStatements("<div class='uscic-paperversion-if uscic-paperversion-nesting" . $this->nesting . "'><div class='uscic-paperversion-if-condition'>" . $rule . "</div>" . $this->addFrontDashes($this->nesting), 1);
         }
     }
 
@@ -713,7 +719,7 @@ class PaperGenerator {
     }
 
     function addAssignment(&$node, $instruction) {
-        
+
         $rule = trim($instruction->getRule());
         $rgid = trim($instruction->getRgid());
 
@@ -723,7 +729,7 @@ class PaperGenerator {
 
         // hide module dot notations
         $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-        
+
         // split left and right hand
         $split = splitString("/:=/", $rule);
         $lefthand = includeText($split[0], $excluded);
@@ -742,7 +748,6 @@ class PaperGenerator {
             if (startsWith($rule, "/*")) {
 
                 $this->skipComments($cnt, $cnt);
-
             } else if (startsWith($rule, "//")) {
                 
             } else if ($rule == "") {

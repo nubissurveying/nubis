@@ -28,6 +28,7 @@ class DisplaySysAdmin extends Display {
                   <link href="css/uscicadmin.css" rel="stylesheet">
                   <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"> 
                   ';
+
         $returnStr = $this->showHeader(Language::messageSMSTitle(), $extra . $extra2);
         $returnStr .= $this->displayOptionsSidebar("optionssidebarbutton", "optionssidebar");
         $returnStr .= $this->bindAjax();
@@ -405,7 +406,7 @@ class DisplaySysAdmin extends Display {
         $returnStr .= '<ol class="breadcrumb">';
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.surveys'), Language::headerSurveys()) . '</li>';
         $returnStr .= '<li>' . $survey->getName() . '</li>';
-        
+
         if ($_SESSION['VRFILTERMODE_SURVEY'] == 0) {
             $returnStr .= '<li class="active">' . Language::headerSections() . '</li>';
         } else if ($_SESSION['VRFILTERMODE_SURVEY'] == 1) {
@@ -533,7 +534,7 @@ class DisplaySysAdmin extends Display {
     }
 
     function showRouting($seid) {
-        $returnStr .= '<form id="hiddenform" name="hiddenform" method="post">';
+        $returnStr = '<form id="hiddenform" name="hiddenform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.clickrouting'));
         $returnStr .= "<input type=hidden name=action id=action />";
         $returnStr .= '</form>';
@@ -547,16 +548,16 @@ class DisplaySysAdmin extends Display {
         $returnStr .= '</textarea>';
 
 
-        $returnStr .= '<input type="submit" class="btn btn-default" value="Save"/>';
+        $returnStr .= '<input style="margin-top: 15px;" type="submit" class="btn btn-default" value="Save"/>';
 
         $returnStr .= '<span class="pull-right">';
-        $returnStr .= '<button class="btn btn-default" data-toggle="modal" data-target="#listModal">' . Language::labelVariables() . '</button>';
+        $returnStr .= '<button style="margin-top: 15px;" class="btn btn-default" data-toggle="modal" data-target="#listModal">' . Language::labelVariables() . '</button>';
 
         $track = new Track($_SESSION['SUID'], $seid, OBJECT_SECTION);
         $history = $track->getEntries(SETTING_ROUTING);
         if (sizeof($history) > 0) {
             $returnStr .= '<div class="btn-group">
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <button style="margin-top: 15px;" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             ' . Language::labelHistory() . ' <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">';
@@ -568,7 +569,7 @@ class DisplaySysAdmin extends Display {
         </div>';
         }
 
-        $returnStr .= '<button class="btn btn-default" data-toggle="modal" data-target="#compiledModal">' . Language::labelCompiledCode() . '</button>';
+        $returnStr .= '<button style="margin-top: 15px;" class="btn btn-default" data-toggle="modal" data-target="#compiledModal">' . Language::labelCompiledCode() . '</button>';
         $returnStr .= '</span>';
         $returnStr .= '</form>';
 
@@ -639,12 +640,12 @@ class DisplaySysAdmin extends Display {
                     }
                     
                     var historyeditor = CodeMirror.fromTextArea(document.getElementById("historycontent"), {mode: "text/x-nubis", lineNumbers: true});
-                    $("#historyModal").on("show.bs.modal", function (event) {
+                    $("#historyModal").on("shown.bs.modal", function (event) {
                         event.stopImmediatePropagation();
                         var element = $(event.relatedTarget); // element that triggered the modal
                         var recipient = element.data("trackid"); // Extract info from data-* attributes
                         $.get("index.php?' . POST_PARAM_SMS_AJAX . '=' . SMS_AJAX_CALL . '&p=sysadmin.history.getentry&trid=" + recipient, null, function (data) {
-                              historyeditor.setValue(data.trim());
+                              historyeditor.setValue(data.trim()); historyeditor.refresh();
                         }, "text"); 
                         });
                         
@@ -793,7 +794,7 @@ Q1
 
         $returnStr = '<select id="answertype" name="answertype" class="selectpicker show-tick">';
         if ($type != -1) {
-            $returnStr .= "<option " . $selected[SETTING_FOLLOW_TYPE] . " value=" . SETTING_FOLLOW_TYPE . ">" . Language::optionsFollowType() . "</option>";
+            $returnStr .= "<option value=" . SETTING_FOLLOW_TYPE . ">" . Language::optionsFollowType() . "</option>";
         }
         foreach ($array as $key => $value) {
             $selected = "";
@@ -849,6 +850,7 @@ Q1
         $active = array('', '', '', '');
         $active[$filter] = ' active';
         $params = getSessionParams();
+        $returnStr = "";
 
         /* no mode/language dropdowns on edit routing page */
         $page = $_SESSION['LASTPAGE'];
@@ -859,7 +861,7 @@ Q1
             /* mode drop down (not for mode attributes) */
             $user = new User($_SESSION['URID']);
             if (!inArray($page, array("sysadmin.survey.editsettingsmode"))) {
-                $returnStr = '<form id=modeform method="post">';
+                $returnStr .= '<form id=modeform method="post">';
                 $returnStr .= '<input type=hidden name=r value="' . setSessionsParamString($params) . '">';
                 $returnStr .= $this->displayModesAdmin("surveymode", "surveymode", getSurveyMode(), "", implode("~", $user->getModes($survey->getSuid())));
                 $returnStr .= '<script type=text/javascript>
@@ -976,7 +978,10 @@ Q1
 
     function showSectionSideBar($survey, $filter = 0) {
         $returnStr = '<div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">';
-
+        if (!isset($_SESSION['SEID'])) {
+            return "";
+        }
+        
         $section = $survey->getSection($_SESSION['SEID']);
         $previous = $survey->getPreviousSection($section);
         $next = $survey->getNextSection($section);
@@ -990,9 +995,11 @@ Q1
         }
 
         $returnStr .= '<center>' . $previoustext . '<span class="label label-default">' . $section->getName() . '</span>' . $nexttext . '</center>';
+
         $returnStr .= '<div class="well sidebar-nav">
             <ul class="nav">
               <li>';
+        
         $returnStr .= $this->displayVariableRoutingFilter($survey, $filter); // . '<hr>' . $survey->getName() . ' sections:';
         $returnStr .= '</li></ul>';
         $returnStr .= '     </div><!--/.well -->
@@ -1003,7 +1010,12 @@ Q1
     function displayVariableRoutingFilter($survey, $filter = 0) {
         $active = array('', '', '', '', '');
         $active[$filter] = ' active';
-        $section = $survey->getSection($_SESSION['SEID']);
+        $seid = "";
+        if (isset($_SESSION['SEID'])) {
+            $seid = $_SESSION['SEID'];
+        }
+        $section = $survey->getSection($seid);
+
         $returnStr .= '<form method="post" id="sectionsidebar">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.section'));
         $returnStr .= '<input type="hidden" name="vrfiltermode_section" id="vrfiltermode_section" value="' . $filter . '">';
@@ -1051,7 +1063,7 @@ Q1
 
     /* SURVEYS */
 
-    function showSurveyHeader($survey, $actiontype, $message) {
+    function showSurveyHeader($survey, $actiontype = "", $message = "") {
 
         $returnStr = $this->showSysAdminHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
@@ -1070,7 +1082,7 @@ Q1
         return $returnStr;
     }
 
-    function showSurveyFooter($survey) {
+    function showSurveyFooter($extra = '') {
         $returnStr = '</div>';
         $returnStr .= '</div>';
         $returnStr .= '</div></div>'; //container and wrap        
@@ -1167,6 +1179,12 @@ Q1
     }
 
     function showSectionFooter($survey) {
+        if (!isset($_SESSION['VRFILTERMODE_SURVEY'])) {
+            $_SESSION['VRFILTERMODE_SURVEY'] = 0;
+        }
+        if (!isset($_SESSION['VRFILTERMODE_SECTION'])) {
+            $_SESSION['VRFILTERMODE_SECTION'] = 0;
+        }
         $returnStr = '</div>';
         $returnStr .= $this->showSurveySideBar($survey, $_SESSION['VRFILTERMODE_SURVEY']);
         $returnStr .= $this->showSectionSideBar($survey, $_SESSION['VRFILTERMODE_SECTION']);
@@ -1465,6 +1483,9 @@ Q1
 
         /* edit existing variable */
         if ($var->getName() != "") {
+            if (!isset($_SESSION['VRFILTERMODE_VARIABLE'])) {
+                $_SESSION['VRFILTERMODE_VARIABLE'] = 0;
+            }
             if ($_SESSION['VRFILTERMODE_VARIABLE'] == 0) {
                 $returnStr .= $this->showEditVariableGeneral($var);
             } elseif ($_SESSION['VRFILTERMODE_VARIABLE'] == 1) {
@@ -1749,7 +1770,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditVariableLayout($variable) {
-        $returnStr .= '<form id="editform" method="post">';
+        $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editvariablelayoutres', 'vsid' => $variable->getVsid()));
         $returnStr .= $this->displayComboBox();
         $helpstart = '<div class="input-group">';
@@ -1913,7 +1934,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<tr><td>" . Language::labelTypeEditEnumeratedRandomizer() . "</td>";
             $returnStr .= '<td colspan=4><div class="input-group"><input placeholder="' . Language::labelIfEmptyDefaultOrderPlaceholder() . '" type="text" class="form-control autocompletebasic" name="' . SETTING_ENUMERATED_RANDOMIZER . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getEnumeratedRandomizer(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyDefaultOrder() . '</i></span></div></td></tr>';
             $returnStr .= "<tr><td>" . Language::labelTypeEditDropdownOptgroup() . "</td>";
-            $returnStr .= '<td colspan=4><div class="input-group"><input placeholder="' . Language::labelIfEmptyDefaultOrderPlaceholder() . '" type="text" class="form-control autocompletebasic" name="' . SETTING_DROPDOWN_OPTGROUP . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getComboboxOptGroup(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyNoOptGroups() . '</i></span></div></td></tr>';            
+            $returnStr .= '<td colspan=4><div class="input-group"><input placeholder="' . Language::labelIfEmptyDefaultOrderPlaceholder() . '" type="text" class="form-control autocompletebasic" name="' . SETTING_DROPDOWN_OPTGROUP . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getComboboxOptGroup(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyNoOptGroups() . '</i></span></div></td></tr>';
             $returnStr .= '</table>';
             $returnStr .= '</div>';
         } else if (inArray($answertype, array(ANSWER_TYPE_RANK))) {
@@ -2010,7 +2031,14 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<tr><td>" . Language::labelTypeEditEnumeratedRandomizer() . "</td>";
             $returnStr .= '<td colspan=4><div class="input-group"><input placeholder="' . Language::labelIfEmptyDefaultOrderPlaceholder() . '" type="text" class="form-control autocompletebasic" name="' . SETTING_ENUMERATED_RANDOMIZER . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getEnumeratedRandomizer(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyDefaultOrder() . '</i></span></div></td></tr>';
 
-
+            if (inArray($answertype, array(ANSWER_TYPE_SETOFENUMERATED)) && $current == ORIENTATION_VERTICAL) {
+                $returnStr .= "<tr id='columns2'><td>" . Language::labelTypeSetOfEnumeratedRanking() . "</td>";
+            } else {
+                $returnStr .= "<tr id='columns2' style='display: none;'><td>" . Language::labelTypeSetOfEnumeratedRanking() . "</td>";
+            }
+            $returnStr .= "<td>" . $this->displaySetOfEnumeratedRanking(SETTING_SETOFENUMERATED_RANKING, $variable->getSetOfEnumeratedRanking(), true, $variable->getTyd()) . "</td><td width=25><nobr/></td>";
+            $returnStr .= '</tr>';
+            
             $returnStr .= '</table>';
 
             $returnStr .= "<script type='text/javascript'>";
@@ -2025,6 +2053,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#custom1").hide();
                                                             $("#custom2").hide();
                                                             $("#columns").hide();
+                                                            $("#columns2").hide();
                                                         }  
                                                         else if (this.value == 1 || (this.value=="settingfollowgeneric" && ' . $defaultsurvey . '==1) || (this.value=="settingfollowtype" && ' . $defaulttype . '==3)) {
                                                             $("#horizontal1").show();
@@ -2035,6 +2064,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#custom2").show();
                                                             $("#customtemplate").hide();
                                                             $("#columns").hide();
+                                                            $("#columns2").hide();
                                                         }
                                                         else if (this.value == 2 || (this.value=="settingfollowgeneric" && ' . $defaultsurvey . '==2) || (this.value=="settingfollowtype" && ' . $defaulttype . '==3)) {
                                                             $("#customtemplate").hide();
@@ -2044,7 +2074,10 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#horizontal6").hide();
                                                             $("#custom1").show();
                                                             $("#custom2").show();
-                                                            $("#columns").show();
+                                                            $("#columns").show();                                                            
+                                                            if (' . $answertype . '==' . ANSWER_TYPE_SETOFENUMERATED . ') {
+                                                                $("#columns2").show();
+                                                            }
                                                         }
                                                         else {                                                        
                                                             $("#horizontal1").hide();
@@ -2055,6 +2088,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#custom2").hide();
                                                             $("#customtemplate").hide();
                                                             $("#columns").hide();
+                                                            $("#columns2").hide();
                                                         }
                                                     });
                                                     })';
@@ -2202,7 +2236,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditVariableVerification($variable) {
-        $returnStr .= '<form id="editform" method="post">';
+        $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editvariablevalidationres', 'vsid' => $variable->getVsid()));
         $returnStr .= $this->getVariableTopTab(1);
         $returnStr .= "<div class='well'>";
@@ -2710,7 +2744,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditVariableFill($variable) {
-        $returnStr .= '<form id="hiddenform" name="hiddenform" method="post">';
+        $returnStr = '<form id="hiddenform" name="hiddenform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.clickrouting'));
         $returnStr .= "<input type=hidden name=action id=action />";
         $returnStr .= '</form>';
@@ -2726,7 +2760,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= convertHTLMEntities($variable->getFillCode(), ENT_QUOTES);
         $returnStr .= '</textarea></td></tr>';
         $returnStr .= '</table></div>';
-        $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
+        $returnStr .= '<input style="margin-top: 15px;" type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         $returnStr .= '</form>';
 
         $user = new User($_SESSION['URID']);
@@ -2785,7 +2819,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditVariableCheck($variable) {
-        $returnStr .= '<form id="hiddenform" name="hiddenform" method="post">';
+        $returnStr = '<form id="hiddenform" name="hiddenform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.clickrouting'));
         $returnStr .= "<input type=hidden name=action id=action />";
         $returnStr .= '</form>';
@@ -3207,6 +3241,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showVariableSideBar($survey, $filter = 0) {
+        if (!isset($_SESSION['VSID'])) {
+            return "";
+        }
         $returnStr = '<div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">';
         $var = $survey->getVariableDescriptive($_SESSION['VSID']);
         $previous = $survey->getPreviousVariableDescriptive($var);
@@ -3319,6 +3356,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
         }
 
         if ($type->getTyd() != "") {
+            if (!isset($_SESSION['VRFILTERMODE_TYPE'])) {
+                $_SESSION['VRFILTERMODE_TYPE'] = 0;
+            }
             if ($_SESSION['VRFILTERMODE_TYPE'] == 0) {
                 $returnStr .= '<li class="active">' . Language::headerEditTypeGeneral() . '</li>';
             } elseif ($_SESSION['VRFILTERMODE_TYPE'] == 1) {
@@ -3347,6 +3387,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr = '</div>';
         $returnStr .= $this->showSurveySideBar($survey, $_SESSION['VRFILTERMODE_SURVEY']);
         if (isset($_SESSION['TYD'])) {
+            if (!isset($_SESSION['VRFILTERMODE_TYPE'])) {
+                $_SESSION['VRFILTERMODE_TYPE'] = 0;
+            }
             $returnStr .= $this->showTypeSideBar($survey, $_SESSION['VRFILTERMODE_TYPE']);
         }
         $returnStr .= '</div>';
@@ -3566,6 +3609,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         /* edit existing type */
         if ($type->getTyd() != "") {
+            if (!isset($_SESSION['VRFILTERMODE_TYPE'])) {
+                $_SESSION['VRFILTERMODE_TYPE'] = 0;
+            }
             if ($_SESSION['VRFILTERMODE_TYPE'] == 0) {
                 $returnStr .= $this->showEditTypeGeneral($type);
             } elseif ($_SESSION['VRFILTERMODE_TYPE'] == 1) {
@@ -3839,7 +3885,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditTypeLayout($type) {
-        $returnStr .= '<form id="editform" method="post">';
+        $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.edittypelayoutres', 'tyd' => $type->getTyd()));
 
         $answertype = $type->getAnswerType();
@@ -4083,10 +4129,26 @@ $( ".uscic-form-control-admin" ).contextMenu({
                 $returnStr .= "<tr id='columns' style='display: none;'><td>" . Language::labelTypeEditEnumeratedColumns() . "</td>";
             }
 
+            /*
+             * $returnStr .= '<tr><td>' . Language::labelTypeSetOfEnumeratedRanking() . '</td>';
+        $returnStr .= "<td>" . $this->displaySetOfEnumeratedRanking(SETTING_SETOFENUMERATED_RANKING, $survey->getSetOfEnumeratedRanking()) . "</td><td width=25><nobr/></td>";
+        $returnStr .= "<td><nobr/></td></tr>";
+             */
+            
             $returnStr .= '<td colspan=4><div class="input-group"><input placeholder="' . Language::labelIfEmptyColumnsPlaceholder() . '" type="text" class="form-control" name="' . SETTING_ENUMERATED_COLUMNS . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($type->getEnumeratedColumns(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyColumns() . '</i></span></div></td></tr>';
 
             $returnStr .= "<tr><td>" . Language::labelTypeEditEnumeratedRandomizer() . "</td>";
             $returnStr .= '<td colspan=4><div class="input-group"><input placeholder="' . Language::labelIfEmptyDefaultOrderPlaceholder() . '" type="text" class="form-control autocompletebasic" name="' . SETTING_ENUMERATED_RANDOMIZER . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($type->getEnumeratedRandomizer(), ENT_QUOTES)) . '"/><span class="input-group-addon"><i>' . Language::labelIfEmptyDefaultOrder() . '</i></span></div></td></tr>';
+            
+            
+            if (inArray($answertype, array(ANSWER_TYPE_SETOFENUMERATED)) && $current == ORIENTATION_VERTICAL) {
+                $returnStr .= "<tr id='columns2'><td>" . Language::labelTypeSetOfEnumeratedRanking() . "</td>";
+            } else {
+                $returnStr .= "<tr id='columns2' style='display: none;'><td>" . Language::labelTypeSetOfEnumeratedRanking() . "</td>";
+            }
+            $returnStr .= "<td>" . $this->displaySetOfEnumeratedRanking(SETTING_SETOFENUMERATED_RANKING, $type->getSetOfEnumeratedRanking(), true) . "</td><td width=25><nobr/></td>";
+            $returnStr .= '</tr>';
+            
             $returnStr .= '</table>';
 
             $returnStr .= "<script type='text/javascript'>";
@@ -4101,6 +4163,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#custom1").hide();
                                                             $("#custom2").hide();
                                                             $("#columns").hide();
+                                                            $("#columns2").hide();
                                                         }  
                                                         else if (this.value == 1 || (this.value=="settingfollowgeneric" && ' . $defaultsurvey . '==1)) {
                                                             $("#horizontal1").show();
@@ -4111,6 +4174,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#custom2").show();
                                                             $("#customtemplate").hide();
                                                             $("#columns").hide();
+                                                            $("#columns2").hide();
                                                         }
                                                         else if (this.value == 2 || (this.value=="settingfollowgeneric" && ' . $defaultsurvey . '==2)) {
                                                             $("#customtemplate").hide();
@@ -4121,6 +4185,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#custom1").show();
                                                             $("#custom2").show();
                                                             $("#columns").show();
+                                                            if (' . $answertype . '==' . ANSWER_TYPE_SETOFENUMERATED . ') {
+                                                                $("#columns2").show();
+                                                            }    
                                                         }
                                                         else {
                                                             $("#horizontal1").hide();
@@ -4131,6 +4198,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                                                             $("#custom2").hide();
                                                             $("#customtemplate").hide();
                                                             $("#columns").hide();
+                                                            $("#columns2").hide();
                                                         }
                                                     });
                                                     })';
@@ -4341,7 +4409,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditTypeVerification($type) {
-        $returnStr .= '<form id="editform" method="post">';
+        $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.edittypevalidationres', 'tyd' => $type->getTyd()));
         $returnStr .= $this->getTypeTopTab(1);
         $returnStr .= "<div class='well'>";
@@ -4774,11 +4842,14 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<ol class="breadcrumb">';
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.surveys'), Language::headerSurveys()) . '</li>';
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey'), $survey->getName()) . '</li>';
-        $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey.section', 'seid' => $seid), $section->getName()) . '</li>';
+        $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey.section', 'seid' => $_SESSION['SEID']), $section->getName()) . '</li>';
         if ($group->getName() != "") {
             $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey.group', 'gid' => $group->getGid()), $group->getName()) . '</li>';
         }
         if ($group->getName() != "") {
+            if (!isset($_SESSION['VRFILTERMODE_GROUP'])) {
+                $_SESSION['VRFILTERMODE_GROUP'] = 0;
+            }
             if ($_SESSION['VRFILTERMODE_GROUP'] == 0) {
                 $returnStr .= '<li class="active">' . Language::headerEditTypeGeneral() . '</li>';
             } elseif ($_SESSION['VRFILTERMODE_GROUP'] == 1) {
@@ -4823,6 +4894,9 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showGroupFooter($survey) {
+        if (!isset($_SESSION['VRFILTERMODE_GROUP'])) {
+            $_SESSION['VRFILTERMODE_GROUP'] = 0;
+        }
         if ($_SESSION['VRFILTERMODE_GROUP'] == 0) {
             $returnStr = '<div style="min-height: 300px; max-height: 100%;"></div>';
         } else if ($_SESSION['VRFILTERMODE_GROUP'] == 1) {
@@ -5038,7 +5112,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
     }
 
     function showEditGroupLayout($group) {
-        $returnStr .= '<form id="editform" method="post">';
+        $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editgrouplayoutres', 'gid' => $group->getGid()));
         $returnStr .= $this->displayComboBox();
         $returnStr .= $this->displayColorPicker();
@@ -5087,7 +5161,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= "<td>" . $this->displayHeaderFixed($group->getHeaderFixed(), true) . "</td><td width=25><nobr/></td>            
                                <td>" . Language::labelTypeEditHeaderScrollDisplay() . "</td>";
             $returnStr .= '<td>' . $helpstart . '<input type="text" class="form-control" name="' . SETTING_HEADER_SCROLL_DISPLAY . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($group->getHeaderScrollDisplay(), ENT_QUOTES)) . '">' . $helpend . '</td></tr>';
-            
+
             $returnStr .= "<tr><td>" . Language::labelGroupEditBordered() . "</td>";
             $returnStr .= "<td>" . $this->displayStriped(SETTING_GROUP_TABLE_BORDERED, $group->getTableBordered(), true) . "</td><td width=25><nobr/>";
             $returnStr .= "<td>" . Language::labelGroupEditCondensed() . "</td>";
@@ -5243,7 +5317,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $message = Language::helpFollowSurvey();
         $helpend = '<span class="input-group-addon"><i>' . $message . '</i></span></div>';
 
-        $returnStr .= '<form id="editform" method="post">';
+        $returnStr = '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.survey.editgroupvalidationres', 'gid' => $group->getGid()));
         $returnStr .= $this->getGroupTopTab(1);
         $returnStr .= "<div class='well'>";
@@ -6220,6 +6294,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<span class="label label-default">' . Language::labelSettingsPage() . '</span>';
         $returnStr .= '<div class="well">';
         $returnStr .= '<table width=100%>';
+
         $returnStr .= '<tr><td>' . Language::labelTypeEditLayoutTemplate() . '</td><td>';
         $templateoptions = array();
         if ($dh = opendir("display/templates")) {
@@ -6405,6 +6480,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= "</tr>";
 
         $returnStr .= "<tr><td>" . Language::labelTypeEditMultiColumnQuestion() . "</td>";
+
         $returnStr .= '<td>' . $this->displayMultiColumnQuestionText(SETTING_MULTICOLUMN_QUESTIONTEXT, $survey->getMultiColumnQuestiontext()) . '</td><td width=25><nobr/></td>';
         $returnStr .= "</tr>";
 
@@ -6428,13 +6504,14 @@ $( ".uscic-form-control-admin" ).contextMenu({
 
         $returnStr .= "<td>" . Language::labelGroupEditBordered() . "</td>";
         $returnStr .= "<td>" . $this->displayEnumeratedSplit(SETTING_ENUMERATED_BORDERED, $survey->getEnumeratedBordered()) . "</td></tr>";
-
-        $returnStr .= '<tr><td>' . Language::labelTypeEditLayoutTextBox() . '</td>';
-        $returnStr .= "<td>" . $this->displayEnumeratedTextBox(SETTING_ENUMERATED_TEXTBOX, $survey->getEnumeratedTextBox()) . "</td><td width=25><nobr/></td>";
-        $returnStr .= "<td>" . Language::labelTypeEditLayoutEnumeratedLabel() . "</td><td>" . $this->displayEnumeratedLabel(SETTING_ENUMERATED_LABEL, $survey->getEnumeratedLabel()) . "</td></tr>";
+        
         $returnStr .= "<tr><td>" . Language::labelSliderTextBoxBefore() . '</td><td><input type="text" class="form-control autocompletebasic" name="' . SETTING_ENUMERATED_TEXTBOX_LABEL . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($survey->getEnumeratedTextBoxLabel(), ENT_QUOTES)) . '"></td>';
         $returnStr .= "<td width=25><nobr/></td><td>" . Language::labelSliderTextBoxAfter() . '</td><td><input type="text" class="form-control autocompletebasic" name="' . SETTING_ENUMERATED_TEXTBOX_LABEL . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($survey->getEnumeratedTextBoxPostText(), ENT_QUOTES)) . '"></td>';
         $returnStr .= '</tr>';
+        
+        $returnStr .= "<tr><td>" . Language::labelTypeEditLayoutDot() . "</td><td>" . $this->displaySliderMarker(SETTING_SLIDER_PRESELECTION, $survey->getSliderPreSelection()) . "</td>";
+        $returnStr .= '<td width=25><nobr/></td><td>' . Language::labelTypeSetOfEnumeratedRanking() . '</td>';
+        $returnStr .= "<td>" . $this->displaySetOfEnumeratedRanking(SETTING_SETOFENUMERATED_RANKING, $survey->getSetOfEnumeratedRanking()) . '</td></tr>';
         $returnStr .= '</table>';
         $returnStr .= '</div>';
 
@@ -6574,7 +6651,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         return $returnStr;
     }
 
-    function showCheck($content) {
+    function showCheck($content = "") {
         $returnStr = $this->showToolsHeader(Language::headerToolsChecker());
         $returnStr .= $content;
         $survey = new Survey($_SESSION['SUID']);
@@ -6593,7 +6670,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= '<table>';
 
         $returnStr .= '<tr><td>' . Language::labelOutputDocumentationSurvey() . '</td><td>' . $this->displaySurveys("survey", "survey", $_SESSION['SUID'], '', "onchange='document.getElementById(\"" . SMS_POST_SURVEY . "_hidden\").value=this.value; document.getElementById(\"refreshform\").submit();'") . '</tr>';
-        $returnStr .= '<tr><td>' . Language::labelOutputDocumentationMode() . '</td><td>' . $this->displayModesAdmin("surveymode", "surveymode", getSurveyMode(), "", implode("~", $user->getModes()), "onchange='document.getElementById(\"" . SMS_POST_MODE . "_hidden\").value=this.value; document.getElementById(\"refreshform\").submit();'") . '</tr>';
+        $returnStr .= '<tr><td>' . Language::labelOutputDocumentationMode() . '</td><td>' . $this->displayModesAdmin("surveymode", "surveymode", getSurveyMode(), "", implode("~", $user->getModes(getSurvey())), "onchange='document.getElementById(\"" . SMS_POST_MODE . "_hidden\").value=this.value; document.getElementById(\"refreshform\").submit();'") . '</tr>';
 
         /* language dropdown */
         $langs = explode("~", $user->getLanguages($_SESSION['SUID'], getSurveyMode()));
@@ -6708,7 +6785,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
                 $returnStr .= ' <a onclick="$(\'#vrfiltermode_batch\').val(2);$(\'#batcheditorbar\').submit(); return false;" style="text-decoration:none;"><span class="label ' . $active[2] . '">' . Language::labelGroups() . '</span></a>';
             }
         }
-        
+
         return $returnStr;
     }
 
@@ -8242,8 +8319,11 @@ $( ".uscic-form-control-admin" ).contextMenu({
             $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC(generateRandomPrimkey(8), Config::directLoginKey())) . '">';
             $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
             $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
-            
-            
+            $returnStr .= '<input type=hidden name=' . POST_PARAM_RESET_TEST . ' value="1">';
+
+            if (isset($_SESSION['SYSTEM_KEY']) && $_SESSION['SYSTEM_KEY'] == Config::smsSysadminKey()) {
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_SYSTEM_KEY . ' value="' . addslashes(encryptC($_SESSION['SYSTEM_KEY'], Config::directLoginKey())) . '">';
+            }
             $returnStr .= '<input type=hidden name=' . POST_PARAM_SURVEY_EXECUTION_MODE . ' value="' . SURVEY_EXECUTION_MODE_TEST . '">';
             $returnStr .= '<span class="label label-default">' . Language::labelToolsTestSettings() . '</span>';
             $returnStr .= '<div class="well well-sm">';
@@ -8448,7 +8528,7 @@ $( ".uscic-form-control-admin" ).contextMenu({
         $returnStr .= $this->showFooter(false);
         return $returnStr;
     }
-    
+
 }
 
 ?>

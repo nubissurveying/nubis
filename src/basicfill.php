@@ -28,7 +28,7 @@ class BasicFill {
         return $this->engine->getAnswer($variable);
     }
 
-    function setAnswer($variable, $value) {
+    function setAnswer($variable, $value = "") {
         return $this->engine->setAnswer($variable, $value);
     }
 

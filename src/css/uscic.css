@@ -1466,3 +1466,26 @@ ul.dropdown-menu li.dropdown-header {
     cursor: not-allowed;
 }
 
+/* checkbox styling for ranking */
+.uscic-row-cell-enumerated .checkbox { 
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.uscic-row-cell-enumerated .checkbox input[type="checkbox"] {
+    margin-right: 10px;
+    margin-left: 4px;
+}
+
+.uscic-row-cell-enumerated .checkbox label {
+    display: inline-block;
+    min-width: 100%;
+    max-width: 600px;
+}
+
+.uscic-row-cell-enumerated .checkbox ol {
+    margin-left: -10px;
+    list-style-type:none;
+}

@@ -106,7 +106,7 @@ class Surveys {
         $result = $db->selectQuery('select suid from ' . Config::dbSurvey() . '_surveys order by suid asc');
         if ($result && $db->getNumberOfRows($result) > 0) {
             if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
-                $user = new User($_SESSION['URID']);
+                $user = new User($_SESSION['URID']);                
                 $avsurveys = $user->getSurveysAccess();
                 while ($row = $db->getRow($result)) {
                     if (inArray($row["suid"], $avsurveys) || $all) {
@@ -120,7 +120,107 @@ class Surveys {
         }
         return "";
     }
+    
+    /* get survey identifier by type of survey */
+    function getNurseLabSurvey() {
+        global $db;
+        $result = $db->selectQuery('select suid from ' . Config::dbSurvey() . '_surveys where nurselab=1');
+        if ($db->getNumberOfRows($result) > 0) {
+            $row = $db->getRow($result);
+            return $row["suid"];
+        }
+        return "";
+    }
+    
+    function setNurseLabSurvey($suid) {
+        global $db;
+        if ($suid == "") {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nurselab=0');
+        }
+        else {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nurselab=1 where suid=' . prepareDatabaseString($suid));
+        }
+    }
+    
+    function getNurseVisionSurvey() {
+        global $db;
+        $result = $db->selectQuery('select suid from ' . Config::dbSurvey() . '_surveys where nursevision=1');
+        if ($db->getNumberOfRows($result) > 0) {
+            $row = $db->getRow($result);
+            return $row["suid"];
+        }
+        return "";
+    }
+    
+    function setNurseVisionSurvey($suid) {
+        global $db;
+        if ($suid == "") {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nursevision=0');
+        }
+        else {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nursevision=1 where suid=' . prepareDatabaseString($suid));
+        }
+    }
 
+    function getNurseAntropometricsSurvey() {
+        global $db;
+        $result = $db->selectQuery('select suid from ' . Config::dbSurvey() . '_surveys where nurseantropometrics=1');
+        if ($db->getNumberOfRows($result) > 0) {
+            $row = $db->getRow($result);
+            return $row["suid"];
+        }
+        return "";
+    }
+    
+    function setNurseAntropometricsSurvey($suid) {
+        global $db;
+        if ($suid == "") {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nurseantropometrics=0');
+        }
+        else {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nurseantropometrics=1 where suid=' . prepareDatabaseString($suid));
+        }
+    }
+
+    function getNurseFollowUpSurvey() {
+        global $db;
+        $result = $db->selectQuery('select suid from ' . Config::dbSurvey() . '_surveys where nursefollowup=1');
+        if ($db->getNumberOfRows($result) > 0) {
+            $row = $db->getRow($result);
+            return $row["suid"];
+        }
+        return "";
+    }
+    
+    function setNurseFollowUpSurvey($suid) {
+        global $db;
+        if ($suid == "") {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nursefollowup=0');
+        }
+        else {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nursefollowup=1 where suid=' . prepareDatabaseString($suid));
+        }
+    }
+    
+    function getNurseDataSheetSurvey() {
+        global $db;
+        $result = $db->selectQuery('select suid from ' . Config::dbSurvey() . '_surveys where nursedatasheet=1');
+        if ($db->getNumberOfRows($result) > 0) {
+            $row = $db->getRow($result);
+            return $row["suid"];
+        }
+        return "";
+    }
+    
+    function setNurseDataSheetSurvey($suid) {
+        global $db;
+        if ($suid == "") {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nursedatasheet=0');
+        }
+        else {
+            $result = $db->executeQuery('update ' . Config::dbSurvey() . '_surveys set nursedatasheet=1 where suid=' . prepareDatabaseString($suid));
+        }
+    }
 }
 
 ?>

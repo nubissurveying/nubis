@@ -21,25 +21,31 @@ class DisplayNurse extends Display {
     public function showMain($message = '') {
         $returnStr = $this->showNurseHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
+        $surveys = new Surveys();
         if (isVisionTestNurse(new User($_SESSION['URID']))) {
-
-
             $primkey = gen_password(10);
-            $returnStr .= "<form method=post>";
-            $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
-            $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
-            $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
-            $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
-            $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
-            $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
-            $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . '5' . '">';
-            $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width:200px">Start the vision test</button>';
-            $returnStr .= "</form>";
+
+            $returnStr .= $this->showNavBar();
+            $returnStr .= '<div class="container"><p>';
+            $ns = $surveys->getNurseVisionSurvey();
+            if (isSurveySMS($ns)) {
+                $returnStr .= "<form method=post>";
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . $ns . '">';
+                $returnStr .= '<input type=hidden name=' . POST_PARAM_SURVEY_EXECUTION_MODE . ' value=' . SURVEY_EXECUTION_MODE_NORMAL . '>';
+                $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width: 200px; margin-bottom: 30px;">' . Language::labelNurseStartVision() . '</button>';
+                $returnStr .= "</form>";
+            } else {
+                $returnStr .= $this->displayInfo(Language::messageNurseNoVisionSurvey());
+            }
         } else {
             $returnStr .= $this->showNavBar();
             $returnStr .= '<div class="container"><p>';
-
-
             $returnStr .= $message;
             if (isFieldNurse(new User($_SESSION['URID']))) {
                 $respondents = new Respondents();
@@ -75,8 +81,6 @@ class DisplayNurse extends Display {
 
                 if (isLabNurse(new User($_SESSION['URID']))) {
                     $returnStr .= '<br/><hr>';
-
-
                     $returnStr .= '<b>' . Language::labelNurseFieldDBS() . '</b><br/><br/>';
                     global $db;
                     $query = 'select count(*) as cnt from ' . Config::dbSurveyData() . '_lab where fielddbsstatus = 1';
@@ -85,10 +89,7 @@ class DisplayNurse extends Display {
                         $row = $db->getRow($result);
                         if ($row['cnt'] > 0) {
                             $returnStr .= $this->displayInfo(Language::labelNurseToShip($row["cnt"]));
-
-
                             $returnStr .= '<a href="' . setSessionParams(array('page' => 'nurse.fielddbs.shiptolab')) . '" target="#">' . Language::labelNurseShipToLab() . '</a>';
-
                             $returnStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
                             $returnStr .= '<a href="' . setSessionParams(array('page' => 'nurse.fielddbs.shiptolab.marked')) . '">' . Language::labelNurseMarkShipped() . '</a>';
                         } else {
@@ -108,49 +109,61 @@ class DisplayNurse extends Display {
                 if (!isLabNurse(new User($_SESSION['URID']))) {
                     //TEST
                     $returnStr .= '<hr><b>' . Language::labelNurseTestLab() . '</b><br/><br/>';
-
-
                     $primkey = gen_password(10);
-                    $returnStr .= "<form method=post>";
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . '3' . '">';
-                    $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width:200px">' . Language::labelNurseStartSurvey() . '</button>';
-                    $returnStr .= "</form>";
+                    $ns = $surveys->getNurseLabSurvey();
+                    if (isSurveySMS($ns)) {
+                        $returnStr .= "<form method=post>";
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . $ns . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SURVEY_EXECUTION_MODE . ' value=' . SURVEY_EXECUTION_MODE_NORMAL . '>';
+                        $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width: 200px; margin-bottom: 30px;">' . Language::labelNurseStartSurvey() . '</button>';
+                        $returnStr .= "</form>";
+                    } else {
+                        $returnStr .= $this->displayInfo(Language::messageNurseNoMainSurvey());
+                    }
 
-                    $primkey = gen_password(10);
-                    $returnStr .= "<form method=post>";
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . '5' . '">';
-                    $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width:200px">' . Language::labelNurseStartVision() . '</button>';
-                    $returnStr .= "</form>";
+                    $ns = $surveys->getNurseVisionSurvey();
+                    if (isSurveySMS($ns)) {
+                        $returnStr .= "<form method=post>";
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . $ns . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SURVEY_EXECUTION_MODE . ' value=' . SURVEY_EXECUTION_MODE_NORMAL . '>';
+                        $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width: 200px; margin-bottom: 30px;">' . Language::labelNurseStartVision() . '</button>';
+                        $returnStr .= "</form>";
+                    } else {
+                        $returnStr .= $this->displayInfo(Language::messageNurseNoVisionSurvey());
+                    }
 
-                    $primkey = gen_password(10);
-                    $returnStr .= "<form method=post>";
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
-                    $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . '6' . '">';
-                    $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width:200px">' . Language::labelNurseAntropometrics() . '</button>';
-                    $returnStr .= "</form>";
+                    $ns = $surveys->getNurseAntropometricsSurvey();
+                    if (isSurveySMS($ns)) {
+                        $returnStr .= "<form method=post>";
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SE . ' value="' . addslashes(USCIC_SURVEY) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_PRIMKEY . ' value="' . addslashes(encryptC($primkey, Config::directLoginKey())) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_LANGUAGE . ' value="' . '1' . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_URID . ' value="' . addslashes($_SESSION['URID']) . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_NEW_PRIMKEY . ' value="1">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_MODE . ' value="' . MODE_CAPI . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SUID . ' value="' . $ns . '">';
+                        $returnStr .= '<input type=hidden name=' . POST_PARAM_SURVEY_EXECUTION_MODE . ' value=' . SURVEY_EXECUTION_MODE_TEST . '>';
+                        $returnStr .= '<button type="submit" id="startsurveybtn" class="btn btn-default navbar-btn" style="width: 200px; margin-bottom: 30px;">' . Language::labelNurseAntropometrics() . '</button>';
+                        $returnStr .= "</form>";
+                    } else {
+                        $returnStr .= $this->displayInfo(Language::messageNurseNoAntropometricsSurvey());
+                    }
                 }
             }
         }
 //END TEST
-
-
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
         $returnStr .= $this->showFooter(false);
@@ -207,38 +220,6 @@ class DisplayNurse extends Display {
             $respondentsActive = '';
         }
 
-
-        /*        $surveyActive = '';
-          $outputActive = '';
-          $toolsActive = '';
-          if (!isset($_SESSION['LASTPAGE'])) {
-          $_SESSION['LASTPAGE'] = 'sysadmin.survey';
-          }
-          if (strpos($_SESSION['LASTPAGE'], 'sysadmin.sms') === 0) {
-          $smsActive = ' active';
-          $surveyActive = '';
-          $outputActive = '';
-          $toolsActive = '';
-          }
-          if (strpos($_SESSION['LASTPAGE'], 'sysadmin.survey') === 0) {
-          $smsActive = '';
-          $surveyActive = ' active';
-          $outputActive = '';
-          $toolsActive = '';
-          }
-          if (strpos($_SESSION['LASTPAGE'], 'sysadmin.output') === 0) {
-          $smsActive = '';
-          $surveyActive = '';
-          $outputActive = ' active';
-          $toolsActive = '';
-          }
-          if (strpos($_SESSION['LASTPAGE'], 'sysadmin.tools') === 0) {
-          $smsActive = '';
-          $surveyActive = '';
-          $outputActive = '';
-          $toolsActive = ' active';
-          } */
-
         $returnStr = '
       <!-- Fixed navbar -->
       <div id="mainnavbar" class="navbar navbar-default navbar-fixed-top">
@@ -258,63 +239,20 @@ class DisplayNurse extends Display {
         $returnStr .= '<li' . $respondentsActive . '>' . setSessionParamsHref(array('page' => 'nurse.respondents'), Language::linkInterviews()) . '</li>';
         $returnStr .= '<li' . $followActive . '>' . setSessionParamsHref(array('page' => 'nurse.followup'), Language::labelNurseFollowUp()) . '</li>';
 
-
-//        $returnStr .'<li' . $smsActive . '>' . setSessionParamsHref(array('page' => 'sysadmin.sms'), Language::linkSms()) . '</li>';
-
-
-
-
-        /*     $returnStr .= '<li class="dropdown' . $surveyActive . '"><a data-hover="dropdown" class="dropdown-toggle" data-toggle="dropdown">' . Language::linkSurvey() . ' <b class="caret"></b></a>';
-
-          $surveys = new Surveys();
-          $surveys = $surveys->getSurveys();
-          $returnStr .= '<ul class="dropdown-menu">';
-          foreach ($surveys as $survey) {
-          $span = '';
-          if (isset($_SESSION['SUID']) && $_SESSION['SUID'] == $survey->getSuid()) {
-          $span = ' <span class="glyphicon glyphicon-chevron-down"></span>';
-          }
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.survey', 'suid' => $survey->getSuid()), $survey->getName() . $span) . '</li>';
-          }
-          $returnStr .= '</ul>';
-          $returnStr .= '</li>'; */
-        /*        $returnStr .= '<li class="dropdown' . $outputActive . '"><a data-hover="dropdown" class="dropdown-toggle" data-toggle="dropdown">' . Language::linkOutput() . ' <b class="caret"></b></a>';
-          $returnStr .= '<ul class="dropdown-menu">';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.output.data'), '<span class="glyphicon glyphicon-save"></span> ' . Language::linkData()) . '</li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.output.statistics'), '<span class="glyphicon glyphicon-stats"></span> ' . Language::linkStatistics()) . '</li>';
-          $returnStr .= '<li class="divider"></li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.output.documentation'), '<span class="glyphicon glyphicon-file"></span> ' . Language::linkDocumentation()) . '</li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.output.screendumps'), '<span class="glyphicon glyphicon-screenshot"></span> ' . Language::linkScreendumps()) . '</li>';
-          $returnStr .= '</ul></li>'; */
-
-        /* $returnStr .= '<li class="dropdown' . $toolsActive . '"><a data-hover="dropdown" class="dropdown-toggle" data-toggle="dropdown">' . Language::linkTools() . ' <b class="caret"></b></a>';
-          $returnStr .= '<ul class="dropdown-menu">';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.check'), '<span class="glyphicon glyphicon-check"></span> ' . Language::linkChecker()) . '</li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.compile'), '<span class="glyphicon glyphicon-cog"></span> ' . Language::linkCompiler()) . '</li>';
-          $returnStr .= '<li class="divider"></li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.test'), '<span class="glyphicon glyphicon-comment"></span> ' . Language::linkTest()) . '</li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.flood'), '<span class="glyphicon glyphicon-random"></span> ' . Language::linkFlood()) . '</li>';
-          $returnStr .= '<li class="divider"></li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.export'), '<span class="glyphicon glyphicon-export"></span> ' . Language::linkExport()) . '</li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.import'), '<span class="glyphicon glyphicon-import"></span> ' . Language::linkImport()) . '</li>';
-          $returnStr .= '<li class="divider"></li>';
-          $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'sysadmin.tools.clean'), '<span class="glyphicon glyphicon-trash"></span> ' . Language::linkCleaner()) . '</li>';
-          $returnStr .= '</ul></li>'; */
         $returnStr .= '</ul>';
         $user = new User($_SESSION['URID']);
+        $divider = "";
         $returnStr .= '<ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
               <a data-hover="dropdown" class="dropdown-toggle" data-toggle="dropdown">' . $user->getUsername() . ' <b class="caret"></b></a>
-                 <ul class="dropdown-menu">
-        		<li><a href="' . setSessionParams(array('page' => 'sysadmin.preferences')) . '"><span class="glyphicon glyphicon-wrench"></span> ' . Language::linkPreferences() . '</a></li>';
+                 <ul class="dropdown-menu">';
+        $returnStr .= '<li><a href="' . setSessionParams(array('page' => 'nurse.preferences')) . '"><span class="glyphicon glyphicon-wrench"></span> ' . Language::linkPreferences() . '</a></li>';
+        $divider = '<li class="divider"></li>';
         if (isFieldNurse($user)) { //send/receive button
             $returnStr .= '<li><a href="' . setSessionParams(array('page' => 'interviewer.sendreceive')) . '"><span class="glyphicon glyphicon-import"></span> ' . Language::linkSendReceive() . '</a></li>';
         }
-        if ($user->getUserType() == USER_SYSADMIN) {
-            $returnStr .= '<li><a href="' . setSessionParams(array('page' => 'sysadmin.users')) . '"><span class="glyphicon glyphicon-user"></span> ' . Language::linkUsers() . '</a></li>';
-        }
 
-        $returnStr .= '<li class="divider"></li>
+        $returnStr .= $divider . '
                    <li><a ' . POST_PARAM_NOAJAX . '=' . NOAJAX . ' href="index.php?rs=1&se=2"><span class="glyphicon glyphicon-log-out"></span> ' . Language::linkLogout() . '</a></li>
                  </ul>
              </li>
@@ -332,6 +270,96 @@ class DisplayNurse extends Display {
         return $returnStr;
     }
 
+    function showPreferences($user) {
+
+        $returnStr = $this->showNurseHeader(Language::messageSMSTitle());
+
+        $returnStr .= '<div id="wrap">';
+
+        $returnStr .= $this->showNavBar();
+
+        $returnStr .= '<div class="container"><p>';
+
+//CONTENT
+
+
+
+        $returnStr .= '<h4>' . Language::linkPreferences() . '</h4>';
+
+
+
+        $returnStr .= '<form method=post>';
+
+        $returnStr .= setSessionParamsPost(array('page' => 'nurse.preferencesres'));
+
+        $returnStr .= '<div class="panel panel-default">
+
+  <div class="panel-heading">
+
+    <h3 class="panel-title">' . Language::labelSettings() . '</h3>
+
+  </div>
+
+  <div class="panel-body">
+
+';
+
+        $returnStr .= '<input type="hidden" name="testmode" id="testmode" value="' . $user->getTestMode() . '">';
+        $returnStr .= '<table><tr><td style="width:110px">' . Language::labelMode() . ':</td><td>
+			<div id="testmodeselector" class="btn-group">
+				<button type="button" class="btn btn-default active" value=0>' . Language::labelNormalMode() . '</button>
+				<button type="button" class="btn btn-default" value=1>' . Language::labelTestMode() . '</button>
+			</div></td><td style="width:10px;"></td><td>';
+
+        $returnStr .= '</td></tr>';
+
+        $returnStr .= '</table>';
+
+        $returnStr .= '<script>';
+
+        $returnStr .= '$(\'#testmodeselector button\').click(function() {
+
+		  $(\'#testmodediv\').css("display", "none");
+
+		  $(\'#testmodeselector button\').addClass(\'active\').not(this).removeClass(\'active\');
+
+		  $(\'#testmode\').val("0");
+
+		  if ($(this).val() == "1") {
+
+		    $(\'#testmodediv\').css("display", "block");
+
+		    $(\'#testmode\').val("1");
+
+		  }
+
+		  });
+
+
+if ($(\'#testmode\').val() == "1"){
+
+  $(\'#testmodediv\').css("display", "block");
+
+  $(\'#testmodeselector button\').click();
+
+}
+
+</script>';
+
+        $returnStr .= '
+  </div>
+</div>';
+
+        $returnStr .= '<button type="submit" class="btn btn-default navbar-btn">' . Language::buttonSave() . '</button>';
+        $returnStr .= '</form>';
+
+        //END CONTENT
+        $returnStr .= '</p></div>    </div>'; //container and wrap
+        $returnStr .= $this->showBottomBar();
+        $returnStr .= $this->showFooter();
+        return $returnStr;
+    }
+
     function showSearchRes($respondentsOrHouseholds, $message = '') {
         $returnStr = $this->showNurseHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
@@ -341,14 +369,10 @@ class DisplayNurse extends Display {
 
         //respondents mode!
         $returnStr .= '<h4>' . Language::labelNurseSearchResults() . '</h4>';
-
         $returnStr .= $message;
 
-
-
-
         if (sizeof($respondentsOrHouseholds) > 0) {
-            $returnStr .= sizeof($respondentsOrHouseholds) . ' ' . Language::messageRespondentsFound();
+            $returnStr .= sizeof($respondentsOrHouseholds) . ' ' . Language::messageRespondentsFound() . "<br/><br/>";
             $t = array_values($respondentsOrHouseholds);
             if ($t[0] instanceof Respondent) {
                 $returnStr .= $this->showRespondentsTable($respondentsOrHouseholds, 'nurse.respondent');
@@ -420,13 +444,25 @@ class DisplayNurse extends Display {
             $returnStr .= '</td><td></td></tr>';
         }
 
+        $surveys = new Surveys();
         if (!isLabNurse(new User($_SESSION['URID']))) {
 
             if ($respondent->getAge() < 70) {
 
                 $returnStr .= '<tr><td style="width:200px">' . $labstations['5b']['name'] . '</td><td colspan=3>';
-                $returnStr .= $this->showStartButton($respondent, 5, $lab->getLabBarcode() == '', Language::labelNurseButtonVisionTest(), $lab->getVision() == 2);
-                $returnStr .= $this->showStartButton($respondent, 6, $lab->getLabBarcode() == '', Language::labelNurseButtonAntropometrics(), $lab->getAnthropometrics() == 2);
+                $ns = $surveys->getNurseVisionSurvey();
+                if (isSurveySMS($ns)) {
+                    $returnStr .= $this->showStartButton($respondent, $ns, $lab->getLabBarcode() == '', Language::labelNurseButtonVisionTest(), $lab->getVision() == 2);
+                } else {
+                    $returnStr .= $this->displayInfo(Language::messageNurseNoVisionSurvey());
+                }
+
+                $ns = $surveys->getNurseAntropometricsSurvey();
+                if (isSurveySMS($ns)) {
+                    $returnStr .= $this->showStartButton($respondent, $ns, $lab->getLabBarcode() == '', Language::labelNurseButtonAntropometrics(), $lab->getAnthropometrics() == 2);
+                } else {
+                    $returnStr .= $this->displayInfo(Language::messageNurseNoAntropometricsSurvey());
+                }
                 $returnStr .= '</td></tr>';
 
                 if (!isMainNurse(new User($_SESSION['URID'])) && $lab->getLabBarcode() == '') {
@@ -434,7 +470,12 @@ class DisplayNurse extends Display {
                 }
 
                 $returnStr .= '<tr><td style="width:200px"><nobr>' . $labstations['6']['name'] . '</td><td colspan=3>';
-                $returnStr .= $this->showStartButton($respondent, 3, $lab->getLabBarcode() == '', Language::labelNurseButtonStartLabSurvey(), $lab->getSurvey() == 2);
+                $ns = $surveys->getNurseLabSurvey();
+                if (isSurveySMS($ns)) {
+                    $returnStr .= $this->showStartButton($respondent, $ns, $lab->getLabBarcode() == '', Language::labelNurseButtonStartLabSurvey(), $lab->getSurvey() == 2);
+                } else {
+                    $returnStr .= $this->displayInfo(Language::messageNurseNoMainSurvey());
+                }
                 $returnStr .= '</td></tr>';
 
                 if (!isMainNurse(new User($_SESSION['URID'])) && $lab->getLabBarcode() == '') {
@@ -472,7 +513,12 @@ class DisplayNurse extends Display {
                 $returnStr .= $this->showButton(Language::labelNurseButtonUploadUSB(), $lab->getLabBarcode() == '', $windowopen);
                 $returnStr .= '</td><td valign=center>';
                 if ($respondent->getAge() < 70) {
-                    $returnStr .= $this->showStartButton($respondent, 4, $lab->getLabBarcode() == '', Language::labelNurseButtonDataEnterSheet(), $lab->getMeasures() == 2);
+                    $ns = $surveys->getNurseDataSheetSurvey();
+                    if (isSurveySMS($ns)) {
+                        $returnStr .= $this->showStartButton($respondent, $ns, $lab->getLabBarcode() == '', Language::labelNurseButtonDataEnterSheet(), $lab->getMeasures() == 2);
+                    } else {
+                        $returnStr .= $this->displayInfo(Language::messageNurseNoDataSheetSurvey());
+                    }
                 }
                 $returnStr .= '</td><td></td></tr>';
             }
@@ -518,7 +564,7 @@ class DisplayNurse extends Display {
                 $returnStr .= '<form method=post id=bloodform>';
                 $returnStr .= '<input type=hidden name=blooddate id=blooddate value="' . date("Y-m-d") . '">';
                 $returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.blood.received.fromlab', 'primkey' => $respondent->getPrimkey()));
-                $windowopen = 'var blood_text=prompt(\'' . Language::labelNurseBloodResultReceivedDate() . '\', \'' . date('Y-m-d') . '\'); if(blood_text == \'\' && blood_text !== null) { alert(\'test\'); $(\'#blooddate\').val(blood_text);$(\'form#bloodform\').submit(); } else { alert(\'no\'); return false; }';
+                $windowopen = 'var blood_text=prompt(\'' . Language::labelNurseBloodResultReceivedDate() . '\', \'' . date('Y-m-d') . '\'); if(blood_text == \'\' && blood_text !== null) { $(\'#blooddate\').val(blood_text);$(\'form#bloodform\').submit(); } else { return false; }';
                 $returnStr .= $this->showButton(Language::labelNurseButtonReceivedBloodResultFromLab(), $lab->getBarcode() == '', $windowopen);
                 $returnStr .= '</form>';
             } else {
@@ -575,20 +621,21 @@ class DisplayNurse extends Display {
 
 
 
-            $returnStr .= '<tr><td style="width:200px">' . Language::labelNurseShippingForms() . '</td><td valign=center style="width:50px">';
-            $returnStr .= '<form method=post>';
-            $returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.requestform.print', 'primkey' => $respondent->getPrimkey()));
-            $returnStr .= $this->showButton(Language::labelNurseButtonShippingForms(), $lab->getLabBarcode() == '');
-            $returnStr .= '</form>';
-
-            $returnStr .= '</td><td>';
-
-            $returnStr .= '<form method=post>';
-            $returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.requestform.print', 'primkey' => $respondent->getPrimkey()));
-            $returnStr .= $this->showButton(Language::labelNurseButtonTube9(), $lab->getLabBarcode() == '');
-            $returnStr .= '</form>';
-
-            $returnStr .= '</td><td>';
+            $returnStr .= '<tr>';
+            $returnStr .= '<td style="width:200px">' . Language::labelNurseShippingForms() . '</td>';
+            //$returnStr .= '<td valign=center style="width:50px">';
+            //$returnStr .= '<form method=post>';
+            //$returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.requestform.print', 'primkey' => $respondent->getPrimkey()));
+            //$returnStr .= $this->showButton(Language::labelNurseButtonShippingForms(), $lab->getLabBarcode() == '');
+            //$returnStr .= '</form>';
+            //$returnStr .= '</td>';
+            //$returnStr .= '<td>';
+            //$returnStr .= '<form method=post>';
+            //$returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.requestform.print', 'primkey' => $respondent->getPrimkey()));
+            //$returnStr .= $this->showButton(Language::labelNurseButtonTube9(), $lab->getLabBarcode() == '');
+            //$returnStr .= '</form>';
+            //$returnStr .= '</td>';
+            $returnStr .= '<td>';
 
             $returnStr .= '<form method=post>';
             $returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.cd4results', 'primkey' => $respondent->getPrimkey()));
@@ -697,10 +744,10 @@ class DisplayNurse extends Display {
             if ($respondent->hasPicture('lab')) {
                 $fieldname = 'lab';
             }
-            $returnStr .= '<img src="custom/picture/index.php?id=' . $respondent->getPrimkey() . '&fieldname=' . $fieldname . '&p=show" width="200">';
+            $returnStr .= '<img style="width: 120px;" src="custom/picture/index.php?k=' . encryptC(Config::pictureKey(), Config::smsComponentKey()) . '&id=' . $respondent->getPrimkey() . '&fieldname=' . $fieldname . '&p=show" width="200">';
         }
 
-        $returnStr .= '</td><td valign=top>';
+        $returnStr .= '</td><td style="width: 50px;"><nobr/></td><td valign=top>';
 
         $returnStr .= '<table><tr><td>' . Language::labelNurseBarCode() . ':</td><td colspan=2>';
         if ($lab->getBarcode() != '') {
@@ -728,7 +775,7 @@ class DisplayNurse extends Display {
 
 
 
-        $returnStr .= '</table>';
+        $returnStr .= '</table><br/><br/>';
         if ($respondent->isSelected()) {
             $returnStr .= $this->showInfoButtons($respondent, $lab);
 
@@ -779,11 +826,16 @@ class DisplayNurse extends Display {
 
                     $returnStr .= $this->displayWarning(Language::labelNurseStatus() . ': ' . $lab->displayFieldDBSStatus());
                     $returnStr .= '<br/><table>';
-                    $returnStr .= '<tr><td></td><td><input type=text class="form-control" style="width:200px" name=fielddbscollected value="' . addslashes($lab->getFieldDBSCollectedDate()) . '"></td></tr>';
-                    $returnStr .= '<tr><td>' . Language::labelNurseReceivedDate() . '</td><td><input type=text class="form-control" style="width:200px" name=fielddbsreceived value="' . addslashes($lab->getFieldDBSReceivedDate()) . '"></td></tr>';
-                    $returnStr .= '<tr><td>' . Language::labelNurseShippedDate() . '</td><td><input type=text class="form-control" style="width:200px" name=fielddbsshipped value="' . addslashes($lab->getFieldDBSShipmentDate()) . '"></td></tr>';
-                    $returnStr .= '<tr><td>' . Language::labelNurseResultsFromLab() . '</td><td><input type=text class="form-control" style="width:200px" name=fielddbsshipmentreturneddate value="' . addslashes($lab->getFieldDBSReceivedDateFromLab()) . '"></td></tr>';
-                    $returnStr .= '<tr><td>' . Language::labelNurseResultsClinic() . '</td><td><input type=text class="form-control" style="width:200px" name=fielddbsclinicresultsissueddate value="' . addslashes($lab->getFieldDBSClinicResultsIssued()) . '"></td></tr>';
+                    $dt = $this->displayDateTimePicker('fielddbscollected', 'fielddbscollected', addslashes($lab->getFieldDBSCollectedDate()), getSMSLanguagePostFix(getSMSLanguage()), "true", "false", Config::usFormatSMS());
+                    $returnStr .= '<tr><td>' . Language::labelNurseCollectedDate() . '</td><td>' . $dt . '</td></tr>';
+                    $dt = $this->displayDateTimePicker('fielddbsreceived', 'fielddbsreceived', addslashes($lab->getFieldDBSReceivedDate()), getSMSLanguagePostFix(getSMSLanguage()), "true", "false", Config::usFormatSMS());
+                    $returnStr .= '<tr><td>' . Language::labelNurseReceivedDate() . '</td><td>' . $dt . '</td></tr>';
+                    $dt = $this->displayDateTimePicker('fielddbsshipped', 'fielddbsshipped', addslashes($lab->getFieldDBSShipmentDate()), getSMSLanguagePostFix(getSMSLanguage()), "true", "false", Config::usFormatSMS());
+                    $returnStr .= '<tr><td>' . Language::labelNurseShippedDate() . '</td><td>' . $dt . '</td></tr>';
+                    $dt = $this->displayDateTimePicker('fielddbsshipmentreturneddate', 'fielddbsshipmentreturneddate', addslashes($lab->getFieldDBSReceivedDateFromLab()), getSMSLanguagePostFix(getSMSLanguage()), "true", "false", Config::usFormatSMS());
+                    $returnStr .= '<tr><td>' . Language::labelNurseResultsFromLab() . '</td><td>' . $dt . '</td></tr>';
+                    $dt = $this->displayDateTimePicker('fielddbsclinicresultsissueddate', 'fielddbsclinicresultsissueddate', addslashes($lab->getFieldDBSClinicResultsIssued()), getSMSLanguagePostFix(getSMSLanguage()), "true", "false", Config::usFormatSMS());
+                    $returnStr .= '<tr><td>' . Language::labelNurseResultsClinic() . '</td><td>' . $dt . '</td></tr>';
 
                     $returnStr .= '<tr><td>' . Language::labelNurseStatus() . '</td><td>';
                     $returnStr .= '<select name=fielddbsstatus class="form-control" style="width:250px">';
@@ -990,7 +1042,7 @@ class DisplayNurse extends Display {
         return $returnStr;
     }
 
-    function showRespondentLabBarcode($respondent, $message) {
+    function showRespondentLabBarcode($respondent, $message = "") {
         $returnStr = $this->showNurseHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
 
@@ -1045,7 +1097,7 @@ $(document).ready(function() {
         return $returnStr;
     }
 
-    function showRespondentBarcode($respondent, $message) {
+    function showRespondentBarcode($respondent, $message = "") {
         $returnStr = $this->showNurseHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
 
@@ -1072,8 +1124,6 @@ $(document).ready(function() {
         $lab = new Lab($respondent->getPrimkey());
         $returnStr .= '<form method=post autocomplete=off>';
         $returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.barcode.res', 'primkey' => $respondent->getPrimkey()));
-
-
         $returnStr .= '<table><tr><td>' . Language::labelNurseLabBarCodeScan1() . '</td><td><input type="text" class="form-control" id="scan1" name="scan1" value="' . $lab->getBarcode() . '"></td></tr>';
         $returnStr .= '<tr><td>' . Language::labelNurseLabBarCodeScan2() . '</td><td><input type="text" class="form-control" name="scan2" value="' . $lab->getBarcode() . '"></td></tr></table>';
 
@@ -1110,6 +1160,7 @@ $(document).ready(function() {
         $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'nurse.respondent.info', 'primkey' => $respondent->getPrimkey()), Language::labelNurseRespondent() . ' ' . $respondent->getPrimkey()) . '</li>';
         $returnStr .= '<li class="active">' . Language::labelNurseTakePicture() . '</li>';
         $returnStr .= '</ol>';
+        
         $returnStr .= takePicture('lab', $respondent->getPrimkey());
 
 //end content
@@ -1198,7 +1249,12 @@ $(document).ready(function() {
         $returnStr .= '<div id=refusalreason style="background-color: #dddddd;">';
         $returnStr .= '<br><table>';
         $returnStr .= '<tr><td>' . Language::labelNurseRespondentRefusalReason() . '</td><td><input type=text name=reason class="form-control" value="' . addslashes($lab->getRefusalReason()) . '"></td></tr>';
-        $returnStr .= '<tr><td>' . labelNurseRespondentRefusalDate() . '</td><td><input type=text name=refusaldate class="form-control" value="' . addslashes($lab->getRefusalDate()) . '"></td></tr>';
+        $dt = $this->displayDateTimePicker('refusaldate', 'refusaldate', addslashes($lab->getRefusalDate()), getSMSLanguagePostFix(getSMSLanguage()), "true", "false", Config::usFormatSMS());
+        //$returnStr .= '<tr><td>' . Language::labelNurseRespondentRefusalDate() . '</td><td><input type=text name=refusaldate class="form-control" value="' . addslashes($lab->getRefusalDate()) . '"></td></tr>';
+        $returnStr .= '<tr><td>' . Language::labelNurseRespondentRefusalDate() . '</td><td>' . $dt . '</td></tr>';
+
+
+
         $returnStr .= '</table><br/></div>';
 
 
@@ -1245,7 +1301,8 @@ $(document).ready(function() {
     function showStartButton($respondentOrHousehold, $suid = 3, $alert = false, $btntext = 'Start', $ok = false) {
         $preload = array();
         $lab = new Lab($respondentOrHousehold->getPrimkey());
-        if ($suid == 4) {
+        $surveys = new Surveys();
+        if ($suid == $surveys->getNurseDataSheetSurvey()) {
             if ($lab->getConsent2() == 1 || $lab->getConsent3() == 1) { //station 2 = YES
                 $preload['RgetsStation2'] = '1';
             }
@@ -1759,23 +1816,28 @@ $(document).ready(function() {
         $returnStr .= '<li class="active">' . Language::labelNurseAssignNurse() . '</li>';
         $returnStr .= '</ol>';
 
-        $returnStr .= Language::labelNurseAssignNurseHomeVisit() . '<br/>';
         $users = new Users();
+        $fieldnurses = $users->getUsersByType(USER_NURSE, USER_NURSE_FIELD);
 
-        $returnStr .= '<form method=post>';
-        $returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.assigntofieldnurse.res', 'primkey' => $respondent->getPrimkey()));
+        if (sizeof($fieldnurses) > 0) {
 
-        $returnStr .= '<select name=urid class="form-control" style="width:240px">';
+            $returnStr .= Language::labelNurseAssignNurseHomeVisit() . '<br/>';
+            $returnStr .= '<form method=post>';
+            $returnStr .= setSessionParamsPost(array('page' => 'nurse.respondent.assigntofieldnurse.res', 'primkey' => $respondent->getPrimkey()));
 
-        $fieldnurses = $users->getFieldNurses();
-        foreach ($fieldnurses as $nurse) {
-            $returnStr .= '<option value=' . $nurse->getUrid() . '>' . $nurse->getName() . '</option>';
+            $returnStr .= '<select name=urid class="form-control" style="width:240px">';
+
+            $fieldnurses = $users->getUsersByType(USER_NURSE, USER_NURSE_FIELD);
+            foreach ($fieldnurses as $nurse) {
+                $returnStr .= '<option value=' . $nurse->getUrid() . '>' . $nurse->getName() . '</option>';
+            }
+            $returnStr .= '</select>';
+
+            $returnStr .= '<button type="submit" class="btn btn-default navbar-btn">' . Language::labelNurseButtonSave() . '</button>';
+            $returnStr .= '</form>';
+        } else {
+            $returnStr .= $this->displayInfo(Language::labelNoFieldNurses());
         }
-        $returnStr .= '</select>';
-
-        $returnStr .= '<button type="submit" class="btn btn-default navbar-btn">' . Language::labelNurseButtonSave() . '</button>';
-        $returnStr .= '</form>';
-
 
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
@@ -1809,7 +1871,13 @@ $(document).ready(function() {
         $returnStr .= '</div>';
 
         $returnStr .= '<hr>';
-        $returnStr .= $this->showStartButton($respondent, 3, /* $lab->getLabBarcode() == '' */ false, 'Start survey', $lab->getSurvey() == 2);
+        $surveys = new Surveys();
+        $ns = $surveys->getNurseAntropometricsSurvey();
+        if (isSurveySMS($ns)) {
+            $returnStr .= $this->showStartButton($respondent, $ns, false, Language::labelNurseAntropometrics(), $lab->getSurvey() == 2);
+        } else {
+            $returnStr .= $this->displayInfo(Language::messageNurseNoAntropometricsSurvey());
+        }
 
 
         $returnStr .= '</p></div>    </div>'; //container and wrap
@@ -1972,8 +2040,13 @@ $(document).ready(function() {
         $returnStr .= '<button type="submit" class="btn btn-default navbar-btn">' . Language::buttonAddContact() . '</button>';
 
         $returnStr .= '</form> <b> OR </b>';
-
-        $returnStr .= $this->showStartButton($respondent, 7, false, 'Start follup survey', false);
+        $surveys = new Surveys();
+        $ns = $surveys->getNurseFollowUpSurvey();
+        if (isSurveySMS($ns)) {
+            $returnStr .= $this->showStartButton($respondent, $ns, false, 'Start follow up survey', false);
+        } else {
+            $returnStr .= $this->displayInfo(Language::messageNurseNoFollowUpSurvey());
+        }
 
 
         $returnStr .= '<br/>';

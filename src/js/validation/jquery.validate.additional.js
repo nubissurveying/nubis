@@ -740,7 +740,10 @@ jQuery.validator.addMethod('inclusive', function(value, el, args) {
 jQuery.validator.addMethod("minimumrequired", function(value, element, args) {
     var ar = args.split("-");
     var minrequired = args[0];
-    var fields = ar[1].replace("[", "").replace("]", "");
+    var temp = ar[1];
+    var fields = temp.replaceAll("[]", "BRACKCOMBI");
+    fields = fields.replaceAll("[", "").replaceAll("]", "");
+    fields = fields.replaceAll("BRACKCOMBI", "[]");
     var count = 0;
     fields = fields.split(",");
     for (var i = 0; i < fields.length; i++) {
@@ -749,6 +752,13 @@ jQuery.validator.addMethod("minimumrequired", function(value, element, args) {
         var type = el.attr('type');
         if (type == 'radio') {
             var val = $('[name="' + v + '"]:checked').val();
+        }
+        else if (type == 'checkbox') {
+            var myarray = [];
+            $('[name="' + v + '"]:checked').each(function(){
+                myarray.push($(this).val());
+            });
+            var val = myarray.join("-");
         }
         else {
             var val = el.val();
@@ -768,7 +778,10 @@ jQuery.validator.addMethod("minimumrequired", function(value, element, args) {
 jQuery.validator.addMethod("maximumrequired", function(value, element, args) {
     var ar = args.split("-");
     var maxrequired = args[0];
-    var fields = ar[1].replace("[", "").replace("]", "");
+    var temp = ar[1];
+    var fields = temp.replaceAll("[]", "BRACKCOMBI");
+    fields = fields.replaceAll("[", "").replaceAll("]", "");
+    fields = fields.replaceAll("BRACKCOMBI", "[]");
     var count = 0;
     fields = fields.split(",");
     for (var i = 0; i < fields.length; i++) {
@@ -777,6 +790,13 @@ jQuery.validator.addMethod("maximumrequired", function(value, element, args) {
         var type = el.attr('type');
         if (type == 'radio') {
             var val = $('[name="' + v + '"]:checked').val();
+        }
+        else if (type == 'checkbox') {
+            var myarray = [];
+            $('[name="' + v + '"]:checked').each(function(){
+                myarray.push($(this).val());
+            });
+            var val = myarray.join("-");
         }
         else {
             var val = el.val();
@@ -796,7 +816,10 @@ jQuery.validator.addMethod("maximumrequired", function(value, element, args) {
 jQuery.validator.addMethod("exactrequired", function(value, element, args) {
     var ar = args.split("-");
     var exactrequired = args[0];
-    var fields = ar[1].replace("[", "").replace("]", "");
+    var temp = ar[1];
+    var fields = temp.replaceAll("[]", "BRACKCOMBI");
+    fields = fields.replaceAll("[", "").replaceAll("]", "");
+    fields = fields.replaceAll("BRACKCOMBI", "[]");
     var count = 0;
     fields = fields.split(",");
     for (var i = 0; i < fields.length; i++) {
@@ -805,6 +828,13 @@ jQuery.validator.addMethod("exactrequired", function(value, element, args) {
         var type = el.attr('type');
         if (type == 'radio') {
             var val = $('[name="' + v + '"]:checked').val();
+        }
+        else if (type == 'checkbox') {
+            var myarray = [];
+            $('[name="' + v + '"]:checked').each(function(){
+                myarray.push($(this).val());
+            });
+            var val = myarray.join("-");
         }
         else {
             var val = el.val();
@@ -831,20 +861,13 @@ jQuery.validator.addMethod("uniquerequired", function(value, element, args) {
             if (type == 'radio') {
                 var val = $('[name="' + v + '"]:checked').val();
             }
-            else if (v.endsWith('[]')) {
-                //alert(el.val());
-                var t = '' + el.val();
-                if (t.indexOf(",") > -1) { // multi-dropdown
-                    var vals = t.split(",");
-                }
-                else { // checkboxes
-                    var vals = t.split("-");
-                }
-                //var vals = el.val().split("-");
-                //alert(el.val());
-                val = vals.sort(sortNumber).join("-");
-                //alert(val);
-            }
+            else if (type == 'checkbox') {
+                var myarray = [];
+                $('[name="' + v + '"]:checked').each(function(){
+                    myarray.push($(this).val());
+                });
+                var val = myarray.sort(sortNumber).join("-");
+            }            
             else {
                 var val = el.val();
             }
@@ -880,20 +903,13 @@ jQuery.validator.addMethod("samerequired", function(value, element, args) {
             if (type == 'radio') {
                 var val = $('[name="' + v + '"]:checked').val();
             }
-            else if (v.endsWith('[]')) {
-                //alert(el.val());
-                var t = '' + el.val();
-                if (t.indexOf(",") > -1) { // multi-dropdown
-                    var vals = t.split(",");
-                }
-                else { // checkboxes
-                    var vals = t.split("-");
-                }
-                //var vals = el.val().split("-");
-                //alert(el.val());
-                val = vals.sort(sortNumber).join("-");
-                //alert(val);
-            }
+            else if (type == 'checkbox') {
+                var myarray = [];
+                $('[name="' + v + '"]:checked').each(function(){
+                    myarray.push($(this).val());
+                });
+                var val = myarray.sort(sortNumber).join("-");
+            } 
             else {
                 var val = el.val();
             }

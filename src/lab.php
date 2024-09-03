@@ -19,7 +19,7 @@ class Lab {
     function __construct($primkey) {
         if ($primkey != null && $primkey != '') {
             global $db;
-            $query = 'select *, aes_decrypt(barcode, "' . Config::labKey() . '") as barcode_dec, aes_decrypt(labbarcode, "' . Config::labKey() . '") as labbarcode_dec from ' . Config::dbSurveyData() . '_lab where primkey = "' . prepareDatabaseString($primkey) . '"';
+            $query = 'select *, aes_decrypt(barcode, "' . prepareDatabaseString(Config::labKey()) . '") as barcode_dec, aes_decrypt(labbarcode, "' . prepareDatabaseString(Config::labKey()) . '") as labbarcode_dec from ' . prepareDatabaseString(Config::dbSurveyData()) . '_lab where primkey = "' . prepareDatabaseString($primkey) . '"';
             $result = $db->selectQuery($query);
             if ($result == null || $db->getNumberOfRows($result) == 0) { //not yet present: create?
                 $queryNew = 'insert into ' . Config::dbSurveyData() . '_lab (primkey) values ("' . prepareDatabaseString($primkey) . '")';
@@ -510,38 +510,40 @@ class Lab {
 
 
         $query .= 'urid = "' . prepareDatabaseString($this->getUrid()) . '", ';
-
-        $query .= 'labvisitts = "' . prepareDatabaseString($this->getLabVisitTs()) . '", ';
-
-
+        $ts = prepareDatabaseString($this->getLabVisitTs());
+        if ($ts == "") {
+            $query .= 'labvisitts = NULL, ';
+        }
+        else {
+            $query .= 'labvisitts = "' . $ts . '", ';
+        }
 
         $query .= 'fielddbsshipmentdate = "' . prepareDatabaseString($this->getFieldDBSShipmentDate()) . '", ';
         $query .= 'fielddbsreceiveddate = "' . prepareDatabaseString($this->getFieldDBSReceivedDate()) . '", ';
         $query .= 'fielddbscollecteddate = "' . prepareDatabaseString($this->getFieldDBSCollectedDate()) . '", ';
         $query .= 'fielddbsshipmentreturneddate = "' . prepareDatabaseString($this->getFieldDBSReceivedDateFromLab()) . '", ';
         $query .= 'fielddbsclinicresultsissueddate = "' . prepareDatabaseString($this->getFieldDBSClinicResultsIssued()) . '", ';
-
         $query .= 'fielddbsstatus =  "' . prepareDatabaseString($this->getFieldDBSStatus()) . '", ';
-
         $query .= 'labdbslocation =  "' . prepareDatabaseString($this->getLabDBSLocation()) . '", ';
         $query .= 'labdbsposition =  "' . prepareDatabaseString($this->getLabDBSPosition()) . '", ';
-
         $query .= 'labbloodstatus =  "' . prepareDatabaseString($this->getLabBloodStatus()) . '", ';
         $query .= 'labbloodshipmentdate =  "' . prepareDatabaseString($this->getLabBloodShipmentDate()) . '", ';
         $query .= 'labbloodshipmentreturneddate =  "' . prepareDatabaseString($this->getLabBloodReceivedDateFromLab()) . '", ';
-
-
         $query .= 'labbloodlocation =  "' . prepareDatabaseString($this->getLabBloodLocation()) . '", ';
         $query .= 'labbloodposition =  "' . prepareDatabaseString($this->getLabBloodPosition()) . '", ';
         $query .= 'labbloodsenttolab = "' . prepareDatabaseString($this->getLabBloodSentToLab()) . '", ';
         $query .= 'labbloodnotcollected = "' . prepareDatabaseString($this->getLabBloodNotCollected()) . '", ';
-
-
         $query .= 'consenturid = "' . prepareDatabaseString($this->getConsentUrid()) . '", ';
-        $query .= 'consentts = "' . prepareDatabaseString($this->getConsentTs()) . '" ';
-
+        
+        $ts = prepareDatabaseString($this->getConsentTs());
+        if ($ts == "") {
+            $query .= 'consentts = NULL ';
+        }
+        else {
+            $query .= 'consentts = "' . $ts . '" ';
+        }
+        
         $query .= 'WHERE primkey = "' . prepareDatabaseString($this->getPrimkey()) . '"';
-
         $db->executeQuery($query);
     }
 

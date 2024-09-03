@@ -24,12 +24,18 @@ class Users {
         return '*, aes_decrypt(password, "' . Config::smsPasswordKey() . '") as password ';
     }
 
-    function getUsersByType($type) {
+    function getUsersByType($type, $subtype = "") {
         global $db;
         $users = array();
-        $result = $db->selectQuery('SELECT ' . $this->getSelectQuery() . ' FROM ' . Config::dbSurvey() . '_users where usertype = ' . prepareDatabaseString($type));
-        while ($row = $db->getRow($result)) {
-            $users[] = new User($row);
+        $extra = '';
+        if ($subtype != "") {
+            $extra = ' and usersubtype=' . prepareDatabaseString($subtype);
+        }
+        $result = $db->selectQuery('SELECT ' . $this->getSelectQuery() . ' FROM ' . Config::dbSurvey() . '_users where usertype = ' . prepareDatabaseString($type) . $extra);
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $users[] = new User($row);
+            }
         }
         return $users;
     }
@@ -38,8 +44,10 @@ class Users {
         global $db;
         $users = array();
         $result = $db->selectQuery('SELECT ' . $this->getSelectQuery() . ' FROM ' . Config::dbSurvey() . '_users where username = "' . prepareDatabaseString($name) . '"');
-        while ($row = $db->getRow($result)) {
-            $users[] = new User($row);
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $users[] = new User($row);
+            }
         }
         return $users;
     }
@@ -51,8 +59,10 @@ class Users {
         } else {
             $users = array();
             $result = $db->selectQuery('SELECT ' . $this->getSelectQuery() . ' FROM ' . Config::dbSurvey() . '_users where sup = ' . prepareDatabaseString($urid));
-            while ($row = $db->getRow($result)) {
-                $users[] = new User($row);
+            if ($result && $db->getNumberOfRows($result) > 0) {
+                while ($row = $db->getRow($result)) {
+                    $users[] = new User($row);
+                }
             }
             $this->userArray[$_SESSION['URID']] = $users;
         }
@@ -66,8 +76,10 @@ class Users {
         } else {
             $users = array();
             $result = $db->selectQuery('SELECT ' . $this->getSelectQuery() . ' FROM ' . Config::dbSurvey() . '_users');
-            while ($row = $db->getRow($result)) {
-                $users[] = new User($row);
+            if ($result && $db->getNumberOfRows($result) > 0) {
+                while ($row = $db->getRow($result)) {
+                    $users[] = new User($row);
+                }
             }
             $this->userArray[$_SESSION['URID']] = $users;
         }

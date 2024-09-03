@@ -16,7 +16,9 @@ class DisplayQuestionBasic extends Display {
 
     protected $primkey; // tracks data identifier
     protected $state;
+    protected $errorchecks; // tracks error checks to be used
     protected $errormessages; // tracks error messages to be used
+    protected $errorcheckmessages; // tracks error messages to be used
     protected $engine;
     protected $subs;
     protected $language; // tracks language
@@ -38,12 +40,14 @@ class DisplayQuestionBasic extends Display {
     private $externalonly; // tracks variables stored externally only
     var $inlineeditable;
     var $inlineediticon;
+    var $progressbarwidth;
 
     function __construct($prim, $engine) {
         $this->primkey = $prim;
         $this->engine = $engine;
         $this->errorchecks = array();
         $this->errormessages = array();
+        $this->errorcheckmessages = array(); 
         $this->lastparse = true;
         $this->showheader = true;
         $this->showfooter = true;
@@ -181,10 +185,11 @@ class DisplayQuestionBasic extends Display {
         }
 
         if (Config::useAccessible()) {
+            global $survey;
             $returnStr .= '<link href="css/accessible.css" type="text/css" rel="stylesheet">';
             $returnStr .= "<header class='accessible_header' id='surveyheader' role='banner'></header>";
             $returnStr .= '<main class="accessible_main" id="surveymain" role="main">';
-            $returnStr .= "<h1 class='nubis-accessible-hidden'>" . Language::labelAccessibleH1() . "</h1>";
+            $returnStr .= "<h1 class='nubis-accessible-hidden'>" . Language::labelAccessibleH1($survey->getTitle()) . "</h1>";
         }
 
         $returnStr .= '<form id="form" role="form" method="post" autocapitalize="off" spellcheck="false" autocorrect="off" autocomplete="off">';
@@ -248,6 +253,7 @@ class DisplayQuestionBasic extends Display {
                 $section = $this->engine->getSection($queryobject->getSeid());
                 $sectionheaders[$queryobject->getSeid()] = $this->engine->replaceFills($section->getHeader());
             }
+
             if ($queryobject->isShowSectionFooter()) {
                 $section = $this->engine->getSection($queryobject->getSeid());
                 $sectionfooters[$queryobject->getSeid()] = $this->engine->replaceFills($section->getFooter());
@@ -528,7 +534,7 @@ class DisplayQuestionBasic extends Display {
                     $clickback = $this->engine->replaceFills($queryobject->getClickBack());
                     $clickback = str_replace("'", "", $clickback);
                     $back = true;
-                    $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" value="' . $this->engine->replaceFills($queryobject->getLabelBackButton()) . '" type="button" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelBackButton())) . '"; ' . $unmask . ' ' . $clickback . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\'>' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelBackButton()), $buttonformat) . '</button>';
+                    $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" value="' . $this->engine->replaceFills($queryobject->getLabelBackButton()) . '" type="button" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelBackButton())) . '"; ' . $clickback . ' ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\'>' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelBackButton()), $buttonformat) . '</button>';
                 }
             } else {
 
@@ -537,7 +543,7 @@ class DisplayQuestionBasic extends Display {
                         $clickback = $this->engine->replaceFills($queryobject->getClickBack());
                         $clickback = str_replace("'", "", $clickback);
                         $back = true;
-                        $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" value="' . $this->engine->replaceFills($queryobject->getLabelBackButton()) . '" type="button" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelBackButton())) . '"; ' . $unmask . ' ' . $clickback . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit(); \'>' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelBackButton()), $buttonformat) . '</button>';
+                        $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" value="' . $this->engine->replaceFills($queryobject->getLabelBackButton()) . '" type="button" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelBackButton())) . '"; ' . $clickback . ' ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit(); \'>' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelBackButton()), $buttonformat) . '</button>';
                     }
                 }
             }
@@ -584,11 +590,11 @@ class DisplayQuestionBasic extends Display {
                         if ($lastcheck != "") {
                             $lastcheck = "if (" . $lastcheck . ") { scrollToError(); enableButtons(); return false;}";
                         }
-                        $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . $unmask . ' clearForm();' . $extra_empty_check . ' ' . $extra_error_check . ' ' . $accessiblecheck . ' ' . $this->slidercode . ' ' . $lastcheck . ' document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
+                        $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . ' clearForm();' . $extra_empty_check . ' ' . $extra_error_check . ' ' . $accessiblecheck . ' ' . $this->slidercode . ' ' . $lastcheck . ' document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
                     }
                     //  no empty and/or error checking
                     else {
-                        $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . $unmask . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
+                        $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
                     }
                 }
                 //  group
@@ -635,11 +641,11 @@ class DisplayQuestionBasic extends Display {
                         if ($lastcheck != "") {
                             $lastcheck = "if (" . $lastcheck . ") { scrollToError(); enableButtons(); return false;}";
                         }
-                        $returnStrButtons .= '<button class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\' disableButtons(); ' . $screenshotscript . $unmask . ' clearForm();' . $extra_empty_check . ' ' . $extra_error_check . ' ' . $accessiblecheck . ' ' . $this->slidercode . ' ' . $lastcheck . ' document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
+                        $returnStrButtons .= '<button tabindex="0" class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\' disableButtons(); ' . $screenshotscript . ' clearForm();' . $extra_empty_check . ' ' . $extra_error_check . ' ' . $accessiblecheck . ' ' . $this->slidercode . ' ' . $lastcheck . ' document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
                     }
                     //  no empty and/or error checking
                     else {
-                        $returnStrButtons .= '<button class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . $unmask . ' document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
+                        $returnStrButtons .= '<button tabindex="0" class="btn btn-default uscic-button" name="nextbutton" id="uscic-nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . ' document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNextButton())) . '"; ' . $clicknext . ' ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNextButton()) . '">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNextButton()), $buttonformat) . '</button>';
                     }
                 }
             }
@@ -658,7 +664,7 @@ class DisplayQuestionBasic extends Display {
                             if (sizeof($this->engine->getDKAnswers()) > 0) {
                                 $highlight = " uscic-dkbutton-active";
                             }
-                            $returnStrButtons .= '<button disabled="disabled" name="dkbutton" class="btn btn-default uscic-button' . $highlight . '" id="uscic-dkbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelDKButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelDKButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelDKButton()), $buttonformat) . '</button>';
+                            $returnStrButtons .= '<button tabindex="0" disabled="disabled" name="dkbutton" class="btn btn-default uscic-button' . $highlight . '" id="uscic-dkbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelDKButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelDKButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelDKButton()), $buttonformat) . '</button>';
                         }
                         if ($queryobject->getShowRFButton() == BUTTON_YES) {
                             $highlight = "";
@@ -667,7 +673,7 @@ class DisplayQuestionBasic extends Display {
                             if (sizeof($this->engine->getRFAnswers()) > 0) {
                                 $highlight = " uscic-rfbutton-active";
                             }
-                            $returnStrButtons .= '<button disabled="disabled" name="rfbutton" class="btn btn-default uscic-button' . $highlight . '" id="uscic-rfbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelRFButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelRFButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelRFButton()), $buttonformat) . '</button>';
+                            $returnStrButtons .= '<button tabindex="0" disabled="disabled" name="rfbutton" class="btn btn-default uscic-button' . $highlight . '" id="uscic-rfbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelRFButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelRFButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelRFButton()), $buttonformat) . '</button>';
                         }
                         if ($queryobject->getShowNAButton() == BUTTON_YES) {
                             $highlight = "";
@@ -676,7 +682,7 @@ class DisplayQuestionBasic extends Display {
                             if (sizeof($this->engine->getNAAnswers()) > 0) {
                                 $highlight = " uscic-nabutton-active";
                             }
-                            $returnStrButtons .= '<button disabled="disabled" name="nabutton" class="btn btn-default uscic-button' . $highlight . '" id="uscic-nabutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNAButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNAButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNAButton()), $buttonformat) . '</button>';
+                            $returnStrButtons .= '<button tabindex="0" disabled="disabled" name="nabutton" class="btn btn-default uscic-button' . $highlight . '" id="uscic-nabutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelNAButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelNAButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelNAButton()), $buttonformat) . '</button>';
                         }
                     }
                 }
@@ -690,7 +696,7 @@ class DisplayQuestionBasic extends Display {
                 }
                 $click = $this->engine->replaceFills($queryobject->getClickUpdate());
                 $click = str_replace("'", "", $click);
-                $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" name="updatebutton" id="uscic-updatebutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelUpdateButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelUpdateButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelUpdateButton()), $buttonformat) . '</button>';
+                $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" name="updatebutton" id="uscic-updatebutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($this->engine->replaceFills($queryobject->getLabelUpdateButton())) . '"; ' . $click . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $this->engine->replaceFills($queryobject->getLabelUpdateButton()) . '" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelUpdateButton()), $buttonformat) . '</button>';
             }
 
             /* handle remark button */
@@ -709,7 +715,7 @@ class DisplayQuestionBasic extends Display {
                 } else {
                     $returnStrButtons .= "<input type='hidden' name='" . POST_PARAM_REMARK_INDICATOR . "' id='" . POST_PARAM_REMARK_INDICATOR . "'>";
                 }
-                $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="remarkbutton" id="uscic-remarkbutton" data-toggle="modal" data-target="#remarkmodal" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelRemarkButton()), $buttonformat) . '</button>';
+                $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="remarkbutton" id="uscic-remarkbutton" data-toggle="modal" data-target="#remarkmodal" type="button">' . $this->applyFormatting($this->engine->replaceFills($queryobject->getLabelRemarkButton()), $buttonformat) . '</button>';
             }
             if (($this->showdk == true && $this->dkrfna == false) || $queryobject->getShowUpdateButton() == BUTTON_YES || $queryobject->getShowRemarkButton() == BUTTON_YES) {
                 $returnStrButtons .= '</span>';
@@ -719,16 +725,16 @@ class DisplayQuestionBasic extends Display {
         else {
             if ($this->engine->getForward() == true) {
                 $back = true;
-                $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonBack()) . '"; ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonBack() . '" type="button">' . Language::buttonBack() . '</button>';
+                $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonBack()) . '"; ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonBack() . '" type="button">' . Language::buttonBack() . '</button>';
             } else {
                 if ($this->engine->isFirstState() == false) {
                     $back = true;
-                    $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonBack()) . '"; ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonBack() . '" type="button">' . Language::buttonBack() . '</button>';
+                    $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" name="backbutton" id="uscic-backbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonBack()) . '"; ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonBack() . '" type="button">' . Language::buttonBack() . '</button>';
                 }
             }
 
             // next button
-            $returnStrButtons .= '<button class="btn btn-default uscic-button" id="uscic-nextbutton" name="nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonNext()) . '"; ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonNext() . '">' . Language::buttonNext() . '</button>';
+            $returnStrButtons .= '<button tabindex="0" class="btn btn-default uscic-button" id="uscic-nextbutton" name="nextbutton" type="button" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonNext()) . '"; ' . $unmask . ' $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonNext() . '">' . Language::buttonNext() . '</button>';
 
             /* generic dk/rf/na buttons button */
             if ($this->showdk == true) {
@@ -740,17 +746,17 @@ class DisplayQuestionBasic extends Display {
                     if (sizeof($this->engine->getDKAnswers()) > 0) {
                         $highlight = " uscic-dkbutton-active";
                     }
-                    $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="dkbutton" id="uscic-dkbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonDK()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonDK() . '" type="button">' . Language::buttonDK() . '</button>';
+                    $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="dkbutton" id="uscic-dkbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonDK()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonDK() . '" type="button">' . Language::buttonDK() . '</button>';
                     $highlight = "";
                     if (sizeof($this->engine->getRFAnswers()) > 0) {
                         $highlight = " uscic-rfbutton-active";
                     }
-                    $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="rfbutton" id="uscic-rfbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonRF()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonRF() . '" type="button">' . Language::buttonRF() . '</button>';
+                    $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="rfbutton" id="uscic-rfbutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonRF()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonRF() . '" type="button">' . Language::buttonRF() . '</button>';
                     $highlight = "";
                     if (sizeof($this->engine->getNAAnswers()) > 0) {
                         $highlight = " uscic-nabutton-active";
                     }
-                    $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="nabutton" id="uscic-nabutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonNA()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonNA() . '" type="button">' . Language::buttonNA() . '</button>';
+                    $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button' . $highlight . '" name="nabutton" id="uscic-nabutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes(Language::buttonNA()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . Language::buttonNA() . '" type="button">' . Language::buttonNA() . '</button>';
                     $returnStrButtons .= '</span>';
                 }
             }
@@ -762,7 +768,7 @@ class DisplayQuestionBasic extends Display {
                     $returnStrButtons .= '<span class="pull-right">';
                 }
 
-                $returnStrButtons .= '<button disabled="disabled" class="btn btn-default uscic-button" id="uscic-updatebutton" name="updatebutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($queryobject->getLabelUpdateButton()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $queryobject->getLabelUpdateButton() . '" type="button">' . $this->applyFormatting($queryobject->getLabelUpdateButton(), $buttonformat) . '</button>';
+                $returnStrButtons .= '<button tabindex="0" disabled="disabled" class="btn btn-default uscic-button" id="uscic-updatebutton" name="updatebutton" onclick=\'disableButtons(); ' . $screenshotscript . 'document.getElementById("navigation").value="' . addslashes($queryobject->getLabelUpdateButton()) . '"; $("#plets").val(Math.floor((new Date).getTime()/1000)); document.getElementById("form").submit();\' value="' . $queryobject->getLabelUpdateButton() . '" type="button">' . $this->applyFormatting($queryobject->getLabelUpdateButton(), $buttonformat) . '</button>';
             }
 
             if (($this->showdk == true && $this->dkrfna == false) || $queryobject->getShowUpdateButton() == BUTTON_YES || $queryobject->getShowRemarkButton() == BUTTON_YES) {
@@ -949,7 +955,7 @@ class DisplayQuestionBasic extends Display {
     }
 
     function showRemarkModal($queryobject, $qa, $current) {
-        $params = array(POST_PARAM_EXECUTION_MODE => $_SESSION[SURVEY_EXECUTION_MODE], POST_PARAM_DEFAULT_LANGUAGE => getDefaultSurveyLanguage(), POST_PARAM_DEFAULT_MODE => getDefaultSurveyMode(), POST_PARAM_LANGUAGE => getSurveyLanguage(), POST_PARAM_MODE => getSurveyMode(), POST_PARAM_GROUP => $this->engine->getTemplate(), POST_PARAM_TEMPLATE => getSurveyTemplate(), POST_PARAM_VERSION => getSurveyVersion(), POST_PARAM_STATEID => $this->engine->getStateId(), POST_PARAM_RGID => $this->engine->getRgid(), POST_PARAM_DISPLAYED => $this->engine->getDisplayed(), POST_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), POST_PARAM_SUID => $this->engine->getSuid());
+        $params = array("k" => encryptC(Config::ajaxAccessKey(), Config::smsComponentKey()), POST_PARAM_EXECUTION_MODE => $_SESSION[SURVEY_EXECUTION_MODE], POST_PARAM_DEFAULT_LANGUAGE => getDefaultSurveyLanguage(), POST_PARAM_DEFAULT_MODE => getDefaultSurveyMode(), POST_PARAM_LANGUAGE => getSurveyLanguage(), POST_PARAM_MODE => getSurveyMode(), POST_PARAM_GROUP => $this->engine->getTemplate(), POST_PARAM_TEMPLATE => getSurveyTemplate(), POST_PARAM_VERSION => getSurveyVersion(), POST_PARAM_STATEID => $this->engine->getStateId(), POST_PARAM_RGID => $this->engine->getRgid(), POST_PARAM_DISPLAYED => $this->engine->getDisplayed(), POST_PARAM_PRIMKEY => $this->engine->getPrimaryKey(), POST_PARAM_SUID => $this->engine->getSuid());
         $r = setSessionsParamString($params);
         $returnStr = minifyScript("<script type='text/javascript'>
                             function storeRemark() { 
@@ -972,7 +978,7 @@ class DisplayQuestionBasic extends Display {
                                     $.ajax({
                                         type: 'POST',
                                         url: 'ajax/index.php',
-                                        data: {p: 'storeremark', ajaxr: '" . $r . "', " . POST_PARAM_REMARK . ": encodeURIComponent(val)},
+                                        data: {k: '" . encryptC(Config::ajaxAccessKey(), Config::smsComponentKey()) . "', p: 'storeremark', ajaxr: '" . $r . "', " . POST_PARAM_REMARK . ": encodeURIComponent(val)},
                                         async: true
                                       });
                                 }
@@ -1075,7 +1081,7 @@ class DisplayQuestionBasic extends Display {
         if ($this->engine->getTemplate() != "" && $iferror != $ifgroup && $ifgroup == 1) {
             $iferror = $ifgroup;
         }
-        $str .= " data-validation-error=" . $iferror;
+        $str .= " data-validation-error='" . $iferror . "'"; 
         return $str;
     }
 
@@ -1154,8 +1160,13 @@ class DisplayQuestionBasic extends Display {
             $beginformat .= "<u>";
             $endformat .= "</u>";
         }
-
-        $returnStr = '<div id="vsid_' . $var->getVsid() . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-texttype="' . SETTING_QUESTION . '" class="' . $this->inlineeditable . $class . ' ' . $qa . '">' . $this->applyFormatting($text, $var->getQuestionFormatting()) . $this->inlineediticon . "</div>";
+        $et = "";
+        $et1 = "";
+        if (Config::useAccessible()) {
+            $et = 'tabindex="0" role="region" aria-labelledby="regionquestion' . $var->getVsid() . '"';
+            $et1 = '<h4 class="nubis-accessible-hidden" id="regionquestion' . $var->getVsid() . '">' . Language::labelAccessibleQuestion() . '</h4>';
+        }
+        $returnStr = '<div ' . $et . ' id="vsid_' . $var->getVsid() . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-texttype="' . SETTING_QUESTION . '" class="' . $this->inlineeditable . $class . ' ' . $qa . '">' . $et1 . $this->applyFormatting($text, $var->getQuestionFormatting()) . $this->inlineediticon . "</div>";
         //$returnStr = '<div id="vsid_' . $var->getVsid() . '" uscic-target="vsid_' . $var->getVsid() . '" uscic-texttype="' . SETTING_QUESTION . '">' . $this->applyFormatting($text, $questionformat) . $this->inlineediticon . "</div>";
         return $returnStr;
     }
@@ -1167,7 +1178,7 @@ class DisplayQuestionBasic extends Display {
 
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-
+            sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -1448,7 +1459,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-
+            sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -1798,6 +1809,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
+            sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -1888,8 +1900,14 @@ class DisplayQuestionBasic extends Display {
             }
         }
 
+        foreach ($orderedoptions as $option) {
+            $returnStr = str_replace(PLACEHOLDER_ENUMERATED_CODE . $option["code"] . '$', $option["code"], $returnStr);
+        }
+
+
         for ($i = 0; $i < 100; $i++) {
             $returnStr = str_ireplace(PLACEHOLDER_ENUMERATED_OPTION . $i . '$', $inputstr, $returnStr);
+            $returnStr = str_replace(PLACEHOLDER_ENUMERATED_CODE . $i . '$', "", $returnStr);
             $returnStr = str_ireplace(PLACEHOLDER_ENUMERATED_TEXT . $i . '$', $labelstr, $returnStr);
         }
 
@@ -2010,8 +2028,8 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-
             if (is_array($arr) && sizeof($arr) > 0) {
+                sort($arr);
                 $orderedoptions = array();
                 foreach ($arr as $a) {
                     foreach ($options as $option) {
@@ -2043,7 +2061,7 @@ class DisplayQuestionBasic extends Display {
                 $ids[] = $id . '_' . $option["code"];
             }
         }
-
+        $optionsize = max($optioncodes);
 
         $realvarname = $varname;
 
@@ -2083,6 +2101,8 @@ class DisplayQuestionBasic extends Display {
             }
         }
 
+        $ranking = $var->isSetOfEnumeratedRanking();
+
         //foreach ($orderedoptions as $option) {
         for ($i = 0; $i < $itemspercolumn; $i++) {
             $returnStr .= "<tr class='uscic-enumerated-row'>";
@@ -2114,13 +2134,18 @@ class DisplayQuestionBasic extends Display {
                                 break;
                         }
 
+                        if ($ranking == true) {
+                            $span = '<span style="display: hidden;" id="' . substr($realvarname, 0, strlen($realvarname) - 2) . "_badge" . $option["code"] . '" class="numberclass badge pull-right"></span>';
+                            $labelstr = "<ol><li>" . $labelstr . $span . "</li></ol>";
+                        }
+
                         $disabled = '';
                         if ($this->isEnumeratedActive($variable, $var, $option["code"]) == false) {
                             $disabled = ' disabled ';
                         }
 
                         $selected = ' aria-checked="false"';
-                        if (inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
+                        if ($previousdata != "" && inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
                             $selected = ' CHECKED aria-checked="true"';
                         }
 
@@ -2206,6 +2231,11 @@ class DisplayQuestionBasic extends Display {
             $returnStr .= "</tr>";
         }
 
+        // add ranking        
+        if ($ranking == true) {
+            $returnStr .= $this->addSetOfEnumeratedRanking($variable, $var, $realvarname, substr($realvarname, 0, strlen($realvarname) - 2), $id, $optionsize);
+        }
+
         if ($var->isInputMaskEnabled()) {
             $returnStr .= $this->displayCheckBoxUnchecking($id, $var->getInvalidSubSelected());
         }
@@ -2219,7 +2249,7 @@ class DisplayQuestionBasic extends Display {
             $returnStr .= '</div>';
         } else {
             $returnStr .= '</div>';
-            $returnStr .= $this->addSetOfEnumeratedHidden($variable, $var, $realvarname, $varname, $id, $previousdata);
+            $returnStr .= $this->addSetOfEnumeratedHidden($variable, $var, $realvarname, $varname, $id, $previousdata, $ranking);
         }
 
         // add dk/rf/na
@@ -2241,7 +2271,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-
+            sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -2433,7 +2463,7 @@ class DisplayQuestionBasic extends Display {
 
             if (trim($option["label"]) != "") {
                 $selected = ' aria-checked="false"';
-                if (inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
+                if ($previousdata != "" && inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
                     $selected = ' CHECKED aria-checked="true"';
                 }
 
@@ -2648,7 +2678,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-
+            sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -2708,7 +2738,7 @@ class DisplayQuestionBasic extends Display {
         foreach ($orderedoptions as $option) {
             if (trim($option["label"]) != "") {
                 $selected = ' aria-checked="false"';
-                if (inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
+                if ($previousdata != "" && inArray($option["code"], explode(SEPARATOR_SETOFENUMERATED, $previousdata))) {
                     $selected = ' CHECKED aria-checked="true"';
                 }
 
@@ -2776,7 +2806,7 @@ class DisplayQuestionBasic extends Display {
         return $returnStr;
     }
 
-    function addSetOfEnumeratedTextbox($variable, $var, $varname, $refername, $id, $previousdata) {
+    function addSetOfEnumeratedTextbox($variable, $var, $varname, $refername, $id, $previousdata, $rank = false) {
         $returnStr = "";
         $pretext = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_TEXTBOX_LABEL);
         $pretext = '<span id="vsid_' . $var->getVsid() . '_pretext" class="input-group-addon uscic-inputaddon-pretext">' . $this->applyFormatting($pretext, $var->getAnswerFormatting()) . '</span>';
@@ -2820,6 +2850,12 @@ class DisplayQuestionBasic extends Display {
                                     ' . $posttext . $inputgroupend . '
                                 </div>
                                 ';
+
+        $extra = "";
+        if ($rank == true) {
+            $extra = "updateNumbers();";
+        }
+
         $returnStr .= "<script type=text/javascript>";
         $returnStr .= minifyScript('$( document ).ready(function() {
                             $("#' . $id . '_textbox").keyup(
@@ -2869,7 +2905,8 @@ class DisplayQuestionBasic extends Display {
                                                 arr.splice(index, 1);
                                             }
                                         }                                          
-                                        $("#' . $id . '_textbox").val(arr.join("' . SEPARATOR_SETOFENUMERATED . '"));
+                                        $("#' . $id . '_textbox").val(arr.join("' . SEPARATOR_SETOFENUMERATED . '"));' .
+                $extra . '
                                         return;
                                 });    
                                 });
@@ -2878,7 +2915,45 @@ class DisplayQuestionBasic extends Display {
         return $returnStr;
     }
 
-    function addSetOfEnumeratedHidden($variable, $var, $varname, $refername, $id, $previousdata) {
+    function addSetOfEnumeratedRanking($variable, $var, $varname, $refername, $id, $size) {
+        $returnStr = "";
+        $returnStr .= "<script type=text/javascript>";
+        $returnStr .= minifyScript('function clearBadges() {
+                                        for (i = 0; i <= ' . $size . '; i++) {
+                                            var el = $("#' . $refername . '_" + i).parent().find("li span.numberclass");
+                                            if (el) {
+                                                el.text("");
+                                                el.css("display", "hidden");
+                                            }    
+                                         }
+                                       }
+                                       
+                                       function updateNumbers() {
+
+                                            clearBadges();
+                                            var selected = $("#' . $refername . '_hidden").val().split("-");
+                                            if (selected.length == 0) {
+                                                return;
+                                            }
+
+                                            var array = selected;
+                                            for (i = 0; i < array.length; i++) {
+                                                var el = $("#' . $refername . '_" + array[i]).parent().find("li span.numberclass");
+                                                if (el) {
+                                                    el.text((i+1));
+                                                }   
+                                            }
+                                        }
+
+                                    $( document ).ready(function() {
+                                        updateNumbers();
+                                    });
+                            ');
+        $returnStr .= "</script>";
+        return $returnStr;
+    }
+
+    function addSetOfEnumeratedHidden($variable, $var, $varname, $refername, $id, $previousdata, $rank = false) {
         $returnStr = "";
 
         if ($this->dkrfna == true) {
@@ -2887,7 +2962,16 @@ class DisplayQuestionBasic extends Display {
             }
         }
 
-        $returnStr .= '<input name="' . $varname . '" id="' . $id . '_hidden" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" type=hidden value="' . addslashes($previousdata) . '">';
+        $extra = "";
+        if ($rank == true) {
+            $extra = "updateNumbers();";
+        }
+
+        if ($previousdata != "") {
+            $previousdata = addslashes($previousdata);
+        }
+
+        $returnStr .= '<input name="' . $varname . '" id="' . $id . '_hidden" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off" type=hidden value="' . $previousdata . '">';
         $returnStr .= "<script type=text/javascript>";
         $returnStr .= minifyScript('$( document ).ready(function() {
                                 $("input[name=\'' . $refername . '\']").on(\'change\', function(event) {                                        
@@ -2914,7 +2998,8 @@ class DisplayQuestionBasic extends Display {
                                                 arr.splice(index, 1);
                                             }
                                         }
-                                        $("#' . $id . '_hidden").val(arr.join("' . SEPARATOR_SETOFENUMERATED . '"));
+                                        $("#' . $id . '_hidden").val(arr.join("' . SEPARATOR_SETOFENUMERATED . '"));' .
+                $extra . '    
                                         return;
                                 });
                                 });
@@ -3230,6 +3315,7 @@ class DisplayQuestionBasic extends Display {
         $optioncodes = array();
         $label = $var->getEnumeratedLabel();
         $labels = array();
+
         foreach ($orderedoptions as $option) {
             $optioncodes[] = $option["code"];
             if (trim($option["label"]) != "") {
@@ -3537,11 +3623,121 @@ $(window).resize(function() {
         }
         $inlineclass = "";
         $hovertext = $this->engine->getFill($variable, $var, SETTING_HOVERTEXT);
-        if ($hovertext != "") {
-            $returnStr = "<div title='" . str_replace("'", "", $hovertext) . "' class='uscic-answer'>";
-        } else {
-            $returnStr = "<div class='uscic-answer'>";
+        $acc = "";
+        if (Config::useAccessible()) {
+            $acc = 'role="region" aria-labelledby="regionanswer' . $var->getVsid() . '" id="vsid_' . $var->getVsid() . '"';
         }
+
+        $returnStr = "";
+        if ($hovertext != "") {
+            $returnStr = "<div " . $acc . " title='" . str_replace("'", "", $hovertext) . "' class='uscic-answer'>";
+        } else {
+            $returnStr = "<div " . $acc . " class='uscic-answer'>";
+        }
+
+        if (Config::useAccessible()) {
+            $expl = Language::labelAccessibleAnswer() . ": ";
+            switch ($answertype) {
+                case ANSWER_TYPE_STRING: //string   
+                    $expl .= Language::labelAccessibleString();
+                    //$minimumlength = $this->engine->getFill($variable, $var, SETTING_MINIMUM_LENGTH);
+                    //$maximumlength = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_LENGTH);
+                    //$minwords = $this->engine->getFill($variable, $var, SETTING_MINIMUM_WORDS);
+                    //$maxwords = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_WORDS);
+                    break;
+                case ANSWER_TYPE_ENUMERATED: //enumerated    
+                    $expl .= Language::labelAccessibleEnumerated();
+                    break;
+                case ANSWER_TYPE_SETOFENUMERATED: //set of enumerated   
+                    $expl .= Language::labelAccessibleSetOfEnumerated();
+                    break;
+                case ANSWER_TYPE_DROPDOWN: //drop down
+                    $expl .= Language::labelAccessibleDropdown();
+                    break;
+                case ANSWER_TYPE_MULTIDROPDOWN: //multiple selection dropdown                
+                    $expl .= Language::labelAccessibleMultiDropdown();
+                    break;
+                case ANSWER_TYPE_INTEGER: //integer 
+                    $expl .= Language::labelAccessibleInteger();
+                    break;
+                case ANSWER_TYPE_DOUBLE: //double
+                    $expl .= Language::labelAccessibleDouble();
+                    break;
+                case ANSWER_TYPE_RANGE: //range
+
+                    $expl .= Language::labelAccessibleRange();
+                    $min = false;
+
+                    /* input masking */
+                    $minimum = $this->engine->getFill($variable, $var, SETTING_MINIMUM_RANGE);
+                    if ($minimum == "" || !is_numeric($minimum)) {
+                        
+                    } else {
+                        $min = true;
+                        $expl .= Language::labelAccessibleRangeMin($minimum);
+                    }
+                    $maximum = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_RANGE);
+                    if ($maximum == "" || !is_numeric($maximum)) {
+                        
+                    } else {
+                        if ($min) {
+                            $expl .= Language::labelAccessibleRangeAnd();
+                        }
+                        $expl .= Language::labelAccessibleRangeMax($maximum);
+                    }
+
+                    $expl .= Language::labelAccessibleRangeEnd();
+                    break;
+                case ANSWER_TYPE_SLIDER: //slider
+                    $expl .= Language::labelAccessibleSlider();
+                    $min = false;
+
+                    /* input masking */
+                    $minimum = $this->engine->getFill($variable, $var, SETTING_MINIMUM_RANGE);
+                    if ($minimum == "" || !is_numeric($minimum)) {
+                        
+                    } else {
+                        $min = true;
+                        $expl .= Language::labelAccessibleSliderMin($minimum);
+                    }
+                    $maximum = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_RANGE);
+                    if ($maximum == "" || !is_numeric($maximum)) {
+                        
+                    } else {
+                        if ($min) {
+                            $expl .= Language::labelAccessibleSliderAnd();
+                        }
+                        $expl .= Language::labelAccessibleSliderMax($maximum);
+                    }
+
+                    if ($var->isTextbox()) {
+                        $expl .= Language::labelAccessibleSliderEnd();
+                    }
+                    break;
+                case ANSWER_TYPE_DATE: //date  
+                    $expl .= Language::labelAccessibleDate();
+                    break;
+                case ANSWER_TYPE_TIME: //time
+                    $expl .= Language::labelAccessibleTime();
+                    break;
+                case ANSWER_TYPE_DATETIME: //date/time   
+                    $expl .= Language::labelAccessibleDateTime();
+                    break;
+                case ANSWER_TYPE_OPEN: //open
+                    $expl .= Language::labelAccessibleOpen(); //
+                    /* $minimumlength = $this->engine->getFill($variable, $var, SETTING_MINIMUM_LENGTH);
+                      $maximumlength = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_LENGTH);
+                      $minwords = $this->engine->getFill($variable, $var, SETTING_MINIMUM_WORDS);
+                      $maxwords = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_WORDS);
+                      $pattern = $this->engine->getFill($variable, $var, SETTING_PATTERN); */
+                    break;
+                case ANSWER_TYPE_CALENDAR: //calendar
+                    break;
+                case ANSWER_TYPE_CUSTOM: //custom   
+            }
+            $returnStr .= '<h4 class="nubis-accessible-hidden" id="regionanswer' . $var->getVsid() . '">' . $expl . '</h4>';
+        }
+
         if ($inline) {
             $inlineclass = "-inline";
             $returnStr = "";
@@ -3635,12 +3831,14 @@ $(window).resize(function() {
                         if ($minimum == "" || !is_numeric($minimum)) {
                             $minimum = ANSWER_RANGE_MINIMUM;
                         }
-                        $mintext = 'min: ' . $minimum . ',';
+                        $mintext = 'min: ' . $minimum . ','
+                                . '';
                         $maximum = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_RANGE);
                         if ($maximum == "" || !is_numeric($maximum)) {
                             $maximum = ANSWER_RANGE_MAXIMUM;
                         }
-                        $maxtext = 'max: ' . $maximum . ',';
+                        $maxtext = 'max: ' . $maximum . ','
+                                . '';
                     }
 
                     $spinnertype = '';
@@ -3672,7 +3870,8 @@ $(window).resize(function() {
                                             $(document).ready(function() {
                                                 $("#' . $id . '").TouchSpin({
                                                     ' . $mintext .
-                            $maxtext .
+                            '' .
+                            $maxtext . '' .
                             $spinnertype . '                                                                                                            
                                                     step: ' . $step . ',
                                                     verticalupclass: "' . str_replace('"', '&#34;', $var->getSpinnerUp()) . '",
@@ -4110,9 +4309,9 @@ $(window).resize(function() {
                 $minwords = $this->engine->getFill($variable, $var, SETTING_MINIMUM_WORDS);
                 $maxwords = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_WORDS);
                 if ($minwords > 0) {
-                    $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_MINWORDS, $minwords), replacePlaceHolders(array(PLACEHOLDER_MINIMUM_WORDS => $minimumwords), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_MINIMUM_WORDS)));
+                    $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_MINWORDS, $minwords), replacePlaceHolders(array(PLACEHOLDER_MINIMUM_WORDS => $minwords), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_MINIMUM_WORDS)));
                 }
-                $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_MAXWORDS, $maxwords), replacePlaceHolders(array(PLACEHOLDER_MAXIMUM_WORDS => $maximumwords), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_MAXIMUM_WORDS)));
+                $this->addErrorCheck($varname, $variable, new ErrorCheck(ERROR_CHECK_MAXWORDS, $maxwords), replacePlaceHolders(array(PLACEHOLDER_MAXIMUM_WORDS => $maxwords), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_MAXIMUM_WORDS)));
 
                 $pattern = $this->engine->getFill($variable, $var, SETTING_PATTERN);
                 if (trim($pattern) != "") {
@@ -4139,7 +4338,7 @@ $(window).resize(function() {
                 $maximum = $this->engine->getFill($variable, $var, SETTING_MAXIMUM_CALENDAR);
                 $returnStr .= '<div class="form-group uscic-formgroup' . $inlineclass . '">
                             <div class="uscic-calendar' . $inlineclass . '">' . $this->showCalendar($varname, $id, $previousdata, $maximum, "en", true) . '
-                            <p style="display:none" id="' . $id . '_help" class="help-block">You can only select a maximum of ' . $maximum . ' days.</p>
+                            <p style="display:none; color: #c09853; font-weight: bold; margin-top: 15px;" id="' . $id . '_help" class="has-warning help-block">' . Language::errorCalendarMaximumDates($maximum) . '</p>
                              </div>
                              </div>';
                 $returnStr .= $fieldsetend;
@@ -4488,7 +4687,7 @@ $(window).resize(function() {
         }
     }
 
-    function addRankChecks($name, $variable, $var, $type) {
+    function addRankChecks($name, $variable, $var) {
         $min = $this->engine->getFill($variable, $var, SETTING_MINIMUM_RANKED);
         if ($min != "") {
             $this->addErrorCheck($name, $variable, new ErrorCheck(ERROR_CHECK_MINRANKED, $min), replacePlaceHolders(array(PLACEHOLDER_MINIMUM_RANKED => $min), $this->engine->getFill($variable, $var, SETTING_ERROR_MESSAGE_MINIMUM_RANK)));
@@ -4534,7 +4733,12 @@ $(window).resize(function() {
             $width = PROGRESSBAR_WIDTH;
         }
         $this->progressbarwidth = $width;
-
+        if ($this->progressbarwidth == "") {
+            $this->progressbarwidth = PROGRESSBAR_WIDTH;
+        }
+        if ($fillcolor == "") {
+            $fillcolor = PROGRESSBAR_FILLED_COLOR;
+        }
         $pro = $this->calculateProgress($queryobject);
         $current = $pro["value"];
         $progress = $pro["percent"];
@@ -4657,7 +4861,7 @@ $(window).resize(function() {
                 $returnStr .= "<div " . $hovertext . " class='uscic-singledropdown " . $qa . "'>";
             }
         } else {
-            $multipleheader = 'title="Nothing selected" ';
+            $multipleheader = ''; // 'title="Nothing selected" ';
             if ($inline == false) {
                 $returnStr .= "<div " . $hovertext . " class='uscic-multidropdown " . $qa . "'>";
             }
@@ -4726,14 +4930,19 @@ $(window).resize(function() {
         }
 
         $cnt = 0;
+        $opengroup = false;
         foreach ($orderedoptions as $option) {
             if (trim($option["label"]) != "") {
                 $cnt++;
 
                 // check for optgroup entry
                 if (isset($optlabels[$cnt])) {
-                    $returnStr .= $optlabels[$cnt];
-                }
+                    if ($opengroup == true) {
+                        $returnStr .= "</optgroup>";
+                    }
+                    $opengroup = true;
+                    $returnStr .= "<optgroup label=" . $optlabels[$cnt] . ">";
+                } // add to documentation
                 $selected = '';
                 if (inArray($option["code"], $previous)) {
                     $selected = ' SELECTED aria-checked="true"';
@@ -4747,6 +4956,11 @@ $(window).resize(function() {
                 $returnStr .= '<option id="' . $id . '_' . $option["code"] . '" data-content="' . $this->applyFormatting($option["label"], $var->getAnswerFormatting()) . '" ' . $optionrole . $disabled . $selected . ' value="' . $option["code"] . '">' . $this->applyFormatting($option["label"], $var->getAnswerFormatting()) . '</option>';
             }
         }
+
+        if ($opengroup == true) {
+            $returnStr .= "</optgroup>";
+        }
+
         if ($inline == false) {
             $returnStr .= '</select>' . $posttext . $inputgroupend . '                                               
                         </div>' . $dkrfna . '                  
@@ -4936,7 +5150,7 @@ function getEvents() {
         }
         $click = str_replace("'", "", $click);
         $returnStr = '<div class="btn-group">
-  <button type="button" class="btn btn-default dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">
+  <button tabindex="0" type="button" class="btn btn-default dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">
     ' . Language::surveyChangeLanguage() . ' <span class="caret"></span>
   </button>
   <ul class="dropdown-menu" role="menu">';
@@ -4978,7 +5192,7 @@ function getEvents() {
         $click = str_replace("'", "", $click);
 
         $returnStr = '<div class="btn-group">
-  <button type="button" class="btn btn-default dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">
+  <button tabindex="0" type="button" class="btn btn-default dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">
     ' . Language::surveyChangeMode() . ' <span class="caret"></span>
   </button>
   <ul class="dropdown-menu" role="menu">';
@@ -5093,14 +5307,14 @@ function getEvents() {
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <button tabindex="0" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title">' . Language::labelAssignmentWarnings() . '\'</h4>
       </div>
       <div class="modal-body">';
         $returnStr .= implode("<br/>", $this->getAssignmentWarnings());
         $returnStr .= '</div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button tabindex="0" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

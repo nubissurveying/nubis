@@ -43,8 +43,8 @@ class SurveyAjax {
             case 'storeparadata':
                 $this->storeParadata();
                 exit;
-            case 'capturescreenshot':
-                $this->capturescreenshot();
+            /*case 'capturescreenshot':
+                $this->capturescreenshot();*/
         }
     }
 

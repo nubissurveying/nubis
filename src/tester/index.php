@@ -15,6 +15,7 @@
 require_once("../constants.php");
 require_once("../functions.php");
 require_once("../dbConfig.php");
+
 $_SESSION['SYSTEM_ENTRY'] = USCIC_SMS;
 $loaded = dbConfig::load("../conf.php");
 require_once("../config.php");
@@ -28,6 +29,14 @@ require_once("../display/templates/displayquestion_" . getSurveyTemplate() . ".p
 
 if (loadvar('r') != '') {
     getSessionParamsPost(loadvar('r'));
+}
+
+if (!isset($_SESSION[CONFIGURATION_ENCRYPTION_TESTER])) {
+    $_SESSION[CONFIGURATION_ENCRYPTION_TESTER] = decryptC(getFromSessionParams("k"), Config::smsComponentKey());
+}
+
+if ($_SESSION[CONFIGURATION_ENCRYPTION_TESTER] != Config::testerKey()) {
+    exit;
 }
 
 // include language

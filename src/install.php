@@ -133,6 +133,13 @@ class Install {
         $keys[10] = $this->generateKey();
         $keys[11] = $this->generateKey();
         $keys[12] = $this->generateKey();
+        $keys[13] = $this->generateKey();
+        $keys[14] = $this->generateKey();
+        $keys[15] = $this->generateKey();
+        $keys[16] = $this->generateKey();
+        $keys[17] = $this->generateKey();
+        $keys[18] = $this->generateKey();
+        $keys[19] = $this->generateKey();
 
         $returnStr .= '
                 </select>
@@ -241,8 +248,29 @@ class Install {
             <td>' . Language::installLabelEncryptionRemark() . '</td><td><input value="' . $keys[11] . '"  type="text" class="form-control" name="encryptionremarks" /></td>
         </tr>                                
         <tr>
-            <td>' . Language::installLabelEncryptionCommunication() . '</td><td><input value="' . $keys[12] . '"  type="text" class="form-control" name="encryptioncommunication" /></td>
-        </tr>                                
+            <td>' . Language::installLabelEncryptionCommunicationContent() . '</td><td><input value="' . $keys[12] . '"  type="text" class="form-control" name="encryptioncommunicationcontent" /></td>
+        </tr>
+        <tr>
+            <td>' . Language::installLabelEncryptionCommunicationContent() . '</td><td><input value="' . $keys[13] . '"  type="text" class="form-control" name="encryptioncommunicationcomponent" /></td>
+        </tr>
+        <tr>
+            <td>' . Language::installLabelEncryptionCommunicationAccess() . '</td><td><input value="' . $keys[14] . '"  type="text" class="form-control" name="encryptioncommunicationaccess" /></td>
+        </tr>
+        <tr>
+            <td>' . Language::installLabelEncryptionTester() . '</td><td><input value="' . $keys[15] . '"  type="text" class="form-control" name="encryptiontester" /></td>
+        </tr> 
+        <tr>
+            <td>' . Language::installLabelEncryptionPicture() . '</td><td><input value="' . $keys[16] . '"  type="text" class="form-control" name="encryptionpicture" /></td>
+        </tr>
+        <tr>
+            <td>' . Language::installLabelEncryptionCalendar() . '</td><td><input value="' . $keys[17] . '"  type="text" class="form-control" name="encryptioncalendar" /></td>
+        </tr> 
+        <tr>
+            <td>' . Language::installLabelEncryptionUploadAccess() . '</td><td><input value="' . $keys[18] . '"  type="text" class="form-control" name="encryptionuploadaccess" /></td>
+        </tr>
+        <tr>
+            <td>' . Language::installLabelEncryptionUploadAjax() . '</td><td><input value="' . $keys[19] . '"  type="text" class="form-control" name="encryptionajaxaccess" /></td>
+        </tr>
         </table>
         <br/>    
         <button onclick="$(\'#myTabs li:eq(2) a\').tab(\'show\'); return false;" class="btn btn-default">' . Language::installButtonBack() . '</button>
@@ -467,16 +495,7 @@ class Install {
             <option selected value="2">' . Language::installLabelNo() . '</option>
             </select>              
             </td>
-        </tr>
-        <tr>
-        <td>' . Language::installLabelSampleInterviewAddress() . '</td>
-        <td>
-            <select class="selectpicker show-tick" name="sampleinterviewaddress" />
-            <option value="1">' . Language::installLabelYes() . '</option>
-            <option selected value="2">' . Language::installLabelNo() . '</option>
-            </select>              
-            </td>
-        </tr>
+        </tr>        
         <tr>
         <td>' . Language::installLabelSampleProxyContact() . '</td>
         <td>
@@ -501,6 +520,15 @@ class Install {
             <select class="selectpicker show-tick" name="allowsamplecommunication" />
             <option value="1">' . Language::installCommunicationYes() . '</option>
             <option selected value="2">' . Language::installCommunicationNo() . '</option>
+            </select>                        
+            </td>
+        </tr>
+        <tr>
+        <td>' . Language::installLabelAllowUpload() . '</td>
+        <td>
+            <select class="selectpicker show-tick" name="allowupload" />
+            <option value="1">' . Language::installUploadYes() . '</option>
+            <option selected value="2">' . Language::installUploadNo() . '</option>
             </select>                        
             </td>
         </tr>
@@ -562,10 +590,10 @@ $configuration = array(
     CONFIGURATION_SAMPLE => array(
         CONFIGURATION_SAMPLE_PANEL => "' . loadvar("sampletype") . '",
         CONFIGURATION_SAMPLE_TRACKING => "' . loadvar("sampletracking") . '",
-        CONFIGURATION_SAMPLE_INTERVIEWADDRESS => "' . loadvar("sampleinterviewaddress") . '",
         CONFIGURATION_SAMPLE_PROXYCODE => "' . loadvar("sampleproxycode") . '",
         CONFIGURATION_SAMPLE_PROXYCONTACT => "' . loadvar("sampleproxycontact") . '",
         CONFIGURATION_SAMPLE_ALLOW_COMMUNICATION => "' . loadvar("allowsamplecommunication") . '",
+        CONFIGURATION_SAMPLE_ALLOW_UPLOAD => "' . loadvar("allowupload") . '",
         CONFIGURATION_SAMPLE_COMMUNICATION => "' . loadvar("samplecommunication") . '",
         CONFIGURATION_SAMPLE_FILELOCATION => "' . loadvar("samplefilelocation") . '"
     ),
@@ -580,8 +608,15 @@ $configuration = array(
         CONFIGURATION_ENCRYPTION_ACTION_PARAMS => "' . loadvar("encryptionparameters") . '",
         CONFIGURATION_ENCRYPTION_DIRECT => "' . loadvar("encryptiondirect") . '",
         CONFIGURATION_ENCRYPTION_LAB => "' . loadvar("encryptionlab") . '",
-        CONFIGURATION_ENCRYPTION_COMMUNICATION => "' . loadvar("encryptioncommunication") . '",    
+        CONFIGURATION_ENCRYPTION_COMMUNICATION_CONTENT => "' . loadvar("encryptioncommunicationcontent") . '",    
+        CONFIGURATION_ENCRYPTION_COMMUNICATION_COMPONENT => "' . loadvar("encryptioncommunicationcomponent") . '",    
+        CONFIGURATION_ENCRYPTION_COMMUNICATION_ACCESS => "' . loadvar("encryptioncommunicationaccess") . '",    
+        CONFIGURATION_ENCRYPTION_TESTER => "' . loadvar("encryptiontester") . '",    
+        CONFIGURATION_ENCRYPTION_PICTURE => "' . loadvar("encryptionpicture") . '",    
+        CONFIGURATION_ENCRYPTION_CALENDAR => "' . loadvar("encryptioncalendar") . '",    
         CONFIGURATION_ENCRYPTION_FILE => "' . loadvar("encryptionfile") . '",
+        CONFIGURATION_ENCRYPTION_COMMUNICATION_UPLOAD => "' . loadvar("encryptionuploadaccess") . '",    
+        CONFIGURATION_ENCRYPTION_COMMUNICATION_AJAX => "' . loadvar("encryptionajaxaccess") . '",    
         CONFIGURATION_ENCRYPTION_SYSADMIN => "' . $syskey . '"
     ),
     CONFIGURATION_DATETIME => array(
@@ -625,11 +660,11 @@ $configuration = array(
 
                 // create tables
                 $fr = file_get_contents(dirname(__FILE__) . "/admin/sql/createtables.sql");
-                $str = str_replace("survey1", loadvar("databasetablename"), $fr);
+                $str = str_replace("survey1", prepareDatabaseString(loadvar("databasetablename")), $fr);
                 $db->executeQueries($str);
 
-                $query = "REPLACE INTO `" . loadvar("databasetablename") . "_users` (`urid`, `status`, `name`, `username`, `password`, `usertype`, usersubtype, `sup`, `filter`, `regionfilter`, `testmode`, `communication`, `settings`, `access`, `lastdata`, `ts`) VALUES
-                (1, 1, 'Sysadmin', 'sysadmin', aes_encrypt('sysadmin','" . loadvar("encryptionadmin") . "'), 4, 1, NULL, 1, 0, 0, 2, 0x613a313a7b733a31303a226e6176696e6272656164223b733a313a2231223b7d, NULL, NULL, '2014-04-12 00:20:49');";
+                $query = "REPLACE INTO `" . prepareDatabaseString(loadvar("databasetablename")) . "_users` (`urid`, `status`, `name`, `username`, `password`, `usertype`, usersubtype, `sup`, `filter`, `regionfilter`, `testmode`, `communication`, `settings`, `access`, `lastdata`, `ts`) VALUES
+                (1, 1, 'Sysadmin', 'sysadmin', aes_encrypt('sysadmin','" . prepareDatabaseString(loadvar("encryptionadmin")) . "'), 4, 1, NULL, 1, 0, 0, 2, 0x613a313a7b733a31303a226e6176696e6272656164223b733a313a2231223b7d, NULL, NULL, '2014-04-12 00:20:49');";
                 $db->executeQuery($query);
                 return $this->getContent("finish", $syskey);
             }

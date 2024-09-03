@@ -14,9 +14,13 @@
 
 class Respondents {
 
+    function __construct() {
+        
+    }
+    
     static function getDeIdentified() {
-
-        $query = 'aes_decrypt(firstname, \'' . Config::smsPersonalInfoKey() . '\') as firstname_dec, ';
+        $query = 'aes_decrypt(logincode, \'' . Config::loginCodeKey() . '\') as logincode_dec, ';        
+        $query .= 'aes_decrypt(firstname, \'' . Config::smsPersonalInfoKey() . '\') as firstname_dec, ';
         $query .= 'aes_decrypt(lastname, \'' . Config::smsPersonalInfoKey() . '\') as lastname_dec, ';
         $query .= 'aes_decrypt(age, \'' . Config::smsPersonalInfoKey() . '\') as age_dec, ';
         $query .= 'aes_decrypt(sex, \'' . Config::smsPersonalInfoKey() . '\') as sex_dec, ';
@@ -24,33 +28,34 @@ class Respondents {
         $query .= 'aes_decrypt(address1, \'' . Config::smsPersonalInfoKey() . '\') as address1_dec, ';
         $query .= 'aes_decrypt(address2, \'' . Config::smsPersonalInfoKey() . '\') as address2_dec, ';
         $query .= 'aes_decrypt(zip, \'' . Config::smsPersonalInfoKey() . '\') as zip_dec, ';
+        $query .= 'aes_decrypt(state, \'' . Config::smsPersonalInfoKey() . '\') as state_dec, ';
         $query .= 'aes_decrypt(city, \'' . Config::smsPersonalInfoKey() . '\') as city_dec, ';
         $query .= 'aes_decrypt(longitude, \'' . Config::smsPersonalInfoKey() . '\') as longitude_dec, ';
         $query .= 'aes_decrypt(latitude, \'' . Config::smsPersonalInfoKey() . '\') as latitude_dec, ';
         $query .= 'aes_decrypt(email, \'' . Config::smsPersonalInfoKey() . '\') as email_dec, ';
         $query .= 'aes_decrypt(telephone1, \'' . Config::smsPersonalInfoKey() . '\') as telephone1_dec, ';
-        $query .= 'aes_decrypt(telephone2, \'' . Config::smsPersonalInfoKey() . '\') as telephone2_dec, ';
-        $query .= 'aes_decrypt(logincode, \'' . Config::loginCodeKey() . '\') as logincode_dec ';
-        if (dbConfig::defaultSeparateInterviewAddress()) {
-            $query .= Respondents::getExtraDeidentified();
-        }
+        $query .= 'aes_decrypt(telephone2, \'' . Config::smsPersonalInfoKey() . '\') as telephone2_dec ';
         return $query;
     }
-
-    static function getExtraDeidentified() {
-        $extra = ', aes_decrypt(original_firstname, \'' . Config::smsPersonalInfoKey() . '\') as original_firstname_dec ';
-        $extra .= ', aes_decrypt(original_lastname, \'' . Config::smsPersonalInfoKey() . '\') as original_lastname_dec ';
-        $extra .= ', aes_decrypt(original_telephone1, \'' . Config::smsPersonalInfoKey() . '\') as original_telephone1_dec ';
-        $extra .= ', aes_decrypt(interview_address1, \'' . Config::smsPersonalInfoKey() . '\') as interview_address1_dec ';
-        $extra .= ', aes_decrypt(interview_address2, \'' . Config::smsPersonalInfoKey() . '\') as interview_address2_dec ';
-        $extra .= ', aes_decrypt(interview_zip, \'' . Config::smsPersonalInfoKey() . '\') as interview_zip_dec ';
-        $extra .= ', aes_decrypt(interview_city, \'' . Config::smsPersonalInfoKey() . '\') as interview_city_dec ';
-        $extra .= ', aes_decrypt(interview_state, \'' . Config::smsPersonalInfoKey() . '\') as interview_state_dec ';
-        return $extra;
-    }
-
-    function Respondents() {
-        
+    
+    static function getShortDeIdentified() {
+        $query = 'aes_decrypt(logincode, \'' . Config::loginCodeKey() . '\') as logincode, ';        
+        $query .= 'aes_decrypt(firstname, \'' . Config::smsPersonalInfoKey() . '\') as firstname, ';
+        $query .= 'aes_decrypt(lastname, \'' . Config::smsPersonalInfoKey() . '\') as lastname, ';
+        $query .= 'aes_decrypt(age, \'' . Config::smsPersonalInfoKey() . '\') as age, ';
+        $query .= 'aes_decrypt(sex, \'' . Config::smsPersonalInfoKey() . '\') as sex, ';
+        $query .= 'aes_decrypt(birthdate, \'' . Config::smsPersonalInfoKey() . '\') as birthdate, ';
+        $query .= 'aes_decrypt(address1, \'' . Config::smsPersonalInfoKey() . '\') as address1, ';
+        $query .= 'aes_decrypt(address2, \'' . Config::smsPersonalInfoKey() . '\') as address2, ';
+        $query .= 'aes_decrypt(zip, \'' . Config::smsPersonalInfoKey() . '\') as zip, ';
+        $query .= 'aes_decrypt(city, \'' . Config::smsPersonalInfoKey() . '\') as city, ';
+        $query .= 'aes_decrypt(state, \'' . Config::smsPersonalInfoKey() . '\') as state, ';
+        $query .= 'aes_decrypt(longitude, \'' . Config::smsPersonalInfoKey() . '\') as longitude, ';
+        $query .= 'aes_decrypt(latitude, \'' . Config::smsPersonalInfoKey() . '\') as latitude, ';
+        $query .= 'aes_decrypt(email, \'' . Config::smsPersonalInfoKey() . '\') as email, ';
+        $query .= 'aes_decrypt(telephone1, \'' . Config::smsPersonalInfoKey() . '\') as telephone1, ';
+        $query .= 'aes_decrypt(telephone2, \'' . Config::smsPersonalInfoKey() . '\') as telephone2 ';
+        return $query;
     }
 
     function getRespondentsForFollowup() {
@@ -200,9 +205,15 @@ class Respondents {
         if ($user != null) {
             $urid = $user->getUrid();
         }
+        
+        // main
         $query = 'replace into ' . Config::dbSurvey() . '_respondents (primkey, firstname, urid, test, hhid, sex, age, selected, present, permanent, hhorder) values (\'' . $primkey . '\', aes_encrypt(\'' . $firstname . '\', \'' . Config::smsPersonalInfoKey() . '\'), ' . prepareDatabaseString($urid) . ', ' . $test . ', \'' . $hhid . '\', aes_encrypt(\'' . $sex . '\', \'' . Config::smsPersonalInfoKey() . '\'), aes_encrypt(\'' . $age . '\', \'' . Config::smsPersonalInfoKey() . '\'), ' . $selected . ', ' . $present . ', ' . $permanent . ', ' . $hhorder . ')';
-
         $result = $db->selectQuery($query);
+        
+        // lab
+        $query = 'replace into ' . Config::dbSurvey() . '_lab (primkey, barcode, labbarcode, refusal, refusalreason, refusaldate, consent1, consent2, consent3, consent4, consent5, consent6, consent7, consent8, survey, measures, vision, anthropometrics, cd4res, cd4date, fielddbscollecteddate, fielddbsreceiveddate, fielddbsstatus, fielddbsshipmentdate, fielddbsshipmentreturneddate, fielddbsclinicresultsissueddate, fielddbsclinicname, fielddbshivfinalanon, labvisitts, labdbsposition, labdbslocation, labbloodposition, labbloodlocation, labbloodsenttolab, labbloodnotcollected, labbloodstatus, labbloodshipmentdate, labbloodshipmentreturneddate, requestform, urid, consenturid, consentts) values (\'' . $primkey . '\', null, null, "0", null, null, "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", null, null, null, null, "0", null, "", "", "", "", null, "", "", "", "", "", null, "0", "", "", null, "0", "0", null)';
+        $result = $db->selectQuery($query);
+        
         return new Respondent($primkey);
     }
 
@@ -308,8 +319,32 @@ class Respondents {
         return null;
     }
 
-    function getUnassigned($psu = -1) {
-        
+    function getUnassigned($puid = -1) {
+        global $db;
+        $respondents = array();
+        $query = $this->getUnassignedAsQuery($puid);
+        $result = $db->selectQuery($query);        
+        while ($row = $db->getRow($result)) {
+            $respondents[] = new Respondent($row);
+        }
+        return $respondents;
+    }
+    
+    function getUnassignedAsQuery($puid = -1, $cleanQuery = false) {
+
+        $psuStr = '';
+        if ($puid > 0) {
+            $psuStr = ' and puid = "' . $puid . '"';
+        }
+
+        $uridStr = ' urid <= 0 ';
+        $currentUser = new User($_SESSION['URID']);
+        if ($currentUser->getUserType() == USER_SUPERVISOR) {
+            $uridStr = ' urid = ' . $currentUser->getUrid();
+        }
+
+        $query = 'select primkey, ' . $this->getShortDeIdentified() . ' from ' . Config::dbSurvey() . '_respondents where ' . $uridStr . ' ' . $psuStr . ' order by primkey asc';
+        return $query;
     }
 
     function getRespondentsByUrid($urid) {

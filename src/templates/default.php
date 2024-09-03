@@ -16,6 +16,7 @@ class DefaultTemplate {
 
     protected $engine;
     protected $variables;
+    protected $realvariables;
     protected $language;
     protected $inclusive;
     protected $exclusive;
@@ -195,7 +196,7 @@ class DefaultTemplate {
             if (strtoupper($exclude) != strtoupper($variable) && !inArray($var->getAnswerType(), array(ANSWER_TYPE_NONE, ANSWER_TYPE_SECTION))) {
                 $name = SESSION_PARAMS_ANSWER . $this->displaynumbers[strtoupper($variable)];
                 if (inArray($var->getAnswerType(), array(ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN))) {
-                    $name .= "[]";
+                    $name .= "name[]";
                 }
                 $answeridlist[] = $name;
             }

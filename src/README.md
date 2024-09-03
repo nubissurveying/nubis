@@ -268,7 +268,7 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 <td>MobileDetect</td>
 <td><a target="_blank" href="https://github.com/serbanghita/Mobile-Detect">https://github.com/serbanghita/Mobile-Detect</a></td>
 <td>MIT License (custom)</td>
-<td>2.8.37</td>
+<td>2.8.41</td>
 </tr>
 
 <tr>
@@ -325,6 +325,13 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 <td><a target="_blank" href="https://github.com/jashkenas/underscore">https://github.com/jashkenas/underscore</a></td>
 <td>Custom, no restrictions (https://github.com/jashkenas/underscore/blob/master/LICENSE)</td>
 <td>Not provided</td>
+</tr>
+
+<tr>
+<td>Wolfcast Browser Detection</td>
+<td><a target="_blank" href="https://github.com/Wolfcast/BrowserDetection">https://github.com/Wolfcast/BrowserDetection</a></td>
+<td>MIT License</td>
+<td>2.9.7</td>
 </tr>
 
 </tbody>

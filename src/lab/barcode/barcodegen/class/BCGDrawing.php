@@ -144,10 +144,13 @@ class BCGDrawing {
      * Draws the barcode on the image $im.
      */
     public function draw() {
+        
         $size = $this->barcode->getDimension(0, 0);
         $this->w = max(1, $size[0]);
         $this->h = max(1, $size[1]);
+        
         $this->init();
+        
         $this->barcode->draw($this->im);
     }
 

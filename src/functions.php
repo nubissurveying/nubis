@@ -196,7 +196,7 @@ function minifyScript($str) {
     if (Config::useDynamicMinify() == false) {
         return $str;
     }
-    return \JShrink\Minifier::minify($str);
+    return \JShrink\Minifier::minify($str); 
 }
 
 /* survey functions */
@@ -214,7 +214,7 @@ function loadProgressBar($suid, $seid, $version) {
 
     global $db;
 
-    $q = "select progressbar from " . Config::dbSurvey() . "_engines where suid=" . $suid . " and seid=" . $seid . " and version=" . $version;
+    $q = "select progressbar from " . Config::dbSurvey() . "_engines where suid=" . prepareDatabaseString($suid) . " and seid=" . prepareDatabaseString($seid) . " and version=" . prepareDatabaseString($version);
 
     $r = $db->selectQuery($q);
 
@@ -231,7 +231,7 @@ function loadProgressBar($suid, $seid, $version) {
 
 function loadSetFillClasses($suid, $seid, $version) {
     global $db;
-    $q = "select setfills from " . Config::dbSurvey() . "_engines where suid=" . $suid . " and seid=" . $seid . " and version=" . $version;
+    $q = "select setfills from " . Config::dbSurvey() . "_engines where suid=" . prepareDatabaseString($suid) . " and seid=" . prepareDatabaseString($seid) . " and version=" . prepareDatabaseString($version);
     $r = $db->selectQuery($q);
     if ($row = $db->getRow($r)) {
         if ($row["setfills"] != "") {
@@ -263,14 +263,14 @@ function loadEngine($suid, $primkey, $phpid, $version, $seid, $doState = true, $
         
     }
 
-    $q = "select engine from " . Config::dbSurvey() . "_engines where suid=" . $suid . " and seid=" . $seid . " and version=" . $version;
+    $q = "select engine from " . Config::dbSurvey() . "_engines where suid=" . prepareDatabaseString($suid) . " and seid=" . prepareDatabaseString($seid) . " and version=" . prepareDatabaseString($version);
     $r = $db->selectQuery($q);
     $code = "";
 
     // get compiled code
     if ($row = $db->getRow($r)) {
         ob_start();
-        $code = unserialize(gzuncompress($row["engine"]));
+        $code = unserialize(gzuncompress($row["engine"]));        
     }
     // no compiled code found, create empty engine to continue
     else {
@@ -337,7 +337,7 @@ function setSurveyVersion($l) {
 function getSurveyVersion($survey = "") {
 
     /* SMS */
-    if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
+    if (isset($_SESSION['SYSTEM_ENTRY']) && $_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
         if ($survey == "") {
             global $survey;
         }
@@ -376,7 +376,7 @@ function getDefaultSurveyMode() {
 
 function isSurveyMode($l) {
 
-    if (trim($l) == "" || !is_numeric($l)) {
+    if ($l == null || trim($l) == "" || !is_numeric($l)) {
         return false;
     }
 
@@ -425,7 +425,7 @@ function setSurveyMode($l, $flooding = false) {
 function getSurveyMode() {
 
     /* SMS */
-    if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
+    if (isset($_SESSION['SYSTEM_ENTRY']) && $_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
         if (loadvar(SMS_POST_MODE) != '') {
             $l = loadvar(SMS_POST_MODE);
             if (isSurveyMode($l)) {
@@ -469,7 +469,7 @@ function getSurveyMode() {
     global $engine, $mode;
 
     /* global mode has been set! (via one of the options below, so no need to repeat) */
-    if (isSurveyMode($mode)) {
+    if (isSurveyMode($mode)) {        
         return $mode;
     }
 
@@ -512,9 +512,23 @@ function getSurveyMode() {
 
 /* survey functions */
 
-function isSurvey($l) {
-
+function isSurveySMS($l) {
     if (trim($l) == "" || !is_numeric($l)) {
+        return false;
+    }
+    
+    $sv = new Surveys();
+    $surveys = $sv->getSurveyIdentifiers();
+    foreach ($surveys as $surv) {
+        if ($surv == $l) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isSurvey($l) {
+    if ($l == null || trim($l) == "" || !is_numeric($l)) {
         return false;
     }
 
@@ -538,7 +552,6 @@ function isSurvey($l) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -578,7 +591,7 @@ function setSurvey($l) {
 function getSurvey() {
 
     /* SMS */
-    if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
+    if (isset($_SESSION['SYSTEM_ENTRY']) && $_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
         if (loadvar(SMS_POST_SURVEY) != "") {
             $_SESSION['SUID'] = loadvar(SMS_POST_SURVEY);
         }
@@ -736,7 +749,7 @@ function getSMSLanguagePostFix($l) {
 
 function isSurveyLanguage($l) {
 
-    if (trim($l) == "" || !is_numeric($l)) {
+    if ($l == null || trim($l) == "" || !is_numeric($l)) {
         return false;
     }
 
@@ -824,7 +837,7 @@ function switchSurveyLanguageTranslator($l) {
 function getSurveyLanguage() {
 
     /* SMS */
-    if ($_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
+    if (isset($_SESSION['SYSTEM_ENTRY']) && $_SESSION['SYSTEM_ENTRY'] == USCIC_SMS) {
         if (loadvar(SMS_POST_LANGUAGE) != '') {
             $l = loadvar(SMS_POST_LANGUAGE);
             if (isSurveyLanguage($l)) {
@@ -943,7 +956,7 @@ function getSurveyTemplateAllowChange() {
 function isSurveyTemplate($t) {
 
     // forgo any checks if existing section
-    if (trim($t) == "" || !is_numeric($t)) {
+    if ($t == null || trim($t) == "" || !is_numeric($t)) {
         return false;
     }
 
@@ -957,7 +970,7 @@ function isSurveyTemplate($t) {
         return true;
     }
 
-    return inArray($l, array_keys(Common::surveyOverallTemplates()));
+    return inArray($t, array_keys(Common::surveyOverallTemplates()));
 }
 
 function getSurveyTemplate() {
@@ -1041,7 +1054,7 @@ function getBaseSectionSeid($suid) {
 
     // check in _sections table
     global $db;
-    $query = "select seid from " . Config::dbSurvey() . "_sections where suid=" . $suid . " and name='Base'";
+    $query = "select seid from " . Config::dbSurvey() . "_sections where suid=" . prepareDatabaseString($suid) . " and name='Base'";
     $res = $db->selectQuery($query);
     if ($res) {
         if ($db->getNumberOfRows($res) > 0) {
@@ -1268,6 +1281,9 @@ function isSurveySection($seid) {
 /* string functions */
 
 function convertHTLMEntities($str, $quotes = ENT_QUOTES, $encoding = "UTF-8") {
+    if ($str === null) {
+        return null;
+    }
     return htmlentities($str, $quotes, $encoding);
 }
 
@@ -1300,12 +1316,14 @@ function reversenat($str_a, $str_b) {
 
 function compareLength($a, $b) {
 
+    // https://www.php.net/manual/en/arrayobject.uksort.php
+    // the comparison function must return an integer less than, equal to, or greater than zero 
+    // if the first argument is considered to be respectively less than, equal to, or greater than the second. 
     if (strlen($a) > strlen($b)) {
-
-        return true;
+        return 1;
     }
 
-    return false;
+    return -1;
 }
 
 // http://stackoverflow.com/questions/834303/php-startswith-and-endswith-functions
@@ -1374,7 +1392,6 @@ function prepareClassExtension($text) {
 }
 
 function getReferences($text, $indicator) {
-
     if (trim($text) == "") {
         return array();
     }
@@ -1711,8 +1728,12 @@ function stringSort($str1, $str2, $case = 1) {
 
 function inArray($str, $array, $casesensitive = 1) {
 
-    // http://stackoverflow.com/questions/2166512/php-case-insensitive-in-array-function
+    // if searchedfor is null, check in case sensitive version (preg_quote does not like null as search input)
+    if ($str === null) {
+	return in_array($str, $array);
+    }
 
+    // http://stackoverflow.com/questions/2166512/php-case-insensitive-in-array-function
     if ($casesensitive == 1) { // case insensitive
         $lengths = array_map('strlen', $array);
         if (sizeof($lengths) > 0 && strlen($str) > max($lengths)) { // if input string longer than longest array element, then no need to do preg_grep
@@ -2077,34 +2098,23 @@ function getURL() {
 function setPath() {
 
     $path = ini_get("include_path");
-
     $base = substr(__FILE__, 0, strrpos(__FILE__, DIRECTORY_SEPARATOR));
-
     $delimiter = ":";
-
     if (isWindows()) {
-
         $delimiter = ";";
     }
 
-
-
     /* add locations */
-
     $path .= $delimiter . $base;
-
     $path .= $delimiter . $base . DIRECTORY_SEPARATOR . "admin";
     $path .= $delimiter . $base . DIRECTORY_SEPARATOR . "custom";
     $path .= $delimiter . $base . DIRECTORY_SEPARATOR . "display";
     $path .= $delimiter . $base . DIRECTORY_SEPARATOR . "display" . DIRECTORY_SEPARATOR . "templates";
     $path .= $delimiter . $base . DIRECTORY_SEPARATOR . "language";
-
+    $path .= $delimiter . $base . DIRECTORY_SEPARATOR . "sample";
     $path .= $delimiter . $base . DIRECTORY_SEPARATOR . "templates";
 
-
-
     /* update path */
-
     ini_set("include_path", $path);
 }
 
@@ -2142,6 +2152,7 @@ function checkIsSet($var, $default = '') {
 
 /* http://stackoverflow.com/questions/606179/what-encryption-algorithm-is-best-for-encrypting-cookies  */
 
+/*
 function encryptC($text, $salt) {
     return trim(base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $text, MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND))));
 }
@@ -2149,6 +2160,22 @@ function encryptC($text, $salt) {
 function decryptC($text, $salt) {
     return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
 }
+*/
+
+
+function encryptC($text, $salt) { 
+  $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+  $iv = '1234567891011121'; //less safe, but no funny chars
+  $encrypted = openssl_encrypt($text, 'aes-256-cbc', $salt, 0, $iv);
+  return trim(base64_encode($encrypted . '::' . $iv));
+} 
+
+function decryptC($text, $salt){ 
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+    list($encrypted_data, $iv) = explode('::', base64_decode($text), 2);
+    return openssl_decrypt($encrypted_data, 'aes-256-cbc', $salt, 0, $iv);  
+}
+
 
 // http://www.eatyourvariables.com/php/mysql-compatible-aes-encryption-and-decryption
 function aes_encrypt($val, $key) {
@@ -2217,7 +2244,7 @@ function cardinal($answer) {
 }
 
 function isTestMode() {
-    if ($_SESSION[SURVEY_EXECUTION_MODE] == SURVEY_EXECUTION_MODE_TEST) {
+    if (isset($_SESSION[SURVEY_EXECUTION_MODE]) && $_SESSION[SURVEY_EXECUTION_MODE] == SURVEY_EXECUTION_MODE_TEST) {
         return true;
     }
     return false;
@@ -2274,7 +2301,7 @@ function checkUserAccess() {
     $user = new User($_SESSION['URID']);
     $cm = getSurveyMode();
     $cl = getSurveyLanguage();
-    $modes = $user->getModes();
+    $modes = $user->getModes(getSurvey());
     $languages = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
     if (!inArray($cm, $modes) || !inArray($cl, $languages)) {
         return false;
@@ -2467,7 +2494,7 @@ function tempdebug() {
 }
 
 function doExit() {
-    if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
+    if (isset($_SESSION['SYSTEM_ENTRY']) && $_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
         $_SESSION['REQUEST_IN_PROGRESS'] = null;
         unset($_SESSION['REQUEST_IN_PROGRESS']);
     }

@@ -17,7 +17,7 @@ class DisplayRespondent extends Display {
     function setPrefix($refpage) {
         return $refpage;
     }
-
+    
     function showInfoSub($respondentOrHousehold, $edit = false) {
         $returnStr = '<table>';
 
@@ -27,18 +27,14 @@ class DisplayRespondent extends Display {
             $returnStr .= '<tr><td style="width:100px">' . Language::labelRespondentName() . ':</td><td><b>' . $this->showInputBox('name', $respondentOrHousehold->getName(), $edit) . '</td><td></td></tr>';
         }
         $info1 = $this->defaultDisplayInfoAddressColumns();
-        //return array('address1_dec' => Language::labelDwelling(), 'city_dec' => Language::labelVillage()); 
+        
         foreach ($info1 as $key => $info) {
             $info1edit = $edit;
-            if ($edit == true && $respondentOrHousehold instanceof Respondent)
+            if ($edit == true && $respondentOrHousehold instanceof Respondent && dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
                 $info1edit = false;
+            }
             $returnStr .= '<tr><td>' . $info . ':</td><td colspan=2 style="width:200px">' . $this->showInputBox(rtrim($key, '_dec'), $respondentOrHousehold->getDataByField($key), $info1edit) . '</td></tr>';
         }
-
-        //SET THIS THROUGH defaultDisplayInfo1AddressColumns
-//        $returnStr .= '<tr><td valign=top>Address 1:</td><td colspan=2 style="width:200px">' . $this->showInputBox('address1', $respondentOrHousehold->getAddress1(), $edit) . '</td></tr>';
-//        $returnStr .= '<tr><td>Address 2:</td><td colspan=2>' . $this->showInputBox('address2', $respondentOrHousehold->getAddress2(), $edit) . '</td></tr>';
-//        $returnStr .= '<tr><td>City / Zip:</td><td>' . $this->showInputBox('city', $respondentOrHousehold->getCity(), $edit) . '</td><td>' . $this->showInputBox('zip', $respondentOrHousehold->getZip(), $edit) . '</td></tr>';
 
         $returnStr .= '<tr><td colspan=3><hr></td></tr>';
 
@@ -48,12 +44,6 @@ class DisplayRespondent extends Display {
         foreach ($info2 as $key => $info) {
             $returnStr .= '<tr><td>' . $info . ':</td><td colspan=2 style="width:200px">' . $this->showInputBox(rtrim($key, '_dec'), $respondentOrHousehold->getDataByField($key), $edit) . '</td></tr>';
         }
-
-        //SET THIS THROUGH defaultDisplayInfo2AddressColumns
-//        $returnStr .= '<tr><td>Telephone:</td><td colspan=2>' . $this->showInputBox('telephone1', $respondentOrHousehold->getTelephone1(), $edit) . '</td></tr>';
-//        $returnStr .= '<tr><td>Email:</td><td colspan=2>' . $this->showInputBox('email', $respondentOrHousehold->getEmail(), $edit) . '</td></tr>';
-        //    $returnStr .= '<tr><td>Fax:</td><td colspan=2>' . $this->showInputBox('fax', $respondentOrHousehold->getTelephone2(), $edit) . '</td></tr>';
-        //    $returnStr .= '<tr><td>Email:</td><td colspan=2>' . $this->showInputBox('email', $respondentOrHousehold->getEmail(), $edit) . '</td></tr>';
 
         if (!$edit) {
             $psu = new Psu($respondentOrHousehold->getPuid());
@@ -77,6 +67,7 @@ class DisplayRespondent extends Display {
     }
 
     function showInfo($respondentOrHousehold, $message = '', $refpageprefix = '') {
+        
         $content = $message;
         $refpage = 'interviewer.household';
         if ($respondentOrHousehold instanceof Respondent) {
@@ -97,6 +88,7 @@ class DisplayRespondent extends Display {
         $content .= '<tr><td colspan=2><hr></td></tr>';
         $content .= '<tr><td colspan=3>';
         if ($respondentOrHousehold instanceof Household) {
+            
             $content .= '<div class="alert alert-info" style="max-height: 160px; overflow-y:scroll;">';
             $content .= '<table width=100%><tr><td colspan=3><b>' . Language::labelRespondentHHMembers() . '</b></td><td></td></tr>';
             $nohhmemberselected = ($respondentOrHousehold->getStatus() == 2 && sizeof($respondentOrHousehold->getSelectedRespondents()) == 0);
@@ -112,10 +104,11 @@ class DisplayRespondent extends Display {
                 if ($respondentOrHousehold->getStatus() == 2 && !$respondent->isPresent()) {
                     $content .= '<tr style="color:red"><td colspan=3><nobr>' . $primkeyPopup;
                     $content .= '<span class="glyphicon glyphicon-remove"></span> ';
-                } elseif ($respondentOrHousehold->getStatus() != 2) {
-                    $content .= '<tr><td colspan=3><nobr>' . $primkeyPopup;
-                    $content .= '<span class="glyphicon glyphicon-user"></span> ';
-                } elseif ($respondent->isPresent() && ($respondent->isSelected() || $respondent->isFinR() || $respondent->isFamR())) {
+                } //elseif ($respondentOrHousehold->getStatus() != 2) {
+                    //$content .= '<tr><td colspan=3><nobr>' . $primkeyPopup;
+                    //$content .= '<span class="glyphicon glyphicon-user"></span> ';
+                //} 
+                elseif ($respondent->isPresent() && ($respondent->isSelected() || $respondent->isFinR() || $respondent->isFamR())) {
                     $content .= '<tr><td colspan=3><nobr>' . $primkeyPopup;
                     $content .= '<span class="glyphicon glyphicon-user"></span> ';
                     $content .= '<a href="' . setSessionParams(array('page' => $this->setPrefix('interviewer.respondent.info'), 'primkey' => $respondent->getPrimkey())) . '">';
@@ -125,10 +118,11 @@ class DisplayRespondent extends Display {
                 }
 
                 $content .= $respondent->getName() . $this->displayGender($respondent) . $this->displayAge($respondent) . $this->displayFinR($respondent) . $this->displayFamR($respondent) . $this->displaySelected($respondent, false);
-                $content .= '</div>';
+                $content .= '</div>';                
                 if (!$nohhmemberselected && $respondent->isPresent() && ($respondent->isSelected() || $respondent->isFinR() || $respondent->isFamR())) {
                     $content .= '</a>';
                 }
+                
                 $content .= '</td><td align=right><nobr>';
                 $content .= $this->displayStatus($respondent, false);
                 $content .= $this->displayMovedOut($respondent, false);
@@ -141,6 +135,7 @@ class DisplayRespondent extends Display {
             }
             $content .= '</table></div>';
         } else { //respondent: show info on finR, famR ect
+            
             $content .= '<div class="alert alert-info">';
             $content .= Language::labelRespondentSex() . ': ' . $this->displayGenderFull($respondentOrHousehold) . '<br/>';
             $content .= Language::labelRespondentAge() . ': ' . $this->displayAge($respondentOrHousehold) . '<br/>';
@@ -363,7 +358,7 @@ class DisplayRespondent extends Display {
             $returnStr .= Language::labelRespondentRespondent() . ' ';
         } else {
 
-            $returnStr .= Language::labelRespondentHousehold() . 'Household ';
+            $returnStr .= Language::labelRespondentHousehold() . ' ';
         }
         $returnStr .= $respondentOrHousehold->getPrimkey() . '</li>
 
@@ -377,7 +372,7 @@ class DisplayRespondent extends Display {
 
 
 
-        if (dbConfig::defaultTracking()) {
+        if (dbConfig::defaultTracking() == PANEL_TRACKING_YES && $respondentOrHousehold instanceof Respondent) {
 
             $returnStr .= '<li><a href="' . setSessionParams(array('page' => $refpage . '.tracking', 'primkey' => $respondentOrHousehold->getPrimkey())) . '"><span class="glyphicon glyphicon-road"></span> ' . Language::labelTracking() . '</a></li>';
         }

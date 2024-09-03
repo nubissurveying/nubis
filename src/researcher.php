@@ -325,19 +325,23 @@ class Researcher {
         $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
 
         $this->determineModeLanguage($de);
+        $de->setProperty(DATA_OUTPUT_TYPE, DATA_OUTPUT_TYPE_DATA_TABLE);
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION, loadvar(DATA_OUTPUT_PRIMARY_KEY_ENCRYPTION));
         $de->setProperty(DATA_OUTPUT_PRIMARY_KEY_IN_DATA, loadvar(DATA_OUTPUT_PRIMARY_KEY_IN_DATA));
         $de->setProperty(DATA_OUTPUT_SURVEY, loadvar(DATA_OUTPUT_SURVEY));
-        $de->setProperty(DATA_OUTPUT_TYPEDATA, loadvar(DATA_OUTPUT_TYPEDATA));
-        $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
+        $de->setProperty(DATA_OUTPUT_TYPEDATA, loadvar(DATA_OUTPUT_TYPEDATA));        
         $de->setProperty(DATA_OUTPUT_FROM, loadvar(DATA_OUTPUT_FROM));
-        $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));
+        $de->setProperty(DATA_OUTPUT_TO, loadvar(DATA_OUTPUT_TO));     
+        
         if (loadvar(DATA_OUTPUT_TYPEPARADATA) == PARADATA_RAW) {
             $de->setProperty(DATA_OUTPUT_FILETYPE, FILETYPE_CSV);
             $de->generateParadata();
-        } else {
+        } else if (loadvar(DATA_OUTPUT_TYPEPARADATA) == PARADATA_PROCESSED) {
             $de->setProperty(DATA_OUTPUT_FILETYPE, loadvar(DATA_OUTPUT_FILETYPE));
             $de->generateProcessedParadata();
+        } else {
+            $de->setProperty(DATA_OUTPUT_FILETYPE, FILETYPE_CSV);
+            $de->generateErrorParadata();
         }
         $de->download();
     }

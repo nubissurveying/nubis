@@ -28,9 +28,9 @@ class Progressbar {
 
     function __construct($suid, $seid) {
 
-        $this->suid = $suid;
+        $this->suid = prepareDatabaseString($suid);
 
-        $this->seid = $seid;
+        $this->seid = prepareDatabaseString($seid);
 
         $this->entries = array();
         $this->storeentries = array();
@@ -74,7 +74,7 @@ class Progressbar {
 
         global $db;
 
-        $del = "delete from " . Config::dbSurvey() . "_progressbars where suid=" . $this->suid . " and mainseid=" . $this->seid;
+        $del = "delete from " . Config::dbSurvey() . "_progressbars where suid=" . prepareDatabaseString($this->suid) . " and mainseid=" . prepareDatabaseString($this->seid);
 
         $db->executeQuery($del);
     }
@@ -84,14 +84,12 @@ class Progressbar {
     }
 
     function save() {
-
         $this->delete();
-
         global $db;
-
+        $number = 0;
         for ($j = 0; $j < sizeof($this->storeentries); $j++) {
             $entry = $this->storeentries[$j];
-            $i = "replace into " . Config::dbSurvey() . "_progressbars (suid, mainseid, seid, seidrgid, rgid, number, loopstring) values(" . $this->suid . "," . $this->seid . "," . $entry["seid"] . "," . $entry["seidrgid"] . "," . $entry["rgid"] . "," . $entry["number"] . ",'" . $entry["loopstring"] . "')";
+            $i = "replace into " . Config::dbSurvey() . "_progressbars (suid, mainseid, seid, seidrgid, rgid, number, loopstring) values(" . prepareDatabaseString($this->suid) . "," . prepareDatabaseString($this->seid) . "," . prepareDatabaseString($entry["seid"]) . "," . prepareDatabaseString($entry["seidrgid"]) . "," . prepareDatabaseString($entry["rgid"]) . "," . prepareDatabaseString($entry["number"]) . ",'" . prepareDatabaseString($entry["loopstring"]) . "')";
             $db->executeQuery($i);
             $number++;
         }
@@ -203,15 +201,10 @@ class Progressbar {
     function getSectionTotal($suid, $seid) {
 
         global $db;
-        $query = "select count(*) as cnt from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid;
-        
-        //$query = "select sum(looptimes) as cnt from hrs_screens where suid=" . $suid . " and seid=" . $seid;
+        $query = "select * from " . Config::dbSurvey() . "_screens where suid=" . $suid . " and seid=" . $seid;
         $res = $db->selectQuery($query);
         if ($res) {
-            if ($db->getNumberOfRows($res) > 0) {
-                $row = $db->getRow($res);
-                return $row["cnt"];
-            }
+            return $db->getNumberOfRows($res);            
         }
         return 1;
     }

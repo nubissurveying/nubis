@@ -118,7 +118,6 @@ class Data {
         $cnt8 = 0;
         global $db;
         $select = "select variable, sum(timespent) as total2 from " . Config::dbSurveyData() . "_consolidated_times where suid=" . prepareDatabaseString($suid) . " and variable='" . prepareDatabaseString($variable) . "' and timespent < " . prepareDatabaseString($cutoff) . " group by variable order by variable asc"; // , ts asc
-        //echo $select;
         $res = $db->selectQuery($select);
         if ($res) {
 
@@ -276,7 +275,7 @@ class Data {
         set_time_limit(0); // generating may take a while
 // create table
         global $db;
-        $create = "create table if not exists " . Config::dbSurveyData() . "_consolidated_times  (
+        $create = "create table if not exists " . prepareDatabaseString(Config::dbSurveyData()) . "_consolidated_times  (
                 suid int(11) NOT NULL DEFAULT '1',
                 primkey varchar(150) NOT NULL,
                 stateid int(11) DEFAULT NULL,  
@@ -292,11 +291,11 @@ class Data {
         $db->executeQuery($create);
 
         // update
-        $query = "delete from " . Config::dbSurveyData() . "_consolidated_times where suid=" . prepareDatabaseString($suid);
+        $query = "delete from " . prepareDatabaseString(Config::dbSurveyData()) . "_consolidated_times where suid=" . prepareDatabaseString($suid);
         $db->executeQuery($create);
 
         // old non-group by compliant: $query = "REPLACE INTO " . Config::dbSurveyData() . "_consolidated_times SELECT suid, primkey, begintime, stateid, variable, avg(timespent) as timespent, language, mode, version, ts FROM " . Config::dbSurveyData() . "_times where suid=" . $suid . " group by primkey, begintime order by primkey asc";
-        $query = "REPLACE INTO " . Config::dbSurveyData() . "_consolidated_times SELECT min(suid) as suid, primkey, begintime, min(stateid) as stateid, min(variable) as variable, avg(timespent) as timespent, min(language) as language, min(mode) as mode, min(version) as version, min(ts) as ts FROM " . Config::dbSurveyData() . "_times where suid=" . prepareDatabaseString($suid) . " group by primkey, (CONVERT_TZ(begintime,'UTC','America/Vancouver')), rgid";
+        $query = "REPLACE INTO " . prepareDatabaseString(Config::dbSurveyData()) . "_consolidated_times SELECT min(suid) as suid, primkey, begintime, min(stateid) as stateid, min(variable) as variable, avg(timespent) as timespent, min(language) as language, min(mode) as mode, min(version) as version, min(ts) as ts FROM " . Config::dbSurveyData() . "_times where suid=" . prepareDatabaseString($suid) . " group by primkey, (CONVERT_TZ(begintime,'UTC','America/Vancouver')), rgid";
         $db->executeQuery($query);
     }
 
@@ -661,9 +660,9 @@ class Data {
                             foreach ($a as $error => $times) {
                                 $query = "replace into " . Config::dbSurveyData() . "_processed_paradata (`pid`, `suid`, `primkey`, `rgid`, `variablename`, `answer`, `language`, `mode`, `version`, `ts`) values (";
                                 if ($key != "") {
-                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "',aes_encrypt('" . $times . "','" . $key . "')," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                    $query .= prepareDatabaseString($row["pid"]) . "," . prepareDatabaseString($row["suid"]) . ",'" . prepareDatabaseString($row["primkey"]) . "'," . prepareDatabaseString($row["rgid"]) . ",'" . prepareDatabaseString(strtolower($k . "_" . $error)) . "',aes_encrypt('" . prepareDatabaseString($times) . "','" . prepareDatabaseString($key) . "')," . prepareDatabaseString($row["language"]) . "," . prepareDatabaseString($row["mode"]) . "," . prepareDatabaseString($row["version"]) . ",'" . prepareDatabaseString($row["ts"]) . "'";
                                 } else {
-                                    $query .= $row["pid"] . "," . $row["suid"] . ",'" . $row["primkey"] . "'," . $row["rgid"] . ",'" . strtolower($k . "_" . $error) . "','" . $times . "'," . $row["language"] . "," . $row["mode"] . "," . $row["version"] . ",'" . $row["ts"] . "'";
+                                    $query .= prepareDatabaseString($row["pid"]) . "," . prepareDatabaseString($row["suid"]) . ",'" . prepareDatabaseString($row["primkey"]) . "'," . prepareDatabaseString($row["rgid"]) . ",'" . prepareDatabaseString(strtolower($k . "_" . $error)) . "','" . prepareDatabaseString($times) . "'," . prepareDatabaseString($row["language"]) . "," . prepareDatabaseString($row["mode"]) . "," . prepareDatabaseString($row["version"]) . ",'" . prepareDatabaseString($row["ts"]) . "'";
                                 }
                                 $query .= ")";
                                 $db->executeQuery($query);

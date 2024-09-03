@@ -33,10 +33,8 @@ class Communication {
 
     function isUpdateAvailable($urid) {
         $postUrl = getCommunicationServer();
-        $data = array('p' => 'updateavailable', 'urid' => $urid);
-
-        $result = $this->curlToServer($data, $postUrl);
-        
+        $data = array('k' => encryptC(Config::communicationAccessKey(), Config::smsComponentKey()), 'p' => 'updateavailable', 'urid' => $urid);
+        $result = $this->curlToServer($data, $postUrl);        
         if (trim($result) == 'yes') {
             return true;
         }
@@ -45,7 +43,7 @@ class Communication {
 
     function confirmDataReceived($urid) {
         $postUrl = getCommunicationServer();
-        $data = array('p' => 'datareceived', 'urid' => $urid);
+        $data = array('k' => encryptC(Config::communicationAccessKey(), Config::smsComponentKey()), 'p' => 'datareceived', 'urid' => $urid);
         $result = $this->curlToServer($data, $postUrl);
 
         if (trim($result) == 'yes') {
@@ -59,14 +57,14 @@ class Communication {
         $return = '';
         $wherets = ' WHERE 1 = 1';
         if (trim($ts) != '') {
-            $wherets .= ' AND ts > "' . $ts . '"';
+            $wherets .= ' AND ts > "' . prepareDatabaseString($ts) . '"';
         }
         if (trim($extraCondition) != '') {
             $wherets .= ' AND ' . $extraCondition;
         }
         foreach ($tables as $table) {
 
-            $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_' . $table . $wherets);
+            $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_' . prepareDatabaseString($table) . $wherets);
             if ($db->getNumberOfRows($result) > 0) {
                 $finfo = $result->fetch_fields();
                 $fieldnames = array();
@@ -117,7 +115,7 @@ class Communication {
     function sendToServer($str, $urid) {
         $postUrl = getCommunicationServer();
         $str = urlencode($this->encryptAndCompress($str));
-        $data = array('p' => 'upload', 'urid' => $urid, 'query' => $str);
+        $data = array('k' => encryptC(Config::communicationAccessKey(), Config::smsComponentKey()), 'p' => 'upload', 'urid' => $urid, 'query' => $str);
 
         $result = $this->curlToServer($data, $postUrl);
         
@@ -129,7 +127,7 @@ class Communication {
 
     function receiveFromServer($urid) {
         $postUrl = getCommunicationServer();
-        $data = array('p' => 'receive', 'urid' => $urid);
+        $data = array('k' => encryptC(Config::communicationAccessKey(), Config::smsComponentKey()), 'p' => 'receive', 'urid' => $urid);
 
         $result = $this->curlToServer($data, $postUrl);        
         $this->importData($result);        
@@ -232,7 +230,7 @@ class Communication {
         if ($notReceivedCheck) {
             $receivedStr = ' and received = 0';
         }
-        $query = 'select * from ' . Config::dbSurvey() . '_communication where datatype = ' . $datatype . $receivedStr . ' and urid = ' . $urid . ' and direction = 1 order by ts asc, hnid asc';  //was desc
+        $query = 'select * from ' . Config::dbSurvey() . '_communication where datatype = ' . prepareDatabaseString($datatype) . $receivedStr . ' and urid = ' . prepareDatabaseString($urid) . ' and direction = 1 order by ts asc, hnid asc';  //was desc        
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
             $rows[] = $row;
@@ -242,7 +240,7 @@ class Communication {
 
     function setUpdateReceived($urid) {
         global $db;
-        $query = 'update ' . Config::dbSurvey() . '_communication set received = 1, receivedts = "' . date('Y-m-d H:i:s') . '" where urid = ' . $urid;
+        $query = 'update ' . Config::dbSurvey() . '_communication set received = 1, receivedts = "' . prepareDatabaseString(date('Y-m-d H:i:s')) . '" where urid = ' . prepareDatabaseString($urid);
         return $db->selectQuery($query);
     }
 
@@ -277,11 +275,22 @@ class Communication {
     }
 
     function assignHousehold(Household $household, $newurid) {
-// only _household and _respondents
-        $data = $this->exportTables(array('households'), '', 'primkey = "' . $household->getPrimkey() . '"');
+        // _household and _respondents
+        $data = $this->exportTables(array('households'), '', 'primkey = "' . prepareDatabaseString($household->getPrimkey()) . '"');
         $data .= "\n";
-        $data .= $this->exportTables(array('respondents'), '', 'hhid = "' . $household->getPrimkey() . '"');
+        $data .= $this->exportTables(array('respondents'), '', 'hhid = "' . prepareDatabaseString($household->getPrimkey()) . '"');
         $this->addSQLToUser($data, $newurid);
+    }
+    
+    function assignLab($household, $respondent, $lab, $newurid) {
+        // _household, _respondents and _lab
+        $data = $this->exportTables(array('households'), '', 'primkey = "' . prepareDatabaseString($household->getPrimkey()) . '"');
+        $data .= "\n";
+        $data .= $this->exportTables(array('respondents'), '', 'primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"');
+        $this->addSQLToUser($data, $newurid);
+        $data .= "\n";
+        $data = $this->exportTables(array('lab'), '', 'primkey = "' . prepareDatabaseString($lab->getPrimkey()) . '"');
+        $this->addSQLToUser($data, $selurid);
     }
 
     function reassignHousehold(Household $household, $oldurid, $newurid) {
@@ -290,34 +299,60 @@ class Communication {
 
         if ($newurid != -1) { //back to agency
             //insert data into new iwer
-            $data = $this->exportTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . $household->getPrimkey() . '"');
+            $data = $this->exportTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . prepareDatabaseString($household->getPrimkey()) . '"');
             $this->addSQLToUser($data, $newurid);
             //insert data into new iwer (for respodnents)
             foreach ($household->getSelectedRespondentsWithFinFamR() as $respondent) {
-                $data = $this->exportTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . $respondent->getPrimkey() . '"');
+                $data = $this->exportTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"');
                 $this->addSQLToUser($data, $newurid);
             }
 
             //get data for household and respondents and add to new urid
-            $data = $this->exportTables(array('households'), '', 'primkey = "' . $household->getPrimkey() . '"');
+            $data = $this->exportTables(array('households'), '', 'primkey = "' . prepareDatabaseString($household->getPrimkey()) . '"');
             $data .= "\n";
-            $data .= $this->exportTables(array('respondents'), '', 'hhid = "' . $household->getPrimkey() . '"');
+            $data .= $this->exportTables(array('respondents'), '', 'hhid = "' . prepareDatabaseString($household->getPrimkey()) . '"');
             $this->addSQLToUser($data, $newurid);
         }
 
         if ($oldUser->getUserType() == USER_INTERVIEWER) {//not if this isn't an interviewer
             //remove data from old interviewer  
-            $data = $this->removeFromTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . $household->getPrimkey() . '"');
+            $data = $this->removeFromTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . prepareDatabaseString($household->getPrimkey()) . '"');
             $this->addSQLToUser($data, $oldurid);
             //remove data from old interviewer  (for respondents)
             foreach ($household->getSelectedRespondentsWithFinFamR() as $respondent) {
-                $data = $this->exportTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . $respondent->getPrimkey() . '"');
+                $data = $this->exportTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"');
                 $this->addSQLToUser($data, $oldurid);
             }
             //now remove from oldurid
-            $data = $this->removeFromTables(array('households'), '', 'primkey = "' . $household->getPrimkey() . '"');
+            $data = $this->removeFromTables(array('households'), '', 'primkey = "' . prepareDatabaseString($household->getPrimkey()) . '"');
             $data .= "\n";
-            $data .= $this->removeFromTables(array('respondents'), '', 'hhid = "' . $household->getPrimkey() . '"');
+            $data .= $this->removeFromTables(array('respondents'), '', 'hhid = "' . prepareDatabaseString($household->getPrimkey()) . '"');
+
+            $this->addSQLToUser($data, $oldurid);
+        }
+    }
+    
+    function reassignRespondent(Respondent $respondent, $oldurid, $newurid) {
+        $oldUser = new User($oldurid);
+        //add to new iwer first.. then remove from old.
+
+        if ($newurid != -1) { //back to agency
+            //insert data into new iwer
+            $data = $this->exportTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"');
+            $this->addSQLToUser($data, $newurid);
+            
+            //get data for household and respondents and add to new urid
+            $data .= $this->exportTables(array('respondents'), '', 'primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"');
+            $this->addSQLToUser($data, $newurid);
+        }
+
+        if ($oldUser->getUserType() == USER_INTERVIEWER) {//not if this isn't an interviewer
+            //remove data from old interviewer  
+            $data = $this->removeFromTables(array('data', 'datarecords', 'states', 'times', 'remarks', 'contacts'), '', 'primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"');
+            $this->addSQLToUser($data, $oldurid);
+            
+            //now remove from oldurid
+            $data .= $this->removeFromTables(array('respondents'), '', 'primkey = "' . prepareDatabaseString($respondent->getPrimkey()) . '"');
 
             $this->addSQLToUser($data, $oldurid);
         }
@@ -325,7 +360,7 @@ class Communication {
 
     function removeRecord($hnid) {
         global $db;
-        $query = 'delete from ' . Config::dbSurvey() . '_communication where hnid = ' . $hnid;
+        $query = 'delete from ' . Config::dbSurvey() . '_communication where hnid = ' . prepareDatabaseString($hnid);
         return $db->executeQuery($query);
     }
 
@@ -345,7 +380,7 @@ class Communication {
 
     function getLastUploaded($urid) {
         global $db;
-        $query = 'select max(ts) as lastupdated from ' . Config::dbSurvey() . '_communication where direction = 2 and urid = ' . $urid;
+        $query = 'select max(ts) as lastupdated from ' . Config::dbSurvey() . '_communication where direction = 2 and urid = ' . prepareDatabaseString($urid);
         $result = $db->selectQuery($query);
         $row = $db->getRow($result);
         return $row['lastupdated'];

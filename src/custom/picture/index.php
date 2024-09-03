@@ -12,16 +12,23 @@
   ------------------------------------------------------------------------
  */
 
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
+//error_reporting(E_ALL);
+//ini_set("display_errors", 1);
 
 set_include_path(dirname(dirname(getcwd())));
 require_once('constants.php');
 require_once('functions.php');
 
-require_once('dbConfig.php');
-require_once('config.php');
+require_once("dbConfig.php");
+$loaded = dbConfig::load("../../conf.php");
+require_once("config.php");
 require_once('database.php');
+
+$k = decryptC(loadvar("k"), Config::smsComponentKey());
+
+if ($k != Config::pictureKey()) {
+    exit;
+}
 
 date_default_timezone_set(Config::timezone());
 $id = loadvar('id');
@@ -30,7 +37,7 @@ $p = loadvar('p');
 $db = new Database();
 if ($id != '' && $fieldname != '') {
     if ($p == 'show') { //show image
-        $query = 'select AES_DECRYPT(picture, "' . Config::filePictureKey() . '") as picture1 from ' . Config::dbSurveyData() . '_pictures where primkey="' . $id . '" and variablename = "' . $fieldname . '"';
+        $query = 'select AES_DECRYPT(picture, "' . Config::filePictureKey() . '") as picture1 from ' . Config::dbSurveyData() . '_pictures where primkey="' . prepareDatabaseString($id) . '" and variablename = "' . prepareDatabaseString($fieldname) . '"';
         $result = $db->selectQuery($query);
         if ($result != null && $db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
@@ -56,7 +63,7 @@ if ($id != '' && $fieldname != '') {
         $query .= '"' . prepareDatabaseString($fieldname) . '", ';
         //$query .= '"' . prepareDatabaseString(base64_decode(implode("", $_POST))) . '") ';
 
-        $query .= 'AES_ENCRYPT("' . prepareDatabaseString(base64_decode(implode("", $_POST))) . '", "' . Config::filePictureKey() . '")) ';
+        $query .= 'AES_ENCRYPT("' . prepareDatabaseString(base64_decode(implode("", $_POST))) . '", "' . prepareDatabaseString(Config::filePictureKey()) . '")) ';
 
         $db->executeQuery($query);
     }

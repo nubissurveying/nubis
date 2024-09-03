@@ -1098,7 +1098,7 @@ class DisplayResearcher extends Display {
         $returnStr .= '<tr><td>' . Language::labelOutputDataTable() . '</td><td>';
         $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_TYPE . ">";
         //$returnStr .= "<option></option>";
-        $returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATARECORD_TABLE . ">" . Language::optionsDataDataRecordTable() . "</option>";
+        //$returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATARECORD_TABLE . ">" . Language::optionsDataDataRecordTable() . "</option>";
         $returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATA_TABLE . ">" . Language::optionsDataDataTable() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
@@ -1470,6 +1470,7 @@ class DisplayResearcher extends Display {
         //$returnStr .= "<option></option>";
         $returnStr .= "<option value=" . PARADATA_RAW . ">" . Language::optionsParadataRaw() . "</option>";
         $returnStr .= "<option value=" . PARADATA_PROCESSED . ">" . Language::optionsParadataProcessed() . "</option>";
+        $returnStr .= "<option value=" . PARADATA_ERRORS . ">" . Language::optionsParadataError() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
 
@@ -1533,7 +1534,7 @@ class DisplayResearcher extends Display {
         $returnStr .= '<tr><td>' . Language::labelOutputDataTable() . '</td><td>';
         $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_TYPE . ">";
         //$returnStr .= "<option></option>";
-        $returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATARECORD_TABLE . ">" . Language::optionsDataDataRecordTable() . "</option>";
+        //$returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATARECORD_TABLE . ">" . Language::optionsDataDataRecordTable() . "</option>";
         $returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATA_TABLE . ">" . Language::optionsDataDataTable() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
@@ -1734,14 +1735,18 @@ var chart = new Highcharts.Chart({
 
         //99900174
 
-        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data where suid = ' . $survey . ' and variablename="' . $fieldname . '" and length(primkey) > ' . Config::getMinimumPrimaryKeyLength() . ' and length(primkey) < ' . Config::getMaximumPrimaryKeyLength() . '  and answer is not null group by DATE(ts) order by DATE(ts) asc';
-        $total = 0;
-        $dataStr .= "[Date.UTC(2014,  6, 20), 0   ],";
+        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data where suid = ' . prepareDatabaseString($survey) . ' and variablename="' . prepareDatabaseString($fieldname) . '" and length(primkey) > ' . prepareDatabaseString(Config::getMinimumPrimaryKeyLength()) . ' and length(primkey) < ' . prepareDatabaseString(Config::getMaximumPrimaryKeyLength()) . '  and answer is not null group by DATE(ts) order by DATE(ts) asc';
+        $total = 0;        
         $result = $db->selectQuery($query);
-        while ($row = $db->getRow($result)) {
-            $key = $row['dateobs'];
-            $total += $row['cntobs'];
-            $dataStr .= "[Date.UTC(" . substr($key, 0, 4) . ", " . (substr($key, 5, 2) - 1) . ", " . substr($key, 8, 2) . "), " . $total . "],";
+        if ($db->getNumberOfRows($result) == 0) {
+            $dataStr .= "[Date.UTC(2014,  6, 20), 0   ],";
+        }
+        else {
+            while ($row = $db->getRow($result)) {
+                $key = $row['dateobs'];
+                $total += $row['cntobs'];
+                $dataStr .= "[Date.UTC(" . substr($key, 0, 4) . ", " . (substr($key, 5, 2) - 1) . ", " . substr($key, 8, 2) . "), " . $total . "],";
+            }
         }
         $returnStr = rtrim($dataStr, ',');
         return $returnStr;
@@ -1778,7 +1783,7 @@ var chart = new Highcharts.Chart({
         $title = Language::messageSMSTitle();
         $sub = Language::labelResponseDataContactsSub();
         $names = Language::labelResponseDataContacts();
-        $actiontype = array(101, 103, 109, 502, 504);
+        $actiontype = Language::labelResponseDataContactCodes();
 
 
         //$returnStr = '<script src="js/export-csv.js"></script>';
@@ -1847,7 +1852,7 @@ var chart = new Highcharts.Chart({
         global $db;
         $dataStr = '';
         $actions = array();
-        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts where code = ' . $code . ' group by DATE(ts) order by DATE(ts) asc';
+        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts where code = ' . prepareDatabaseString($code) . ' group by DATE(ts) order by DATE(ts) asc';
         $total = 0;
         $dataStr .= "[Date.UTC(2014,  6, 20), 0   ],";
         $result = $db->selectQuery($query);
@@ -2205,7 +2210,7 @@ var chart = new Highcharts.Chart({
 
         require_once("detection_bootstrap.php");
         $detect = new Mobile_Detect();
-
+        
         $total = sizeof($data);
         if ($total == 0) {
             $total = 1;
@@ -2226,22 +2231,24 @@ var chart = new Highcharts.Chart({
                 $othercount++;
             }
 
-            $browser = new Browser($d);
-            $name = $browser->getBrowser();
-            if ($name == 'Navigator') { // rename if android mobile browser
+            $browser = new Wolfcast\BrowserDetection($d);
+            $name = $browser->getName();
+
+            if ($name == 'Samsung Internet') { // rename if Samsung internet browser to Android browser
                 $name = "Android browser";
             }
             if (isset($browsercounts[ucwords($name)])) {
-                $browsercounts[ucwords($name)]++;
+                $browsercounts[ucwords($name)] ++;
             } else {
                 $browsercounts[ucwords($name)] = 1;
             }
 
-            //$os = new Os($d);
-            //$name = $os->getName();
-            $platform = $browser->getPlatform();
+            $name = $browser->getPlatform();
+            if ($name == 'Macintosh') { // rename if Macintosh
+                $name = "Apple/Macintosh";
+            }
             if (isset($oscounts[ucwords($name)])) {
-                $oscounts[ucwords($name)]++;
+                $oscounts[ucwords($name)] ++;
             } else {
                 $oscounts[ucwords($name)] = 1;
             }

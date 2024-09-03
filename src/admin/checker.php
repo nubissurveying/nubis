@@ -87,6 +87,7 @@ class Checker {
     }
 
     function checkSection($section, $all = false) {
+        $text = array();
         $text[] = $section->getHeader();
         $text[] = $section->getFooter();
 
@@ -106,7 +107,11 @@ class Checker {
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         $t = $var->getAnswerType();
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
-
+        $text = array();
+        
+        if (!isset($_SESSION['VRFILTERMODE_VARIABLE'])) {
+            $_SESSION['VRFILTERMODE_VARIABLE'] = 0;
+        }
         // general        
         if ($_SESSION['VRFILTERMODE_VARIABLE'] == 0 || $all == true) {
             $text[] = $var->getQuestion();
@@ -291,7 +296,7 @@ class Checker {
         }
 
         // check for references
-        $fills = getReferences(implode(" ", $text), INDICATOR_FILL);
+        $fills = getReferences(implode(" ", $text), INDICATOR_FILL);        
         $fills1 = getReferences(implode(" ", $text), INDICATOR_FILL_NOVALUE);
         $fills2 = getReferences(implode(" ", $text), INDICATOR_INLINEFIELD_ANSWER);
         $fills3 = getReferences(implode(" ", $text), INDICATOR_INLINEFIELD_TEXT);
@@ -381,8 +386,12 @@ class Checker {
 
         // get answer type
         $t = $var->getAnswerType();
-
-        // general        
+        if (!isset($_SESSION['VRFILTERMODE_TYPE'])) {
+            $_SESSION['VRFILTERMODE_TYPE'] = 0;
+        }
+        
+        // general   
+        $text = array();
         if ($_SESSION['VRFILTERMODE_TYPE'] == 0 || $all == true) {
             switch ($t) {
                 case ANSWER_TYPE_ENUMERATED:
@@ -609,7 +618,12 @@ class Checker {
 
     function checkGroup($group, $all = false) {
 
-        // general        
+        // general  
+        $text = array();
+        if (!isset($_SESSION['VRFILTERMODE_GROUP'])) {
+            $_SESSION['VRFILTERMODE_GROUP'] = 0;
+        }
+        
         if ($_SESSION['VRFILTERMODE_GROUP'] == 0 || $all == true) {
             if ($group->getTemplate() == TABLE_TEMPLATE_CUSTOM) {
                 $text[] = $group->getCustomTemplate();
@@ -699,6 +713,7 @@ class Checker {
 
     function checkSurvey() {
         $survey = new Survey($this->suid);
+        $text = array();
         $text[] = $var->getPageHeader();
     }
 
@@ -781,7 +796,7 @@ class Checker {
                 // see if this is a variable 
                 $v = $this->survey->getVariableDescriptiveByName(getBasicName($s));
                 if ($v->getVsid() != "") {
-                    if ($parts[$i + 1] == "[") { // bracket reference
+                    if (isset($parts[$i + 1]) && $parts[$i + 1] == "[") { // bracket reference
                         if ($v->isArray() == false) {
                             $messages[] = Language::messageCheckerVariableNotArray($s);
                         }

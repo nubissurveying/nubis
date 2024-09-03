@@ -37,8 +37,10 @@ class Section extends Component {
     }
 
     function getSeid() {
-
-        return $this->section['seid'];
+        if (isset($this->section['seid'])) {
+            return $this->section['seid'];
+        }
+        return "";
     }
 
     function setSeid($seid) {
@@ -57,7 +59,10 @@ class Section extends Component {
     }
 
     function getName() {
-        return $this->section['name'];
+        if (isset($this->section['name'])) {
+            return $this->section['name'];
+        }
+        return "";
     }
 
     function setName($name) {
@@ -128,12 +133,12 @@ class Section extends Component {
         $cnt = 1;
 
         foreach ($routinglines as $line) {
-            $lines[] = '(' . prepareDatabaseString($this->getSuid()) . ', ' . prepareDatabaseString($this->getSeid()) . ',' . $cnt . ', "' . prepareDatabaseString($line, false) . '")';
+            $lines[] = '(' . prepareDatabaseString($this->getSuid()) . ', ' . prepareDatabaseString($this->getSeid()) . ',' . prepareDatabaseString($cnt) . ', "' . prepareDatabaseString($line, false) . '")';
 
             $cnt++;
         }
 
-        $query .= implode($lines, ',');
+        $query .= implode(',', $lines);
 
         $result = $db->executeQuery($query); //add new lines
 
@@ -169,8 +174,9 @@ class Section extends Component {
         if ($db->getNumberOfRows($r) > 0) {
 
             $row = $db->getRow($r);
-
-            return unserialize(gzuncompress($row["engine"]));
+            if ($row["engine"] != "") {
+                return unserialize(gzuncompress($row["engine"]));
+            }
         }
 
         return "";
@@ -181,7 +187,7 @@ class Section extends Component {
     function isTranslated() {
         if ($this->isTranslatedVariables() == false) {
             return false;
-        }        
+        }
         return true;
     }
 
@@ -208,7 +214,7 @@ class Section extends Component {
 
         $query = "delete from " . Config::dbSurvey() . "_settings where suid = " . prepareDatabaseString($this->getSuid()) . " and object = " . prepareDatabaseString($this->getObjectName()) . " and objecttype = " . prepareDatabaseString($this->getObjectType());
         $db->executeQuery($query);
-        
+
         $query = "delete from " . Config::dbSurvey() . "_progressbars where suid = " . prepareDatabaseString($this->getSuid()) . " and seid = " . prepareDatabaseString($this->getSeid());
         $db->executeQuery($query);
 
@@ -238,11 +244,11 @@ class Section extends Component {
         $seid = $row["max"] + 1;
         $oldseid = $this->getSeid();
         $oldsuid = $this->getSuid();
-        
+
         /* move routing */
-        $query = "update " . Config::dbSurvey() . "_routing set suid=" . $suid . ", seid=" . $seid . " where suid=" . $oldsuid . " and seid=" . $oldseid;
+        $query = "update " . Config::dbSurvey() . "_routing set suid=" . prepareDatabaseString($suid) . ", seid=" . prepareDatabaseString($seid) . " where suid=" . prepareDatabaseString($oldsuid) . " and seid=" . prepareDatabaseString($oldseid);
         $db->executeQuery($query);
-        
+
         // remove in current survey
         $this->remove();
 
@@ -251,7 +257,7 @@ class Section extends Component {
         $this->setSuid($suid);
 
         /* set position */
-        $query = "select max(position) as max from " . Config::dbSurvey() . "_sections where suid=" . $this->getSuid();
+        $query = "select max(position) as max from " . Config::dbSurvey() . "_sections where suid=" . prepareDatabaseString($this->getSuid());
         $r = $db->selectQuery($query);
         $row = $db->getRow($r);
         $pos = $row["max"] + 1;
@@ -264,7 +270,7 @@ class Section extends Component {
         $vars = $survey->getVariableDescriptives($oldseid);
         foreach ($vars as $var) {
             $var->move($suid, $this->getSeid());
-        }        
+        }
     }
 
     function copy($newsuid = "", $suffix = 2, $types = true) {
@@ -301,14 +307,13 @@ class Section extends Component {
         foreach ($vars as $var) {
             if ($suffix == 2) {
                 $var->copy($var->getName() . "_cl", $newsuid, $this->getSeid(), $types);
-            }
-            else {
+            } else {
                 $var->copy($var->getName(), $newsuid, $this->getSeid(), $types);
             }
         }
-        
+
         /* copy routing */
-        $query = "insert into " . Config::dbSurvey() . "_routing (suid, seid, rgid, rule, ts) select " . $this->getSuid() . "," . $this->getSeid() . ", rgid, rule, ts from  " . Config::dbSurvey() . "_routing where suid=" . $oldsuid . " and seid=" . $oldseid;
+        $query = "insert into " . Config::dbSurvey() . "_routing (suid, seid, rgid, rule, ts) select " . prepareDatabaseString($this->getSuid()) . "," . prepareDatabaseString($this->getSeid()) . ", rgid, rule, ts from  " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($oldsuid) . " and seid=" . prepareDatabaseString($oldseid);
         $db->executeQuery($query);
     }
 

@@ -47,7 +47,7 @@ class Supervisor {
 
                 case 'supervisor.interviewers': return $this->mainPage();
                     break;
-                case 'supervisor.interviewer.info': return $this->showInterviewer();
+                case 'supervisor.interviewer.info': return $this->showInterviewer(getFromSessionParams('interviewer'));
                     break;
 
 
@@ -128,31 +128,46 @@ class Supervisor {
         return $displaySupervisor->displayInterviewers($users);
     }
 
-    function showInterviewer($message = '') {
+    function showInterviewer($urid, $message = '') {
         $displaySupervisor = new DisplaySupervisor();
-        return $displaySupervisor->displayInterviewerAssignedSample(new User(getFromSessionParams('interviewer')), $message);
+        return $displaySupervisor->displayInterviewerAssignedSample(new User($urid), $message);
     }
 
     function showRespondentReassign($primkey) {
-
-        $household = new Household($primkey);
-        $oldurid = $household->getUrid();
+        
         $newurid = loadvar('uridsel');
         $display = new Display();
-        if ($household->getUrid() != $newurid) { //check for double submit -> not yet assigned to this urid
-            $household->setUrid($newurid); //for local!
-            $household->saveChanges();
-            $respondents = $household->getRespondents();
-            foreach ($respondents as $respondent) {
-                $respondent->setUrid($newurid);
-                $respondent->saveChanges();
-            }
+        if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
+            $household = new Household($primkey);        
+            $oldurid = $household->getUrid();
+            if ($household->getUrid() != $newurid) { //check for double submit -> not yet assigned to this urid
+                $household->setUrid($newurid); //for local!
+                $household->saveChanges();
+                $respondents = $household->getRespondents();
+                foreach ($respondents as $respondent) {
+                    $respondent->setUrid($newurid);
+                    $respondent->saveChanges();
+                }
 
-            $communication = new Communication;
-            $communication->reassignHousehold($household, $oldurid, $newurid);
-            return $this->showInterviewer($display->displayInfo(Language::labelSupervisorHouseholdReassigned()));
-        } else {
-            return $this->showInterviewer($display->displayInfo(Language::labelSupervisorHouseholdNotReassigned()));
+                $communication = new Communication();
+                $communication->reassignHousehold($household, $oldurid, $newurid);
+                return $this->showInterviewer($newurid, $display->displayInfo(Language::labelSupervisorHouseholdReassigned()));
+            } else {
+                return $this->showInterviewer($newurid, $display->displayInfo(Language::labelSupervisorHouseholdNotReassigned()));
+            }
+        }
+        else {
+            $respondent = new Respondent($primkey);    
+            $oldurid = $respondent->getUrid();
+            if ($respondent->getUrid() != $newurid) { //check for double submit -> not yet assigned to this urid
+                $respondent->setUrid($newurid); //for local!
+                $respondent->saveChanges();
+                $communication = new Communication();
+                $communication->reassignRespondent($respondent, $oldurid, $newurid);
+                return $this->showInterviewer($newurid, $display->displayInfo(Language::labelSupervisorRespondentReassigned()));
+            } else {
+                return $this->showInterviewer($newurid, $display->displayInfo(Language::labelSupervisorRespondentNotReassigned()));
+            }
         }
     }
 
@@ -313,16 +328,14 @@ class Supervisor {
         $communication->addSQLToUser($respondent->getLastQuery(), $respondent->getUrid());
         $respondent->setCity(loadvar('city'), true);
         $communication->addSQLToUser($respondent->getLastQuery(), $respondent->getUrid());
+        $respondent->setState(loadvar('stat'), true);
+        $communication->addSQLToUser($respondent->getLastQuery(), $respondent->getUrid());
         $respondent->setTelephone1(loadvar('telephone1'), true);
         $communication->addSQLToUser($respondent->getLastQuery(), $respondent->getUrid());
-
-        //$respondent->setTelephone2(loadvar('telephone2'));
-        //$communication->addSQLToUser($respondent->getLastQuery(), $respondent->getUrid());
-
+        $respondent->setTelephone2(loadvar('telephone2'));
+        $communication->addSQLToUser($respondent->getLastQuery(), $respondent->getUrid());
         $respondent->setEmail(loadvar('email'), true);
         $communication->addSQLToUser($respondent->getLastQuery(), $respondent->getUrid());
-
-        //log???
 
         $errorMessage = $respondent->saveChanges();
         $display = new Display();
@@ -334,9 +347,9 @@ class Supervisor {
         return $displaySupervisor->showInfo($respondent, $messageEditError);
     }
 
-    function showPreferences() {
+    function showPreferences($message = "") {
         $displaySupervisor = new DisplaySupervisor();
-        return $displaySupervisor->showPreferences($this->user);
+        return $displaySupervisor->showPreferences($this->user, $message);
     }
 
     function showPreferencesRes() {
@@ -347,7 +360,7 @@ class Supervisor {
         $this->user->setPuid(loadvar('puid'));
         $this->user->saveChanges();
         $display = new Display();
-        return $this->mainPage($display->displaySuccess(Language::messagePreferencesSaved()));
+        return $this->showPreferences($display->displaySuccess(Language::messagePreferencesSaved()));
     }
 
     function showSendReceive() {

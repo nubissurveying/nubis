@@ -1,0 +1,2 @@
+respondent identifier,household identifier,puid,logincode,first name,last name,address1,address2,city,zip,state,longitude,latitude,telephone1,telephone2,email,sex,age,status,test
+12345001,12345,0,,First,Last,Address here,Extra address here,City here,99999,State here,,,987-6543-210,,remail@org,1,25,0,0

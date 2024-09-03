@@ -20,7 +20,7 @@ class LogActions {
         
     }
 
-    function addAction($primkey, $urid, $page, $systemtype = USCIC_SMS, $actiontype = 1) {
+    function addAction($primkey, $urid, $page, $systemtype = USCIC_SMS, $actiontype = 1, $log = true) {
 
         global $db;
         $query = 'INSERT INTO ' . Config::dbSurveyData() . '_actions (primkey, sessionid, urid, suid, ipaddress, systemtype, action, actiontype, params, language, mode, version) VALUES (';
@@ -29,32 +29,32 @@ class LogActions {
         } else {
             $query .= 'NULL, ';
         }
-        $query .= '\'' . session_id() . '\', ';
+        $query .= '\'' . prepareDatabaseString(session_id()) . '\', ';
         if ($urid != '') {
-            $query .= '\'' . $urid . '\', ';
+            $query .= '\'' . prepareDatabaseString($urid) . '\', ';
         } else {
             $query .= 'NULL, ';
         }
         if ($systemtype == USCIC_SURVEY) {
-            $query .= getSurvey() . ', ';
+            $query .= prepareDatabaseString(getSurvey()) . ', ';
         } else {
             $query .= 'NULL, ';
         }
 
         $query .= '\'' . prepareDatabaseString(getClientIp()) . '\', ';
-        $query .= $systemtype . ', ';
+        $query .= prepareDatabaseString($systemtype) . ', ';
         $query .= '\'' . prepareDatabaseString($page) . '\', ';
-        $query .= $actiontype . ', ';
-        if (Config::logParams()) { //log post vars?
-            $query .= ' AES_ENCRYPT(\'' . prepareDatabaseString(serialize($_POST)) . '\', \'' . Config::logActionParamsKey() . '\'), ';
+        $query .= prepareDatabaseString($actiontype) . ', ';
+        if (Config::logParams() && $log == true) { //log post vars?
+            $query .= ' AES_ENCRYPT(\'' . prepareDatabaseString(serialize($_POST)) . '\', \'' . prepareDatabaseString(Config::logActionParamsKey()) . '\'), ';
         } else {
             $query .= ' NULL, ';
         }
 
         if ($systemtype == USCIC_SURVEY) {
-            $query .= getSurveyLanguage() . ', ';
-            $query .= getSurveyMode() . ', ';
-            $query .= getSurveyVersion();
+            $query .= prepareDatabaseString(getSurveyLanguage()) . ', ';
+            $query .= prepareDatabaseString(getSurveyMode()) . ', ';
+            $query .= prepareDatabaseString(getSurveyVersion());
         } else {
             $query .= 'NULL, NULL, NULL';
         }
@@ -100,15 +100,15 @@ class LogActions {
                 }
             }
             
-            $query .= ' AES_ENCRYPT(\'' . prepareDatabaseString(serialize($_POST)) . '\', \'' . Config::logActionParamsKey() . '\'), ';
+            $query .= ' AES_ENCRYPT(\'' . prepareDatabaseString(serialize($_POST)) . '\', \'' . prepareDatabaseString(Config::logActionParamsKey()) . '\'), ';
         } else {
             $query .= ' NULL, ';
         }
 
         if ($systemtype == USCIC_SURVEY) {
-            $query .= getSurveyLanguage() . ', ';
-            $query .= getSurveyMode() . ', ';
-            $query .= getSurveyVersion();
+            $query .= prepareDatabaseString(getSurveyLanguage()) . ', ';
+            $query .= prepareDatabaseString(getSurveyMode()) . ', ';
+            $query .= prepareDatabaseString(getSurveyVersion());
         } else {
             $query .= 'NULL, NULL, NULL';
         }
@@ -139,20 +139,18 @@ class LogActions {
 
     function getNumberOfActionsBySession($sessionid, $systemtype) {
         global $db;
-        $query = 'select count(*) as count from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and systemtype = ' . $systemtype;
+        $query = 'select * from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and systemtype = ' . $systemtype;
         if ($result = $db->selectQuery($query)) {
-            $row = $db->getRow($result);
-            return $row["count"];
+            return $db->getNumberOfRows($result);
         }
         return 0;
     }
 
     function getNumberOfSurveyActionsBySession($sessionid, $systemtype) {
         global $db;
-        $query = 'select count(*) as count from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and systemtype = ' . $systemtype;
-        if ($result = $db->selectQuery($query)) {
-            $row = $db->getRow($result);
-            return $row["count"];
+        $query = 'select * from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and systemtype = ' . $systemtype;        
+        if ($result = $db->selectQuery($query)) {     
+            return $db->getNumberOfRows($result);
         }
         return 0;
     }
@@ -162,10 +160,13 @@ class LogActions {
         $query = 'select urid from ' . Config::dbSurveyData() . '_actions where sessionid = \'' . prepareDatabaseString($sessionid) . '\' and urid != \'\' and actiontype = 1 and systemtype = ' . USCIC_SMS;
         if ($result = $db->selectQuery($query)) {
             $num = $db->getNumberOfRows($result);
-            $row = $db->getRow($result);
-            return array("count" => $num, "urid" => $row["urid"]);
+            if ($num > 0) {
+                $row = $db->getRow($result);
+                return array("count" => $num, "urid" => $row["urid"]); // success
+            }
+            return array("count" => 0, "urid" => ""); // failed
         }
-        return array("count" => 0, "urid" => "");
+        return array("count" => 0, "urid" => ""); // failed
     }
 
     function getLoggedInSurveySession($sessionid) {

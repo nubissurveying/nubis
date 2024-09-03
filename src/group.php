@@ -31,7 +31,10 @@ class Group extends Component {
     }
 
     function getGid() {
-        return $this->group["gid"];
+        if (isset($this->group["gid"])) {
+            return $this->group["gid"];
+        }
+        return '';
     }
 
     function setGid($gid) {
@@ -39,7 +42,10 @@ class Group extends Component {
     }
 
     function getName() {
-        return $this->group["name"];
+        if (isset($this->group["name"])) {
+            return $this->group["name"];
+        }
+        return "";
     }
 
     function setName($name) {
@@ -118,7 +124,7 @@ class Group extends Component {
         $this->setSettingValue(SETTING_ON_NEXT, $value);
     }
 
-    function getOnBack() {
+    function getOnBack($default = true) {
         /* type level setting */
         $val = $this->getSettingValue(SETTING_ON_BACK, $default);
         if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
@@ -193,7 +199,7 @@ class Group extends Component {
         $this->setSettingValue(SETTING_ON_NA, $value);
     }
 
-    function getOnUpdate() {
+    function getOnUpdate($default = true) {
 
         /* type level setting */
         $val = $this->getSettingValue(SETTING_ON_UPDATE, $default);
@@ -269,7 +275,6 @@ class Group extends Component {
         $this->setSettingValue(SETTING_ON_VERSION_CHANGE, $value);
     }
 
-    
     function getClickNext($default = true) {
 
         /* type level setting */
@@ -289,7 +294,7 @@ class Group extends Component {
         $this->setSettingValue(SETTING_CLICK_NEXT, $value);
     }
 
-    function getClickBack() {
+    function getClickBack($default = true) {
         /* type level setting */
         $val = $this->getSettingValue(SETTING_CLICK_BACK, $default);
         if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
@@ -364,7 +369,7 @@ class Group extends Component {
         $this->setSettingValue(SETTING_CLICK_NA, $value);
     }
 
-    function getClickUpdate() {
+    function getClickUpdate($default = true) {
 
         /* type level setting */
         $val = $this->getSettingValue(SETTING_CLICK_UPDATE, $default);
@@ -439,7 +444,7 @@ class Group extends Component {
     function setClickVersionChange($value) {
         $this->setSettingValue(SETTING_CLICK_VERSION_CHANGE, $value);
     }
-    
+
     /* overall display functions */
 
     function getTemplate($default = true) {
@@ -457,7 +462,7 @@ class Group extends Component {
     function setCustomTemplate($text) {
         $this->setSettingValue(SETTING_GROUP_CUSTOM_TEMPLATE, $text);
     }
-    
+
     function getXiTemplate($default = true) {
         return $this->getSettingValue(SETTING_GROUP_XI_TEMPLATE, $default);
     }
@@ -559,7 +564,7 @@ class Group extends Component {
     function setTableHovered($text) {
         $this->setSettingValue(SETTING_GROUP_TABLE_HOVERED, $text);
     }
-    
+
     function getTableMobile($default = true) {
 
         /* group level setting */
@@ -574,7 +579,7 @@ class Group extends Component {
         global $survey;
         return $survey->getTableMobile($default);
     }
-    
+
     function isTableMobile() {
         if ($this->getTableMobile() == GROUP_YES) {
             return true;
@@ -584,12 +589,12 @@ class Group extends Component {
 
     function setTableMobile($text) {
         $this->setSettingValue(SETTING_TABLE_MOBILE, $text);
-    }  
-    
+    }
+
     function getTableMobileLabels($default = true) {
 
         /* group level setting */
-        $val = $this->getSettingValue(SETTING_GROUP_TABLE_MOBILE_LABELS, $default);
+        $val = $this->getSettingValue(SETTING_TABLE_MOBILE_LABELS, $default);
         if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
             return $val;
         }
@@ -597,10 +602,11 @@ class Group extends Component {
         /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
             return SETTING_FOLLOW_GENERIC;
         }
+        
         global $survey;
         return $survey->getTableMobileLabels($default);
     }
-    
+
     function isTableMobileLabels() {
         if ($this->getTableMobileLabels() == MOBILE_LABEL_YES) {
             return true;
@@ -609,8 +615,8 @@ class Group extends Component {
     }
 
     function setTableMobileLabels($text) {
-        $this->setSettingValue(SETTING_GROUP_TABLE_MOBILE_LABELS, $text);
-    }  
+        $this->setSettingValue(SETTING_TABLE_MOBILE_LABELS, $text);
+    }
 
     /* validation */
 
@@ -957,7 +963,7 @@ class Group extends Component {
     function setHeaderAlignment($value) {
         $this->setSettingValue(SETTING_HEADER_ALIGNMENT, $value);
     }
-    
+
     function getFooterDisplay($default = true) {
 
         /* group level setting */
@@ -972,7 +978,7 @@ class Group extends Component {
         global $survey;
         return $survey->getFooterDisplay($default);
     }
-    
+
     function isFooterDisplay() {
         if ($this->getFooterDisplay() == ENUM_FOOTER_YES) {
             return true;
@@ -1978,8 +1984,9 @@ class Group extends Component {
     function setIndividualDKRFNAInline($value) {
         $this->setSettingValue(SETTING_DKRFNA_INLINE, $value);
     }
-    
+
     /* output functions */
+
     function getScreendumpStorage($default = true) {
         /* type level setting */
         $val = $this->getSettingValue(SETTING_SCREENDUMPS, $default);
@@ -1997,14 +2004,14 @@ class Group extends Component {
     function setScreendumpStorage($value) {
         $this->setSettingValue(SETTING_SCREENDUMPS, $value);
     }
-    
+
     function isScreendumpStorage() {
         if ($this->getScreendumpStorage() == SCREENDUMPS_YES) {
             return true;
         }
         return false;
     }
-    
+
     function getParadata($default = true) {
         /* type level setting */
         $val = $this->getSettingValue(SETTING_PARADATA, $default);
@@ -2022,7 +2029,7 @@ class Group extends Component {
     function setParadata($value) {
         $this->setSettingValue(SETTING_PARADATA, $value);
     }
-    
+
     function isParadata() {
         if ($this->getParadata() == PARADATA_YES) {
             return true;
@@ -2043,7 +2050,7 @@ class Group extends Component {
         global $survey;
         return $survey->getMultiColumnQuestiontext($default);
     }
-    
+
     function isMultiColumnQuestiontext() {
         if ($this->getMultiColumnQuestiontext() == MULTI_QUESTION_YES) {
             return true;
@@ -2054,8 +2061,9 @@ class Group extends Component {
     function setMultiColumnQuestiontext($value) {
         $this->setSettingValue(SETTING_MULTICOLUMN_QUESTIONTEXT, $value);
     }
-    
+
     /* input masking */
+
     function getInputMaskCallback($default = true) {
 
         /* type level setting */
@@ -2073,7 +2081,7 @@ class Group extends Component {
     function setInputMaskCallback($value) {
         $this->setSettingValue(SETTING_INPUT_MASK_CALLBACK, $value);
     }
-    
+
     /* translator functions */
 
     function isTranslated() {

@@ -12,12 +12,14 @@
   ------------------------------------------------------------------------
  */
 
+/* NUBIS CUSTOM FUNCTIONS - DO NOT REMOVE */
+
 //FULL QUESTION GOES THROUG THIS SURVEY BEFORE OUTPUT TO THE SCREEN
 function lastParse($str) {
     $patterns = array('/((?i)\[IWER:(.*?)])/s');
     $replace = array('<br/><div class="alert alert-info" role="alert"><b>\2</b></div>');
     $str = preg_replace($patterns, $replace, $str);
-    
+
     $patterns = array('/((?i)@I@\/IWER:(.*?)@I)/s');
     $replace = array('<br/><div class="alert alert-info" role="alert"><b>\2</b></div>');
     $str = preg_replace($patterns, $replace, $str);
@@ -48,15 +50,14 @@ function getAllowedRoutingFunctions() {
         "calcAge",
         "strtotime",
         "date",
-        "str",        
+        "str",
         "cardinal",
         "settingfollowtype",
-		"substring"
-		
-		/* DO NOT MODIFY the above; they are needed by the NubiS compiler */
-		/* ADD custom function names below */
-		
-    ); 
+        "substring"
+
+            /* DO NOT MODIFY the above; they are needed by the NubiS compiler */
+            /* ADD custom function names below */
+    );
 }
 
 // lists functions NOT allowed to be used for routing function calls
@@ -66,7 +67,7 @@ function getForbiddenRoutingFunctions() {
 
 // lists functions allowed to be used for custom answer type function calls
 function getAllowedCustomAnswerFunctions() {
-    return array ("");
+    return array("");
 }
 
 // lists functions NOT allowed to be used for custom answer type function calls
@@ -76,7 +77,7 @@ function getForbiddenCustomAnswerFunctions() {
 
 // lists functions allowed to be used for external storage function calls
 function getAllowedExternalStorageFunctions() {
-    return array ("handleExternalStorageExample");
+    return array("handleExternalStorageExample");
 }
 
 // lists functions NOT allowed to be used for external storage function calls
@@ -86,7 +87,7 @@ function getForbiddenExternalStorageFunctions() {
 
 // lists functions allowed to be used in the interactive tab for PHP on form submit
 function getAllowedOnChangeFunctions() {
-    return array ("");
+    return array("");
 }
 
 // lists functions NOT allowed to be used in the interactive tab for PHP on form submit
@@ -154,8 +155,7 @@ function displayInOtherLanguage() {
 function handleExternalStorageExample($type, $primkey, $variable, $answer = "", $dirty = "") {
     if ($type == STORE_EXTERNAL_GET) {
         // code to retrieve
-    }
-    else {
+    } else {
         // code to store
     }
 }
@@ -431,6 +431,7 @@ function bottomDKRFNA() {
 }
 
 /* blaise functions */
+
 function str($str) {
     return $str;
 }

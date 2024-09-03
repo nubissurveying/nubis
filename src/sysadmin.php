@@ -67,19 +67,26 @@ class SysAdmin {
                 case 'sysadmin.sms.update.scripts.res': return $this->showScriptUpdateRes();
                     break;
 
-//                case 'sysadmin.sms.update.res': return $this->showMetaDataUpdateRes(); break;
                 case 'sysadmin.sms.communication': return $this->showCommunicationTable();
                     break;
                 case 'sysadmin.sms.communication.remove': return $this->showCommunicationRemove();
                     break;
-                case 'sysadmin.sms.sample': return $this->showSample();
+                case 'sysadmin.sms.surveyassignment': return $this->showSurveyAssignment();
                     break;
-                case 'sysadmin.sms.sample.assign': return $this->showAssignSample();
+                case 'sysadmin.sms.surveyassignment.res': return $this->showSurveyAssignmentRes();
+                    break;
+
+                case 'sysadmin.sms.sample': return $this->showSample();
                     break;
                 case 'sysadmin.sms.sample.import': return $this->showImportSample();
                     break;
                 case 'sysadmin.sms.sample.import.res': return $this->showImportSampleRes();
                     break;
+                case 'sysadmin.sms.sample.download': return $this->showSampleDownload();
+                    break;
+                case 'sysadmin.sms.sample.assign': return $this->showAssignSample();
+                    break;
+
                 case "sysadmin.surveys": return $this->showSurveys();
                     break;
                 case "sysadmin.survey": return $this->showSurvey();
@@ -210,7 +217,7 @@ class SysAdmin {
                     break;
                 case "sysadmin.survey.section": return $this->showSection();
                     break;
-                case "sysadmin.survey.addsection": return $this->showEditSection();
+                case "sysadmin.survey.addsection": return $this->showEditSection(true);
                     break;
                 case "sysadmin.survey.editsection": return $this->showEditSection();
                     break;
@@ -645,108 +652,171 @@ class SysAdmin {
         return $this->showCommunicationTable($display->displayInfo('Communication line removed.'));
     }
 
-    function showSample($message) {
+    function showSurveyAssignment($message = "") {
+        $displaySms = new DisplaySms();
+        return $displaySms->showSurveyAssignment($message);
+    }
+
+    function showSurveyAssignmentRes() {
+        $surveys = new Surveys();
+        $surveys->setNurseLabSurvey(loadvar("nurselab"));
+        $surveys->setNurseFollowUpSurvey(loadvar("nursefollowup"));
+        $surveys->setNurseVisionSurvey(loadvar("nursevision"));
+        $surveys->setNurseAntropometricsSurvey(loadvar("nurseantropometrics"));
+        $surveys->setNurseDataSheetSurvey(loadvar("nursedatasheet"));
+        $displaySms = new DisplaySms();
+        $message = $displaySms->displaySuccess(Language::messageSurveyAssignmentUpdated());
+        return $displaySms->showSurveyAssignment($message);
+    }
+
+    function showSample($message = "") {
         $displaySms = new DisplaySms();
         return $displaySms->showSample($message);
     }
 
-    function showImportSample() {
+    function showImportSample($message = "") {
         $displaySms = new DisplaySms();
-        return $displaySms->showImportSample();
+        return $displaySms->showImportSample($message);
     }
 
     function showImportSampleRes() {
 
         /* update last page */
         $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], ".res"));
-
-        if (loadvar('filename') != '') {
-            $list = file_get_contents(loadvar('filename'), FILE_USE_INCLUDE_PATH);
-            $list = explode("\n", $list);
-        } else {
-            $list = loadvar('list');
+        $list = array();
+        $display = new Display();
+        if (loadvar('file') != '') {
+            $list = file_get_contents(loadvar('file'), FILE_USE_INCLUDE_PATH);
+            if (trim($list) == "") {                
+                return $this->showImportSample($display->displayInfo(Language::messageEmptySampleFileSelected()));
+            }
             $list = explode("\r\n", $list);
-        }
-        $seperator = loadvar('separator', '^');
-        $datatype = loadvar('datatype', 0);
-
-        if ($datatype == 0) { //household
-            $query = 'insert into ' . dbConfig::dbSurvey . '_households ';
-            $query .= '(primkey, name, address1, city, puid) values ';
         } else {
-            $query = 'insert into ' . dbConfig::dbSurvey . '_repsondents ';
-            $query .= '(primkey, hhid, firstname, lastname, sex, age, birthdate, ';
-            $query .= ' schoolingyears, educationlevel, ';
-            $query .= ' selected, hhhead, occupationalstatus, relationshiphh, spouseprimkey) values ';
+            $display = new Display();
+            return $this->showImportSample($display->displayInfo(Language::messageNoSampleFileSelected()));
+        }
+        $datatype = loadvar("paneltype");
+        $headquery = "";
+        if ($datatype == PANEL_HOUSEHOLD) { //household
+            $headquery .= 'insert into ' . Config::dbSurvey() . '_households ';
+            $headquery .= '(primkey, puid, name, address1, address2, city, zip, state, longitude, latitude, telephone1, telephone2, status, test) values ';
+        } else {
+            $headquery = 'insert into ' . Config::dbSurvey() . '_respondents ';
+            $headquery .= '(primkey, hhid, puid, logincode, firstname, lastname, address1, address2, city, zip, state, longitude, latitude, telephone1, telephone2, email, sex, age, status, selected, present, test) values ';
         }
 
-
+        global $db;
+        $cnt = 0;
         foreach ($list as $row) {
+            $cnt++;
+            
+            // ignore headers
+            if ($cnt == 1) {
+                continue;
+            }
             if ($row != '') {
-                $item = explode($seperator, $row);
+                $item = explode(",", $row);
 
-                if ($datatype == 0) { //household
-                    $query .= "(";
-                    $query .= '"' . addslashes($item[0]) . '", ';  //primkey
-                    $query .= '"' . addslashes($item[6]) . '", ';  //name
-                    $query .= '"' . addslashes($item[4]) . '", ';  //address1
-                    $query .= '"' . addslashes($item[1]) . '", ';  //city
-                    $query .= '"' . addslashes($item[0]) . '" ';  //puid
-                    $query .= "),<br/>";
+                // fix sample display
+                if ($datatype == PANEL_HOUSEHOLD) { //household
+                    $query = $headquery . "(";
+                    $query .= '"' . prepareDatabaseString($item[0]) . '",'; // primkey
+                    $query .= '"' . prepareDatabaseString($item[1]) . '", '; // puid
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[2]) . '","' . Config::smsPersonalInfoKey() . '"), '; // name
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[3]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // address1
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[4]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // address2
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[5]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // city
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[6]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // zip
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[7]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // state                   
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[8]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // longitude
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[9]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // latitude
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[10]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // telephone1
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[11]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // telephone2
+                    $query .= '"' . prepareDatabaseString($item[12]) . '", '; // status
+                    $query .= '"' . prepareDatabaseString($item[13]) . '"'; // test
+                    $query .= ")";
+                    $db->executeQuery($query);
                 } else {
-                    $query .= "(";
-                    $query .= '"' . addslashes($item[5]) . '", '; //primkey
-                    $query .= '"' . addslashes($item[0]) . '", '; //household id
-                    $query .= '"' . addslashes($item[6]) . '", '; //name
-                    $query .= '"' . addslashes('') . '", ';   //lastname
-                    $query .= '"' . addslashes($item[8]) . '", ';  //sex
-                    $query .= '"' . addslashes($item[13]) . '", ';  //age
-                    $query .= '"' . addslashes($item[9]) . '", '; //birthdate
-
-                    $query .= '"' . addslashes($item[16]) . '", '; //shcoolingyears
-                    $query .= '"' . addslashes($item[15]) . '", '; //educationlevel
-                    $query .= '"' . addslashes($item[14]) . '", '; //selected
-
-                    $query .= '"' . addslashes($item[7]) . '", '; //head
-                    $query .= '"' . addslashes(0) . '", '; //occupational
-                    $query .= '"' . addslashes($item[17]) . '", '; //relationshiphh
-                    $query .= '"' . addslashes($item[18]) . '" '; //spouseid
-                    $query .= "),<br/>";
+                    $query = $headquery . "(";
+                    $query .= '"' . prepareDatabaseString($item[0]) . '",'; // primkey
+                    $query .= '"' . prepareDatabaseString($item[1]) . '", '; // hhid
+                    $query .= '"' . prepareDatabaseString($item[2]) . '", '; // puid
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[3]) . '","' . Config::loginCodeKey() . '"), '; // login code
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[4]) . '","' . Config::smsPersonalInfoKey() . '"), '; // first name
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[5]) . '","' . Config::smsPersonalInfoKey() . '"), '; // last name
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[6]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // address1
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[7]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // address2
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[8]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // city
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[9]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // zip
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[10]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // state 
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[11]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // longitude
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[12]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // latitude
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[13]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // telephone1
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[14]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // telephone2
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[15]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // email
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[16]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // sex
+                    $query .= 'aes_encrypt("' . prepareDatabaseString($item[17]) . '", "' . Config::smsPersonalInfoKey() . '"), '; // age                                        
+                    $query .= '"' . prepareDatabaseString($item[18]) . '", '; // status
+                    $query .= '"' . prepareDatabaseString($item[19]) . '", '; // selected
+                    $query .= '"' . prepareDatabaseString($item[20]) . '", '; // present
+                    $query .= '"' . prepareDatabaseString($item[21]) . '"'; // test
+                    $query .= ")";
+                    $db->executeQuery($query);
                 }
             }
         }
-        $query = rtrim($query, ',<br/>');
-
-
-
-
-        $displaySms = new DisplaySms();
-        $returnStr .= $displaySms->showSmsHeader(array());
-
-        $returnStr .= '<br/><br/><br/>' . $query;
-
-        $returnStr .= '</p></div>    </div>'; //container and wrap
-        $returnStr .= $displaySms->showBottomBar();
-        $returnStr .= $displaySms->showFooter(false);
-        return $returnStr;
+        return $this->showSample($display->displayInfo(Language::messageSampleFileImported()));
     }
 
     function showAssignSample() {
         $assignids = loadvar('assignid');
         $selurid = loadvar('selurid');
-        if (sizeof($assignids) > 0 && $selurid > 0) {
-            foreach ($assignids as $id) { //sysadmin mode: change on server 'only'
-                $household = new Household($id);
-                $household->setUrid($selurid);
-                $household->saveChanges();
+        $message = "";
+        if (is_array($assignids) && sizeof($assignids) > 0 && $selurid > 0) {
+            
+            if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
+                $message = Language::messageSMSAssignHouseholds();
+                foreach ($assignids as $id) { //sysadmin mode: change on server 'only'
+                    $household = new Household($id);
+                    $household->setUrid($selurid);
+                    $household->saveChanges();
+                }
             }
-            $message = 'Households/respondents assigned.';
+            else {
+                $message = Language::messageSMSAssignRespondents();
+                foreach ($assignids as $id) { //sysadmin mode: change on server 'only'
+                    $respondent = new Respondent($id);
+                    $respondent->setUrid($selurid);
+                    $respondent->saveChanges();
+                }
+            }
         } else {
-            $message = 'No households/respondents assigned. Please select some households and a supervisor to assign sample.';
+            if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
+                $message = Language::messageSMSAssignHouseholdsNone();
+            }
+            else {
+                $message = Language::messageSMSAssignRespondentsNone();
+            }
         }
 
         $display = new Display();
         return $this->showSample($display->displayInfo($message));
+    }
+
+    function showSampleDownload() {
+        global $db;
+        $puid = loadvar('puid', 0);
+        
+        if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
+            $households = new Households();
+            $query = $households->getUnassignedAsQuery($puid, true);
+        } else {
+            $respondents = new Respondents();
+            $query = $respondents->getUnassignedAsQuery($puid, true);
+        }
+        $filename = 'unassigned_sample_' . $puid . '_' . date('YmdHis');
+        $result = $db->selectQuery($query);
+        createCSV($result, $filename);
     }
 
     /* survey */
@@ -812,18 +882,18 @@ class SysAdmin {
             if ($aPosition < 0) {
                 $aPosition = 0;
             }
-            $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = 0 where position=" . $toPosition);
-            $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = $toPosition where suid=" . $suid);
+            $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = 0 where position=" . prepareDatabaseString($toPosition));
+            $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = " . prepareDatabaseString($toPosition) . " where suid=" . prepareDatabaseString($suid));
 
             // backward direction: up
             if ($direction === "back") {
-                $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = position + 1 WHERE ($toPosition <= position AND position <= $fromPosition) and suid != $suid and position != 0 ORDER BY position DESC");
+                $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = position + 1 WHERE (" . prepareDatabaseString($toPosition) . " <= position AND position <= " . prepareDatabaseString($fromPosition) . ") and suid != " . prepareDatabaseString($suid) . " and position != 0 ORDER BY position DESC");
             }
             // Forward Direction: down
             else if ($direction === "forward") {
-                $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = position - 1 WHERE ($fromPosition <= position AND position <= $toPosition) and suid != $suid and position != 0 ORDER BY position ASC");
+                $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = position - 1 WHERE (" . prepareDatabaseString($fromPosition) . " <= position AND position <= " . prepareDatabaseString($toPosition) . ") and suid != " . prepareDatabaseString($suid) . " and position != 0 ORDER BY position ASC");
             }
-            $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = $aPosition where position=0");
+            $db->executeQuery("update " . Config::dbSurvey() . "_surveys set position = " . prepareDatabaseString($aPosition) . " where position=0");
         }
     }
 
@@ -859,6 +929,10 @@ class SysAdmin {
                 $survey->setObjectName($newsuid);
                 $survey->addVersion(Language::labelVersionCurrentName(), Language::labelVersionCurrentDescription());
                 $survey->setDefaultMode(MODE_CASI); // self
+                $survey->setAllowedModes(MODE_CASI);
+                $survey->setChangeMode(MODE_CHANGE_NOTALLOWED);
+                $survey->setReentryMode(MODE_REENTRY_NO);
+                $survey->setBackMode(MODE_BACK_NO);
                 $survey->setDefaultLanguage(1); // english
                 $survey->setAccessType(LOGIN_ANONYMOUS);
                 $survey->setName(loadvar('name'));
@@ -1472,22 +1546,26 @@ class SysAdmin {
             $toPosition = loadvar('toPosition');
             $direction = loadvar('direction');
             $aPosition = ($direction === "back") ? $toPosition + 1 : $toPosition - 1;
-            $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = 0 where suid=" . $_SESSION['SUID'] . " and position=" . $toPosition);
-            $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = $toPosition where suid=" . $_SESSION['SUID'] . " and seid=" . $seid);
+            $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = 0 where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and position=" . prepareDatabaseString($toPosition));
+            $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = " . prepareDatabaseString($toPosition) . " where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and seid=" . prepareDatabaseString($seid));
 
             // backward direction: up
             if ($direction === "back") {
-                $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = position + 1 WHERE ($toPosition <= position AND position <= $fromPosition) and suid=" . $_SESSION['SUID'] . " and seid != $seid and position != 0 ORDER BY position DESC");
+                $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = position + 1 WHERE (" . prepareDatabaseString($toPosition) . " <= position AND position <= " . prepareDatabaseString($fromPosition) . ") and suid=" . prepareDatabaseString($_SESSION['SUID']) . " and seid !=  " . prepareDatabaseString($seid) . " and position != 0 ORDER BY position DESC");
             }
             // Forward Direction: down
             else if ($direction === "forward") {
-                $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = position - 1 WHERE ($fromPosition <= position AND position <= $toPosition) and suid=" . $_SESSION['SUID'] . " and seid != $seid and position != 0 ORDER BY position ASC");
+                $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = position - 1 WHERE ("  .prepareDatabaseString($fromPosition) . " <= position AND position <= " . prepareDatabaseString($toPosition) . ") and suid=" . prepareDatabaseString($_SESSION['SUID']) . " and seid != " . prepareDatabaseString($seid) . " and position != 0 ORDER BY position ASC");
             }
-            $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = $aPosition where suid=" . $_SESSION['SUID'] . " and position=0");
+            $db->executeQuery("update " . Config::dbSurvey() . "_sections set position = " . prepareDatabaseString($aPosition) . " where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and position=0");
         }
     }
 
-    function showEditSection() {
+    function showEditSection($new = false) {
+        if ($new) {
+            unset($_SESSION['SEID']);
+            unset($_SESSION['VRFILTERMODE_SECTION']);
+        }
         $displaySysAdmin = new DisplaySysAdmin();
         if (getFromSessionParams('seid') != "") {
             $_SESSION['SEID'] = getFromSessionParams('seid');
@@ -1644,7 +1722,7 @@ class SysAdmin {
                 $compiler = new Compiler($_SESSION['SUID'], getSurveyVersion($survey));
                 $mess = $compiler->generateSections(array($section), true);
                 $oldvars = $survey->getVariableDescriptives($section->getSeid());
-                $mess = $compiler->generateVariableDescriptives($newvars, true);
+                $mess = $compiler->generateVariableDescriptives($oldvars, true);
 
                 /* update survey in session */
                 $_SESSION['SUID'] = $suid;
@@ -1741,7 +1819,6 @@ class SysAdmin {
     function showRemoveSectionRes() {
 
         $_SESSION['LASTPAGE'] = 'sysadmin.survey';
-
         $displaySysAdmin = new DisplaySysAdmin();
         $survey = new Survey($_SESSION['SUID']);
         $seid = getFromSessionParams('seid');
@@ -1797,19 +1874,19 @@ class SysAdmin {
             $toPosition = loadvar('toPosition');
             $direction = loadvar('direction');
             $aPosition = ($direction === "back") ? $toPosition + 1 : $toPosition - 1;
-            $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = 0 where suid=" . $_SESSION['SUID'] . " and position=" . $toPosition);
-            $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = $toPosition where suid=" . $_SESSION['SUID'] . " and vsid=" . $vsid);
+            $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = 0 where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and position=" . prepareDatabaseString($toPosition));
+            $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = " . prepareDatabaseString($toPosition) . " where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and vsid=" . prepareDatabaseString($vsid));
 
             // backward direction: up
             if ($direction === "back") {
-                $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = position + 1 WHERE ($toPosition <= position AND position <= $fromPosition) and suid=" . $_SESSION['SUID'] . " and vsid != $vsid and position != 0 ORDER BY position DESC");
+                $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = position + 1 WHERE (" . prepareDatabaseString($toPosition) . " <= position AND position <= " . prepareDatabaseString($fromPosition) . ") and suid=" . prepareDatabaseString($_SESSION['SUID']) . " and vsid != " . prepareDatabaseString($vsid) . " and position != 0 ORDER BY position DESC");
             }
             // Forward Direction: down
             else if ($direction === "forward") {
-                $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = position - 1 WHERE ($fromPosition <= position AND position <= $toPosition) and vsid != $vsid and suid=" . $_SESSION['SUID'] . " and position != 0 ORDER BY position ASC");
+                $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = position - 1 WHERE (" . prepareDatabaseString($fromPosition) . " <= position AND position <= " . prepareDatabaseString($toPosition) . ") and vsid != " . prepareDatabaseString($vsid) . " and suid=" . prepareDatabaseString($_SESSION['SUID']) . " and position != 0 ORDER BY position ASC");
             }
 
-            $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = $aPosition where suid=" . $_SESSION['SUID'] . " and position=0");
+            $db->executeQuery("update " . Config::dbSurvey() . "_variables set position = " . prepareDatabaseString($aPosition) . " where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and position=0");
         }
     }
 
@@ -1993,12 +2070,11 @@ class SysAdmin {
                             // variable reference ok
                         } else if (is_numeric($t)) {
                             // number ok
-                        } /*else if (startsWith($t, '"') && endsWith($t, '"')) {
-                            // quoted text ok
-                        } else if (startsWith($t, "'") && endsWith($t, "'")) {
-                            // quoted text ok
-                        } */
-                        else {
+                        } /* else if (startsWith($t, '"') && endsWith($t, '"')) {
+                          // quoted text ok
+                          } else if (startsWith($t, "'") && endsWith($t, "'")) {
+                          // quoted text ok
+                          } */ else {
                             if (stripos($t, '(') !== false) {
                                 $t = str_replace('(', '', $t);
                                 $t = str_replace(')', '', $t);
@@ -2037,7 +2113,7 @@ class SysAdmin {
                             return $displaySysAdmin->showEditVariable($vsid, $content);
                         }
                     }
-                } 
+                }
                 // no value, then set to empty
                 else {
                     $variable->setAnswerTypeCustom($tocall);
@@ -2480,6 +2556,10 @@ class SysAdmin {
             $var->setEnumeratedRandomizer(loadvar(SETTING_ENUMERATED_RANDOMIZER));
             $var->setEnumeratedColumns(loadvar(SETTING_ENUMERATED_COLUMNS));
             $var->setHeaderAlignment(loadvar(SETTING_HEADER_ALIGNMENT));
+            
+            if (inArray($answertype, array(ANSWER_TYPE_SETOFENUMERATED))) {
+                $var->setSetOfEnumeratedRanking(loadvar(SETTING_SETOFENUMERATED_RANKING));
+            }
             $ans = loadvar(SETTING_HEADER_FORMATTING);
             if (!is_array($ans)) {
                 $ans = array($ans);
@@ -4260,7 +4340,8 @@ class SysAdmin {
         }
         $survey->setHeaderFormatting(implode("~", $ans));
         $survey->setEnumeratedOrder(loadvar(SETTING_ENUMERATED_ORDER));
-
+        $survey->setSetOfEnumeratedRanking(loadvar(SETTING_SETOFENUMERATED_RANKING));
+        
         $survey->setSliderOrientation(loadvar(SETTING_SLIDER_ORIENTATION));
         $survey->setIncrement(loadvar(SETTING_SLIDER_INCREMENT));
         $survey->setTooltip(loadvar(SETTING_SLIDER_TOOLTIP));
@@ -4269,7 +4350,7 @@ class SysAdmin {
         $survey->setTextboxPosttext(loadvar(SETTING_SLIDER_TEXTBOX_POSTTEXT));
         $survey->setComboBoxNothingLabel(loadvar(SETTING_COMBOBOX_DEFAULT));
         $survey->setSliderLabelPlacement(loadvar(SETTING_SLIDER_LABEL_PLACEMENT));
-
+        $survey->setSliderPreSelection(loadvar(SETTING_SLIDER_PRESELECTION));
         $survey->setShowSectionHeader(loadvar(SETTING_SHOW_SECTION_HEADER));
         $survey->setShowSectionFooter(loadvar(SETTING_SHOW_SECTION_FOOTER));
 
@@ -4456,12 +4537,11 @@ class SysAdmin {
                             // variable reference ok
                         } else if (is_numeric($t)) {
                             // number ok
-                        } /*else if (startsWith($t, '"') && endsWith($t, '"')) {
-                            // quoted text ok
-                        } else if (startsWith($t, "'") && endsWith($t, "'")) {
-                            // quoted text ok
-                        } */
-                        else {
+                        } /* else if (startsWith($t, '"') && endsWith($t, '"')) {
+                          // quoted text ok
+                          } else if (startsWith($t, "'") && endsWith($t, "'")) {
+                          // quoted text ok
+                          } */ else {
                             if (stripos($t, '(') !== false) {
                                 $t = str_replace('(', '', $t);
                                 $t = str_replace(')', '', $t);
@@ -4533,7 +4613,7 @@ class SysAdmin {
         $compiler = new Compiler($_SESSION['SUID'], getSurveyVersion($survey));
 
         $mess = $compiler->generateTypes(array($type));
-        $vars = $survey->getVariableDescriptivesOfType($tyd);
+        $vars = $survey->getVariableDescriptivesOfType($_SESSION['TYD']);
         $mess = $compiler->generateVariableDescriptives($vars);
         $mess = $compiler->generateGetFills($vars);
         $mess = $compiler->generateInlineFields($vars);
@@ -4861,6 +4941,11 @@ class SysAdmin {
             $type->setEnumeratedColumns(loadvar(SETTING_ENUMERATED_COLUMNS));
             $type->setHeaderAlignment(loadvar(SETTING_HEADER_ALIGNMENT));
             $ans = loadvar(SETTING_HEADER_FORMATTING);
+            
+            if (inArray($answertype, array(ANSWER_TYPE_SETOFENUMERATED))) {
+                $type->setSetOfEnumeratedRanking(loadvar(SETTING_SETOFENUMERATED_RANKING));
+            }
+            
             if (!is_array($ans)) {
                 $ans = array($ans);
             }
@@ -5516,6 +5601,7 @@ class SysAdmin {
         $de->setProperty(DATA_OUTPUT_TYPE, loadvar(DATA_OUTPUT_TYPE));
         $de->setProperty(DATA_OUTPUT_ENCODING, "UTF-8");
         //$de->displayProperties();
+
         $de->generate();
         $de->download();
         //$de->displayProperties();
@@ -5841,6 +5927,7 @@ class SysAdmin {
                     $suid = $_SESSION['SUID'];
                 }
                 $section = loadvar("copysection");
+                $newvars = array();
                 foreach ($selected as $sel) {
                     $s = explode("~", $sel);
                     if (isset($surveys[$s[0]])) {
@@ -6651,10 +6738,10 @@ class SysAdmin {
             foreach ($clean as $cl) {
                 $tsquery = "";
                 if ($from != "") {
-                    $tsquery .= " and ts > '" . $from . "'";
+                    $tsquery .= " and ts > '" . prepareDatabaseString($from) . "'";
                 }
                 if ($to != "") {
-                    $tsquery .= " and ts < '" . $to . "'";
+                    $tsquery .= " and ts < '" . prepareDatabaseString($to) . "'";
                 }
 
                 $tables = array();
@@ -6666,29 +6753,29 @@ class SysAdmin {
                 }
 
                 foreach ($tables as $table) {
-                    $query = "delete from " . $table . "_actions where suid=" . $cl . " and systemtype=" . USCIC_SURVEY . $tsquery;
+                    $query = "delete from " . $table . "_actions where suid=" . prepareDatabaseString($cl) . " and systemtype=" . USCIC_SURVEY . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_data where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_data where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_datarecords where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_datarecords where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_screendumps where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_screendumps where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_logs where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_logs where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_observations where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_observations where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_states where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_states where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_times where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_times where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_paradata where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_paradata where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_loopdata where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_loopdata where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_consolidated_times where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_consolidated_times where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
-                    $query = "delete from " . $table . "_processed_paradata where suid=" . $cl . $tsquery;
+                    $query = "delete from " . $table . "_processed_paradata where suid=" . prepareDatabaseString($cl) . $tsquery;
                     $db->executeQuery($query);
                 }
             }
@@ -6720,7 +6807,7 @@ class SysAdmin {
         }
         set_time_limit(0);
         $messages = array();
-
+        $errors = false;
         $survey = new Survey($comp);
         $checker = new Checker($comp);
         $compiler = new Compiler($comp, getSurveyVersion($survey));
@@ -6798,7 +6885,7 @@ class SysAdmin {
                 }
             }
         }
-
+        $content = "";
         $messages = array(Language::labelSections() => $sectionmessages, Language::labelVariables() => $variablemessages, Language::labelTypes() => $typemessages, Language::labelGroups() => $groupmessages, Language::labelSettings() => $surveymessages, Language::LabelRouting() => $routingmessages);
         if ($errors) {
             $m = '<a data-keyboard="false" data-toggle="modal" data-target="#errorsModal">Show error(s)</a>';
@@ -6865,61 +6952,62 @@ class SysAdmin {
                 $sections = $survey->getSections();
                 foreach ($sections as $section) {
                     $mess = $compiler->generateEngine($section->getSeid());
-                    if (sizeof($mess) > 0) {
+                    if (is_array($mess) && sizeof($mess) > 0) {
                         $messages[] = $mess;
                     }
                     $mess = $compiler->generateProgressBar($section->getSeid());
-                    if (sizeof($mess) > 0) {
+                    if (is_array($mess) && sizeof($mess) > 0) {
                         $messages[] = $mess;
                     }
                 }
                 $mess = $compiler->generateSections();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
             }
             if (inArray(SURVEY_COMPONENT_VARIABLE, $components)) {
                 $mess = $compiler->generateVariableDescriptives();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
             }
             if (inArray(SURVEY_COMPONENT_TYPE, $components)) {
 
                 $mess = $compiler->generateTypes();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
             }
             if (inArray(SURVEY_COMPONENT_SETTING, $components)) {
                 $mess = $compiler->generateSurveySettings();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
             }
             if (inArray(SURVEY_COMPONENT_FILL, $components)) {
                 $mess = $compiler->generateGetFills();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
                 $mess = $compiler->generateSetFills();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
             }
             if (inArray(SURVEY_COMPONENT_INLINEFIELDS, $components)) {
                 $mess = $compiler->generateInlineFields();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
             }
             if (inArray(SURVEY_COMPONENT_GROUP, $components)) {
                 $mess = $compiler->generateGroups();
-                if (sizeof($mess) > 0) {
+                if (is_array($mess) && sizeof($mess) > 0) {
                     $messages[] = $mess;
                 }
             }
         }
+
         $survey = $currentsurvey;
         if (sizeof($messages) == 0) {
             $content = $displaySysAdmin->displaySuccess(Language::messageToolsCompileOk());
@@ -7104,32 +7192,40 @@ class SysAdmin {
             $user->setSupervisor(loadvar('uridsel'));
             $user->setStatus(loadvar('status'));
             $user->setUserType(loadvar('usertype'));
-            $user->setUserSubType(loadvar('usersubtype'));
+            if (loadvar('usertype') == USER_SYSADMIN) {
+                $user->setUserSubType(loadvar('usersubtype'));
+            } else if (loadvar('usertype') == USER_NURSE) {
+                $user->setUserSubType(loadvar('usersubtypenurse'));
+            }
             $current = $user->getSurveysAccess();
 
             $allowedsurveys = loadvar(SETTING_USER_SURVEYS);
 
             // add access to all modes and languages if not specified in current access
-            foreach ($allowedsurveys as $a) {
-                if (!inArray($a, $current)) {
-                    $surv = new Survey($a);
-                    $mods = explode("~", $surv->getAllowedModes());
-                    foreach ($mods as $m) {
-                        $user->setLanguages($a, $m, $surv->getAllowedLanguages($m));
+            if (inArray(loadvar('usertype'), array(USER_RESEARCHER, USER_SYSADMIN, USER_TRANSLATOR, USER_TESTER))) {
+                foreach ($allowedsurveys as $a) {
+                    if (!inArray($a, $current)) {
+                        $surv = new Survey($a);
+                        $mods = explode("~", $surv->getAllowedModes());
+                        foreach ($mods as $m) {
+                            $user->setLanguages($a, $m, $surv->getAllowedLanguages($m));
+                        }
                     }
                 }
-            }
-            foreach ($current as $c) {
-                if (!inArray($c, $allowedsurveys)) {
-                    $user->removeSurvey($c);
+                foreach ($current as $c) {
+                    if (!inArray($c, $allowedsurveys)) {
+                        $user->removeSurvey($c);
+                    }
                 }
             }
             $user->saveChanges();
 
             // current survey not in allowed, then update to first survey for user
-            if (!inArray($_SESSION['SUID'], $allowedsurveys)) {
-                $surveys = new Surveys();
-                $_SESSION['SUID'] = $surveys->getFirstSurvey();
+            if (inArray(loadvar('usertype'), array(USER_RESEARCHER, USER_SYSADMIN, USER_TRANSLATOR, USER_TESTER))) {
+                if (!inArray($_SESSION['SUID'], $allowedsurveys)) {
+                    $surveys = new Surveys();
+                    $_SESSION['SUID'] = $surveys->getFirstSurvey();
+                }
             }
         } else {
             $content = $displayUsers->displayWarning(Language::messageUserCorrectErrors());

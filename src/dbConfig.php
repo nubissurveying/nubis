@@ -97,11 +97,7 @@ class dbConfig {
     static function defaultFileLocation() {
         return DbConfig::getProperty(CONFIGURATION_SAMPLE, CONFIGURATION_SAMPLE_FILELOCATION);
     }
-
-    static function defaultSeparateInterviewAddress() {
-        return (DbConfig::getProperty(CONFIGURATION_SAMPLE, CONFIGURATION_SAMPLE_INTERVIEWADDRESS)) == 1; // 1=YES
-    }
-
+   
     static function defaultProxyCode() {
         return (DbConfig::getProperty(CONFIGURATION_SAMPLE, CONFIGURATION_SAMPLE_PROXYCODE)) == 1; // 1=YES
     }

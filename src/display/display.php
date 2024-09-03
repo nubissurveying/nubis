@@ -48,15 +48,15 @@ class Display {
     }
 
     function defaultDisplayOverviewAddressColumns() {
-        return array('address1_dec' => Language::labelDwelling(), 'city_dec' => Language::labelVillage());
+        return array('address1_dec' => Language::labelAdress1(), 'address2_dec' => Language::labelAdress2(), 'city_dec' => Language::labelCity(), 'zip_dec' => Language::labelZip(), 'state_dec' => Language::labelState());
     }
 
     function defaultDisplayInfoAddressColumns() {
-        return array('address1_dec' => Language::labelDwelling(), 'city_dec' => Language::labelVillage());
+        return array('address1_dec' => Language::labelAdress1(), 'address2_dec' => Language::labelAdress2(), 'city_dec' => Language::labelCity(), 'zip_dec' => Language::labelZip(), 'state_dec' => Language::labelState());
     }
 
     function defaultDisplayInfo2AddressColumns() {
-        return array('telephone1_dec' => Language::labelTelephone());
+        return array('telephone1_dec' => Language::labelTelephone(), 'telephone2_dec' => Language::labelTelephone2(), 'email_dec' => Language::labelEmail());
     }
 
     function showHeader($title, $style = '', $fastload = false) {
@@ -119,7 +119,7 @@ class Display {
         return $returnStr;
     }
 
-    function showSurveyHeader($title, $style = '') {
+    function showSurveyHeader($title, $style = '', $extra = '') {
         /* FOR NO CACHING
          * <meta http-equiv="cache-control" content="max-age=0" />
           <meta http-equiv="cache-control" content="no-cache" />
@@ -343,7 +343,7 @@ class Display {
                 });
                 ';
 
-        if ($_SESSION['SEARCH'] == SEARCH_OPEN_YES) {
+        if (isset($_SESSION['SEARCH']) && $_SESSION['SEARCH'] == SEARCH_OPEN_YES) {
             $returnStr .= " var term = '" . $_SESSION['SEARCHTERM'] . "';
                             var r = '" . setSessionsParamString(array("page" => $page)) . "';
                             var url = '';
@@ -528,8 +528,8 @@ class Display {
                                 /* not pattern given, then assume validator function */
                                 if (!startsWith($value, '/')) {
                                     $local .= $e->getValue() . ": true,\r\n";
-                                } else {
-                                    $local .= $e->getType() . ": " . $e->getValue() . ",\r\n";
+                                } else {                                    
+                                    $local .= $e->getType() . ": " . str_replace("/","",$e->getValue()) . ",\r\n";
                                 }
                             }
 
@@ -705,11 +705,11 @@ class Display {
         if ($placement == ERROR_PLACEMENT_AT_TOP || $placement == ERROR_PLACEMENT_AT_BOTTOM) {
             $str .= '$(\'#uscic-errors\').empty();';
         } else {
-            $str .= '$(\'div.form-group\').removeClass(\'has-errors\');
-                $(\'div.form-group\').removeClass(\'has-warning\'); 
+            $str .= '$(\'div.uscic-answer\').removeClass(\'has-errors\');
+                $(\'div.uscic-answer\').removeClass(\'has-warning\'); 
+                $(\'tr.has-warning\').removeAttr(\'style\');  
                 $(\'tr.has-warning\').removeClass(\'has-warning\');
-                $(\'div.form-group\').removeAttr(\'style\');                
-                $(\'tr.form-group\').removeAttr(\'style\');  
+                $(\'div.uscic-answer\').removeAttr(\'style\');                                
                 $(\':input\').removeClass(\'empty-error\');
                 $(\':input\').removeClass(\'error-error\');';
         }
@@ -751,8 +751,8 @@ class Display {
                             errorClass: \'help-block uscic-help-block\',
                             errorPlacement: function(error, element) {  ';
             $errorplacement .= '
-                                if ($(element).closest(\'div.form-group\').hasClass(\'has-errors\') === false) {
-                                   $(element).closest(\'div.form-group\').addClass(\'has-errors\');
+                                if ($(element).closest(\'div.uscic-answer\').hasClass(\'has-errors\') === false) {
+                                   $(element).closest(\'div.uscic-answer\').addClass(\'has-errors\');
                                 }
                                 if ($(element).hasClass(\'uscic-radio-table\') === true) {
                                      error.insertAfter($(element).closest(\'tr\').first().children(\'td\').children(\'div\').first());
@@ -761,7 +761,6 @@ class Display {
                                      error.insertAfter($(element).closest(\'table\').first());
                                 }
                                 else if ($(element).hasClass(\'uscic-checkbox-horizontal-table\') === true) {
-                                    //error.insertAfter($(element).closest(\'table\').parent(\'div.form-group\').first());
                                     error.insertAfter($(element).closest(\'table\').first());
                                 }
                                 else if ($(element).hasClass(\'uscic-checkbox-table\') === true) {
@@ -771,7 +770,7 @@ class Display {
                                     error.insertAfter($(element).closest(\'tr\').first().children(\'td\').children(\'div\').first());
                                 }
                                 else {                                
-                                   error.insertAfter($(element).closest(\'div.form-group\').children().last());            
+                                   error.insertAfter($(element).closest(\'div.uscic-answer\').children().last());            
                                 }
                            }';
             $errorplacement1 = str_replace("ignore-empty", "ignore-error", str_replace("data-validation-empty", "data-validation-error", $errorplacement));
@@ -851,57 +850,57 @@ class Display {
             onfocusout: false,
             highlight: function(element) {                            
                 $(element).addClass(\'empty-error\');
-                $(element).closest(\'div.form-group\').addClass(\'has-warning\');
+                $(element).closest(\'div.uscic-answer\').addClass(\'has-warning\');
                 if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for multi column setup in a table row                
                     $(element).closest(\'tr\').addClass(\'has-warning\');
-                    $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                    $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                 }
                 else if ($(element).is(\':checkbox\')) { // for checkboxes to add the highlighting                
                     if ($(element).hasClass(\'uscic-checkbox-table\') === true) {
                         $(element).closest(\'tr\').addClass(\'has-warning\');
-                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                     else if ($(element).hasClass(\'uscic-checkbox-horizontal-table\') === true) {
-                        $(element).closest(\'table\').parent(\'div.form-group\').addClass(\'has-warning\');
-                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'table\').parent(\'div.uscic-answer\').addClass(\'has-warning\');
+                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                     else {
-                        $(element).closest(\'div.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }    
                 }                
                 else if ($(element).is(\':radio\')) { // for radio buttons to add the highlighting
                     if ($(element).hasClass(\'uscic-radio-table\') === true ) {                    
 			$(element).closest(\'tr\').addClass(\'has-warning\');
-                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                     else if ($(element).hasClass(\'uscic-radio-horizontal-table\') === true) {
-                        $(element).closest(\'table\').parent(\'div.form-group\').addClass(\'has-warning\');
-                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'table\').parent(\'div.uscic-answer\').addClass(\'has-warning\');
+                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                     else {
-                        $(element).closest(\'div.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                 }
                 else if ($(element).is(\'select\')) { // for select picker to add the highlighting                
-                    $(element).next().children().first().attr(\'style\', \'border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                    $(element).next().children().first().attr(\'style\', \'border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                 }
                 else if ($(element).is(\':text\')) { // for sliders and textboxes to add the highlighting
                     if ($(element).hasClass(\'bootstrapslider\') === true) {   
-                        $(element).closest(\'div.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     } 
                     else if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for text fields in a table row
 			$(element).closest(\'tr\').addClass(\'has-warning\');
-                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                 }
                 else if ($(element).hasClass(\'ranker\')) { // for ranker to add the highlighting 
-                    $(element).closest(\'.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                    $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                 } 
             },
             unhighlight: function(element) {
                 $(element).removeClass(\'empty-error\');                
-                if ($(element).closest(\'div .form-group\').hasClass(\'has-errors\') === false) {
-                    $(element).closest(\'div .form-group\').removeClass(\'has-warning\');
+                if ($(element).closest(\'div.uscic-answer\').hasClass(\'has-errors\') === false) {
+                    $(element).closest(\'div.uscic-answer\').removeClass(\'has-warning\');
                     
                     if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for text fields in a table row
                         $(element).closest(\'tr\').removeAttr(\'style\');
@@ -913,12 +912,12 @@ class Display {
                             }  
                         }
                         else if ($(element).hasClass(\'uscic-checkbox-horizontal-table\') === true) {
-                            if ($(element).closest(\'table\').parent(\'div.form-group\').hasClass(\'has-warning\') === false) {
+                            if ($(element).closest(\'table\').parent(\'div.uscic-answer\').hasClass(\'has-warning\') === false) {
                                 $(element).closest(\'table\').removeAttr(\'style\');
                             }  
                         }
                         else {
-                            $(element).closest(\'div.form-group\').removeAttr(\'style\');
+                            $(element).closest(\'div.uscic-answer\').removeAttr(\'style\');
                         }
                     }
                     else if ($(element).is(\':radio\')) { // for checkboxes to remove the highlighting                
@@ -928,12 +927,12 @@ class Display {
                             }    
                         }
                         else if ($(element).hasClass(\'uscic-radio-horizontal-table\') === true) {
-                            if ($(element).closest(\'table\').parent(\'div.form-group\').hasClass(\'has-warning\') === false) {
+                            if ($(element).closest(\'table\').parent(\'div.uscic-answer\').hasClass(\'has-warning\') === false) {
                                 $(element).closest(\'table\').removeAttr(\'style\');
                             }  
                         }
                         else {
-                            $(element).closest(\'div.form-group\').removeAttr(\'style\');
+                            $(element).closest(\'div.uscic-answer\').removeAttr(\'style\');
                         }    
                     }
                     else if ($(element).is(\'select\')) { // for select picker to remove the highlighting                
@@ -941,7 +940,7 @@ class Display {
                     }
                     else if ($(element).is(\':text\')) { // for checkboxes to add the highlighting                                    
                         if ($(element).hasClass(\'bootstrapslider\') === true) {                        
-                            $(element).closest(\'div.form-group\').removeAttr(\'style\');                            
+                            $(element).closest(\'div.uscic-answer\').removeAttr(\'style\');                            
                         }    
                         else if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for text fields in a table row
                             if ($(element).closest(\'tr\').hasClass(\'has-warning\') === false) {;
@@ -950,7 +949,7 @@ class Display {
                         }
                     }
                     else if ($(element).hasClass(\'ranker\')) { // for ranker to add the highlighting                       
-                        $(element).closest(\'.form-group\').first().removeAttr(\'style\');
+                        $(element).closest(\'div.uscic-answer\').first().removeAttr(\'style\');
                     } 
                 }
             },';
@@ -975,58 +974,58 @@ class Display {
             onfocusout: false,
             highlight: function(element) {
                 $(element).addClass(\'error-error\');
-                $(element).closest(\'div.form-group\').addClass(\'has-warning\');
+                $(element).closest(\'div.uscic-answer\').addClass(\'has-warning\');
                 
                 if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for multi column setup in a table row                
                     $(element).closest(\'tr\').addClass(\'has-warning\');
-                    $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                    $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                 }
                 else if ($(element).is(\':checkbox\')) { // for checkboxes to add the highlighting                
                     if ($(element).hasClass(\'uscic-checkbox-table\') === true) {
                         $(element).closest(\'tr\').addClass(\'has-warning\');
-                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }  
                     else if ($(element).hasClass(\'uscic-checkbox-horizontal-table\') === true) {
-                        $(element).closest(\'table\').parent(\'div.form-group\').addClass(\'has-warning\');
-                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'table\').parent(\'div.uscic-answer\').addClass(\'has-warning\');
+                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                     else {
-                        $(element).closest(\'div.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }    
                 }
                 else if ($(element).is(\':radio\')) { // for radio buttons to add the highlighting
                     if ($(element).hasClass(\'uscic-radio-table\') === true) {
 			$(element).closest(\'tr\').addClass(\'has-warning\');
-                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                     else if ($(element).hasClass(\'uscic-radio-horizontal-table\') === true) {
-                        $(element).closest(\'table\').parent(\'div.form-group\').addClass(\'has-warning\');
-                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'table\').parent(\'div.uscic-answer\').addClass(\'has-warning\');
+                        $(element).closest(\'table\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                     else {
-                        $(element).closest(\'div.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                 }
                 else if ($(element).is(\'select\')) { // for select picker to add the highlighting                
-                    $(element).next().children().first().attr(\'style\', \'border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                    $(element).next().children().first().attr(\'style\', \'border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                 } 
                 else if ($(element).is(\':text\')) { // for checkboxes to add the highlighting
                     if ($(element).hasClass(\'bootstrapslider\') === true) {                        
-                        $(element).closest(\'div.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');                        
+                        $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');                        
                     } 
                     else if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for text fields in a table row
 			$(element).closest(\'tr\').addClass(\'has-warning\');
-                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                        $(element).closest(\'tr\').attr(\'style\', \'padding: 0.5em; border: 3px solid; border-color: ' . Config::errorColor() . '; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                     }
                 }
                 else if ($(element).hasClass(\'ranker\')) { // for ranker to add the highlighting                  
-                    $(element).closest(\'.form-group\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: #C09853; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
+                    $(element).closest(\'div.uscic-answer\').attr(\'style\', \'padding: 0.5em; border: 1px solid; border-color: ' . Config::errorColor() . '3; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;\');
                 } 
             },
             unhighlight: function(element) {
                 $(element).removeClass(\'error-error\');
-                if ($(element).closest(\'div .form-group\').hasClass(\'has-errors\') === false) {
-                    $(element).closest(\'div .form-group\').removeClass(\'has-warning\');
+                if ($(element).closest(\'div .uscic-answer\').hasClass(\'has-errors\') === false && $(element).closest(\'div .uscic-answer\').hasClass(\'has-warning\') === false) {
+                    $(element).closest(\'div.uscic-answer\').removeClass(\'has-warning\');
                     
                     if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for text fields in a table row
                         if ($(element).closest(\'tr\').hasClass(\'has-warning\') === false) {;
@@ -1040,12 +1039,12 @@ class Display {
                             }    
                         }
                         else if ($(element).hasClass(\'uscic-checkbox-horizontal-table\') === true) {
-                            if ($(element).closest(\'table\').parent(\'div.form-group\').hasClass(\'has-warning\') === false) {
+                            if ($(element).closest(\'table\').parent(\'div.uscic-answer\').hasClass(\'has-warning\') === false) {
                                 $(element).closest(\'table\').removeAttr(\'style\');
                             }  
                         }
                         else {
-                            $(element).closest(\'div.form-group\').removeAttr(\'style\');
+                            $(element).closest(\'div.uscic-answer\').removeAttr(\'style\');
                         }
                     }
                     else if ($(element).is(\':radio\')) { // for checkboxes to remove the highlighting                
@@ -1055,12 +1054,12 @@ class Display {
                             }    
                         }
                         else if ($(element).hasClass(\'uscic-radio-horizontal-table\') === true) {
-                            if ($(element).closest(\'table\').parent(\'div.form-group\').hasClass(\'has-warning\') === false) {
+                            if ($(element).closest(\'table\').parent(\'div.uscic-answer\').hasClass(\'has-warning\') === false) {
                                 $(element).closest(\'table\').removeAttr(\'style\');
                             }  
                         }
                         else {
-                            $(element).closest(\'div.form-group\').removeAttr(\'style\');
+                            $(element).closest(\'div.uscic-answer\').removeAttr(\'style\');
                         }    
                     }
                     else if ($(element).is(\'select\')) { // for select picker to remove the highlighting                
@@ -1068,14 +1067,14 @@ class Display {
                     }
                     else if ($(element).is(\':text\')) { // for checkboxes to add the highlighting                                    
                         if ($(element).hasClass(\'bootstrapslider\') === true) {                        
-                            $(element).closest(\'div.form-group\').removeAttr(\'style\');                            
+                            $(element).closest(\'div.uscic-answer\').removeAttr(\'style\');                            
                         }
                         else if ($(element).closest(\'td\') && $(element).closest(\'td\').hasClass(\'uscic-table-row-cell-multicolumn\')) { // for text fields in a table row
                             $(element).closest(\'tr\').removeAttr(\'style\');
                         }
                     }
                     else if ($(element).hasClass(\'ranker\')) { // for ranker to add the highlighting                       
-                        $(element).closest(\'.form-group\').first().removeAttr(\'style\');
+                        $(element).closest(\'div.uscic-answer\').first().removeAttr(\'style\');
                     } 
                 }
             },';
@@ -1366,8 +1365,9 @@ class Display {
                                             <script type="text/javascript">
                                             $(document).ready(function() {
                                                 var i = $("#' . $id . '_textbox").TouchSpin({
-                                                    ' . $mintext .
-                            $maxtext .
+                                                    ' . $mintext . 
+                            '' . 
+                            $maxtext . '' . 
                             $spinnertype . '                                                                                                            
                                                     step: ' . $step . ',
                                                     verticalupclass: "' . str_replace('"', '&#34;', $var->getSpinnerUp()) . '",
@@ -1408,7 +1408,7 @@ class Display {
                     $extrahide = "";
                 }
                 else {
-                    $extrahide = '$(".min-slider-handle").addClass(\'round hide\');';
+                    $extrahide = '$("#' . $id . '_slid .min-slider-handle").addClass(\'round hide\');';
                 }
                 $str .= '$("#' . $id . '_textbox").keyup(
                                     function(event) {
@@ -1456,8 +1456,8 @@ class Display {
                 
                 // this handles tick display
                 $str .= "$( window ).resize(function() {
-                            var x = $('#" . $id . "').slider();
-                            x.slider('refresh'); 
+                            var x = $('#" . $id . "').slider();                            
+                            x.refresh({ useCurrentValue: true }); // old: x.slider('refresh'); 
                         });";
                 
                 $str .= "</script>";
@@ -1887,6 +1887,7 @@ class Display {
                 }
             }
         }
+        
         $sec = '';
         $min = '';
         if ($seconds == "true") {
@@ -1977,24 +1978,11 @@ class Display {
             $both = 'sideBySide: ' . $st . ', collapse: ' . $cp . ', ';
         }
 
-        // bootstrap date/time picker version 3
-        /* $returnStr .= '<div class=\'input-group date ' . $class . '\' id=\'' . $id . 'div\'>
-          <div class="input-group uscic-inputgroup-posttext">
-          <input ' . $errorstring . ' ' . $inlinestyle . ' ' . $inlinejavascript . ' autocomplete="off" type=\'text\' class="form-control uscic-form-control ' . $dkrfnaclass . ' ' . $inlineclass . '" value="' . $default . '" id="' . $id . '" name="' . $name . '"/>
-          <div class="input-group-addon uscic-inputaddon-posttext"><span class="glyphicon ' . $icon . '"></span>
-          </div></div>' . $dkrfna . '
-          </div>
-          <script type="text/javascript">
-          $(function () {
-          $(\'#' . $id . '\').datetimepicker({' . $sec . $min . 'format: \'' . $format . '\', language: \'' . $language . '\', pickDate: ' . $pickdate . ', pickTime: ' . $picktime . $inputmasking . '});
-          $(\'#' . $id . '\').attr("readonly","true");
-          });
-          </script>'; */
-
         $role = "";
         if (Config::useAccessible() && $legend != "") {
             $role = ' aria-labelledby="' . $legend . '" ';
-        }                
+        }    
+
 //$extraview = "";
         // bootstrap date/time picker version 4
         $returnStr .= '<div class=\'input-group date ' . $class . '\' id=\'' . $id . 'div\'>
@@ -2014,7 +2002,7 @@ class Display {
         } else {
             $returnStr .= '<script type="text/javascript">
                 $(function () {
-                    $(\'#' . $id . '\').datetimepicker(locale: \'' . $language . '\', ' . 'format: \'' . $format . '\'' . $inputmasking . '});                
+                    $(\'#' . $id . '\').datetimepicker({locale: \'' . $language . '\', ' . 'format: \'' . $format . '\'' . $inputmasking . '});                
                 });        
             </script>';
         }
@@ -2303,6 +2291,7 @@ class Display {
         }
 
         if ($type == USCIC_SMS) {
+            $_SESSION[CONFIGURATION_ENCRYPTION_CALENDAR] = encryptC(Config::calendarKey(), Config::smsComponentKey()); //set key to allow access to calendar in SMS via events.json/index.php
             if (!isRegisteredScript("js/app.js")) {
                 registerScript('js/app.js');
                 $returnStr .= getScript("js/app.js");
@@ -2391,20 +2380,32 @@ class Display {
 <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example">
 	<thead>
 		<tr>
-			<th>Id</th>
-			<th>Name</th>';
+			<th>' . Language::labelRespondentIdentifier() . '</th>
+			<th>' . Language::labelRespondentName() . '</th>';
         $columns = Language::defaultDisplayOverviewAddressColumns();
 
         foreach ($columns as $column) {
             $returnStr .= '<th>' . $column . '</th>';
         }
-        $returnStr .= '<th>Last contact</th>
-			<th>Status</th>
-			<th>Refusal</th>
-		</tr>
+        $returnStr .= '<th>' . Language::labelRespondentLastContact() . '</th>
+			<th>' . Language::labelRespondentStatus() . '</th>
+			<th>' . Language::labelRespondentRefusal() . '</th>';
+        
+        $user = new User($_SESSION["URID"]);
+        if ($user->getUserType() == USER_SUPERVISOR) {
+            $returnStr .= '<th>' . Language::labelHouseholdInterviewer() . '</th>';
+        }
+        
+	$returnStr .= '	</tr>
 	</thead>
 	<tbody>';
         foreach ($respondents as $respondent) {
+            $selurid = $respondent->getUrid();
+            $uridtext = Language::labelUnassigned();
+            if ($selurid > 0) {                
+                $us = new User($selurid);
+                $uridtext = $us->getName();
+            }
             $returnStr .= '<tr>';
             $returnStr .= '<td>' . setSessionParamsHref(array('page' => $refpage . '.info', 'primkey' => $respondent->getPrimkey()), $respondent->getPrimkey()) . '</td>';
             $returnStr .= '<td>' . $respondent->getFirstname() . ' ' . $respondent->getLastname() . '</td>';
@@ -2415,6 +2416,9 @@ class Display {
             $returnStr .= '<td>' . $this->displayLastContact($respondent) . '</td>';
             $returnStr .= '<td>' . $this->displayStatus($respondent) . '</td>';
             $returnStr .= '<td>' . $this->displayRefusal($respondent) . '</td>';
+            if ($user->getUserType() == USER_SUPERVISOR) {
+                $returnStr .= '<td>' . $uridtext . '</td>'; //don't display iwer for members in hh
+            }
             $returnStr .= '</tr>';
         }
 
@@ -2423,24 +2427,36 @@ class Display {
     }
 
     function showHouseholdsTable($households, $refpage = '') {
-        $returnStr = '<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example">
+        // use 'example2' as table id, so we don't apply data tables sorting
+        $returnStr = '<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example2">
 	<thead>
 		<tr>
-			<th>Household id</th>
-			<th>Name</th>';
+			<th>' . Language::labelHouseholdIdentifier() . '</th>
+			<th>' . Language::labelHouseholdName() . '</th>';
 
         $columns = Language::defaultDisplayOverviewAddressColumns();
         foreach ($columns as $column) {
             $returnStr .= '<th>' . $column . '</th>';
         }
-        $returnStr .= '          <th>Last contact</th>
-			<th>Status</th>
-			<th>Refusal</th>
-		</tr>
+        $returnStr .= '          <th>' . Language::labelHouseholdLastContact() . '</th>
+			<th>' . Language::labelHouseholdStatus() . '</th>
+			<th>' . Language::labelHouseholdRefusal() . '</th>';
+        
+        $user = new User($_SESSION["URID"]);
+        if ($user->getUserType() == USER_SUPERVISOR) {
+            $returnStr .= '<th>' . Language::labelHouseholdInterviewer() . '</th>';
+        }
+	$returnStr .= ' </tr>
 	</thead>
 	<tbody>';
 
         foreach ($households as $household) {
+            $selurid = $household->getUrid();
+            $uridtext = Language::labelUnassigned();
+            if ($selurid > 0) {                
+                $us = new User($selurid);
+                $uridtext = $us->getName();
+            }
             $returnStr .= '<tr>';
             $returnStr .= '<td>' . setSessionParamsHref(array('page' => $refpage . 'interviewer.household.info', 'primkey' => $household->getPrimkey()), $household->getPrimkey()) . '</td>';
             $returnStr .= '<td>' . $household->getName() . '</td>';
@@ -2450,6 +2466,9 @@ class Display {
             $returnStr .= '<td><div data-toggle="tooltip" data-placement="top" title="' . $this->displayLastContactText($household) . '">' . $this->displayLastContact($household) . '</div></td>';
             $returnStr .= '<td>' . $this->displayStatus($household) . '</td>';
             $returnStr .= '<td>' . $this->displayRefusal($household) . '</td>';
+            if ($user->getUserType() == USER_SUPERVISOR) {
+                $returnStr .= '<td>' . $uridtext . '</td>'; //don't display iwer for members in hh
+            }
             $returnStr .= '</tr>';
             $respondents = $household->getSelectedRespondentsWithFinFamR();
             foreach ($respondents as $respondent) {
@@ -2458,12 +2477,15 @@ class Display {
                 $returnStr .= '<td ' . $bgcolor . ' align=right>' . setSessionParamsHref(array('page' => $refpage . 'interviewer.respondent.info', 'primkey' => $respondent->getPrimkey()), $respondent->getPrimkey()) . '</td>';
                 $returnStr .= '<td ' . $bgcolor . ' align=right><b>' . $respondent->getName() . '<b></td>';
                 foreach ($columns as $key => $column) {
-                    $returnStr .= '<td ' . $bgcolor . '></td>'; //don't diplay for members in hh
+                    $returnStr .= '<td ' . $bgcolor . '></td>'; //don't display for members in hh
                     // $returnStr .= '<td>' . $household->getDataByField($key) . '</td>';
                 }
                 $returnStr .= '<td ' . $bgcolor . '><div data-toggle="tooltip" data-placement="top" title="' . $this->displayLastContactText($respondent) . '">' . $this->displayLastContact($respondent) . '</div></td>';
                 $returnStr .= '<td ' . $bgcolor . '>' . $this->displayStatus($respondent) . '</td>';
                 $returnStr .= '<td ' . $bgcolor . '>' . $this->displayRefusal($respondent) . '</td>';
+                if ($user->getUserType() == USER_SUPERVISOR) {
+                    $returnStr .= '<td ' . $bgcolor . '></td>'; //don't display iwer for members in hh
+                }
                 $returnStr .= '</tr>';
             }
         }
@@ -2870,7 +2892,7 @@ class Display {
     }
 
     function displaySurveys($name, $id, $current, $ignore = "", $multiple = "", $onchange = "") {
-        $surveys = new Surveys($suid);
+        $surveys = new Surveys();
         $surveys = $surveys->getSurveys(false);
         $returnStr = "<select $onchange $multiple class='selectpicker show-tick' name=$name id=$id>";
         $current = explode("~", $current);
@@ -2878,6 +2900,24 @@ class Display {
             if ($survey->getSuid() != $ignore) {
                 $selected = "";
                 if (inArray($survey->getSuid(), $current)) {
+                    $selected = "SELECTED";
+                }
+                $returnStr .= "<option " . $selected . " value=" . $survey->getSuid() . ">" . $survey->getName() . "</option>";
+            }
+        }
+        $returnStr .= "</select>";
+        return $returnStr;
+    }
+    
+    function displaySurveysNoSelect($name, $id, $current, $ignore = "", $multiple = "", $onchange = "") {
+        $surveys = new Surveys();
+        $surveys = $surveys->getSurveys(false);
+        $returnStr = "<select $onchange $multiple class='selectpicker show-tick' name=$name id=$id>";
+        $returnStr .= "<option value=''>" . Language::labelPleaseSelect() . "</option>";
+        foreach ($surveys as $survey) {
+            if ($survey->getSuid() != $ignore) {
+                $selected = "";
+                if ($survey->getSuid() == $current) {
                     $selected = "SELECTED";
                 }
                 $returnStr .= "<option " . $selected . " value=" . $survey->getSuid() . ">" . $survey->getName() . "</option>";
@@ -3166,8 +3206,9 @@ class Display {
     }
 
     function displayProgressbar($name, $current, $generic = false, $type = -1) {
+
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
-        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", PROGRESSBAR_NO => "", PROGRESSBAR_PERCENT => "", PROGRESS_BAR_BAR => "", PROGRESS_BAR_ALL => "");
+        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", PROGRESSBAR_NO => "", PROGRESSBAR_PERCENT => "", PROGRESSBAR_BAR => "", PROGRESSBAR_ALL => "");
         $selected[$current] = "selected";
 
         if ($type > 0) {
@@ -3187,7 +3228,7 @@ class Display {
 
     function displayProgressbarType($name, $current, $generic = false, $type = -1) {
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
-        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", PROGRESSBAR_NO => "", PROGRESSBAR_PERCENT => "", PROGRESS_BAR_BAR => "", PROGRESS_BAR_ALL => "");
+        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", PROGRESSBAR_NO => "", PROGRESSBAR_PERCENT => "", PROGRESSBAR_BAR => "", PROGRESSBAR_ALL => "");
         $selected[$current] = "selected";
 
         if ($type > 0) {
@@ -3292,11 +3333,11 @@ class Display {
 
     function displayInclusive($name, $current, $generic = false) {
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
-        if ($generic) {
-            $returnStr .= "<option " . $selected[SETTING_FOLLOW_GENERIC] . " value=" . SETTING_FOLLOW_GENERIC . ">" . Language::optionsFollowGeneric() . "</option>";
-        }
         $selected = array(SETTING_FOLLOW_GENERIC => "", GROUP_YES => "", GROUP_NO => "");
         $selected[$current] = "selected";
+        if ($generic) {
+            $returnStr .= "<option " . $selected[SETTING_FOLLOW_GENERIC] . " value=" . SETTING_FOLLOW_GENERIC . ">" . Language::optionsFollowGeneric() . "</option>";
+        }        
         //$returnStr .= "<option></option>";
         $returnStr .= "<option " . $selected[GROUP_YES] . " value=" . GROUP_YES . ">" . Language::optionsGroupYes() . "</option>";
         $returnStr .= "<option " . $selected[GROUP_NO] . " value=" . GROUP_NO . ">" . Language::optionsGroupNo() . "</option>";
@@ -3366,7 +3407,7 @@ class Display {
 
     function displayEnumeratedTemplate($name, $current, $generic = false, $type = -1) {
         $returnStr = "<select id=$name class='selectpicker show-tick' name=$name>";
-        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", ORIENTATION_HORIZONTAL => "", ORIENTATION_VERTICAL => "");
+        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", ORIENTATION_HORIZONTAL => "", ORIENTATION_VERTICAL => "", ORIENTATION_CUSTOM => "");
         $selected[$current] = "selected";
 
         if ($generic) {
@@ -3479,6 +3520,24 @@ class Display {
         $returnStr .= "</select>";
         return $returnStr;
     }
+    
+    function displaySetOfEnumeratedRanking($name, $current, $generic = false, $type = -1) {
+        $returnStr = "<select class='selectpicker show-tick' name='$name'>";
+        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", SETOFENUMERATED_RANKING_YES => "", SETOFENUMERATED_RANKING_NO => "");
+        $selected[$current] = "selected";
+
+        if ($type > 0) {
+            $returnStr .= "<option " . $selected[SETTING_FOLLOW_TYPE] . " value=" . SETTING_FOLLOW_TYPE . ">" . Language::optionsFollowType() . "</option>";
+        } else {
+            if ($generic) {
+                $returnStr .= "<option " . $selected[SETTING_FOLLOW_GENERIC] . " value=" . SETTING_FOLLOW_GENERIC . ">" . Language::optionsFollowGeneric() . "</option>";
+            }
+        }
+        $returnStr .= "<option " . $selected[SETOFENUMERATED_RANKING_YES] . " value=" . SETOFENUMERATED_RANKING_YES . ">" . Language::optionsSetOfEnumeratedRankingYes() . "</option>";
+        $returnStr .= "<option " . $selected[SETOFENUMERATED_RANKING_NO] . " value=" . SETOFENUMERATED_RANKING_NO . ">" . Language::optionsSetOfEnumeratedRankingNo() . "</option>";
+        $returnStr .= "</select>";
+        return $returnStr;
+    }
 
     function displayClickLabel($name, $current, $generic = false, $type = -1) {
         $returnStr = "<select class='selectpicker show-tick' name='$name'>";
@@ -3571,7 +3630,7 @@ class Display {
         return $returnStr;
     }
 
-    function displayEnumeratedSplit($name, $current, $generic = false) {
+    function displayEnumeratedSplit($name, $current, $generic = false, $type = -1) {
         $returnStr = "<select class='selectpicker show-tick' name=$name>";
         $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", ENUMERATED_YES => "", ENUMERATED_NO => "");
         $selected[$current] = "selected";
@@ -4247,7 +4306,7 @@ class Display {
                 $.ajax({
                     type: "POST",
                     url: "ajax/index.php",
-                    data: {ajaxr: "' . $r . '", p: "storeparadata", ' . POST_PARAM_PARADATA . ': paradata},
+                    data: {k: "' . encryptC(Config::ajaxAccessKey(), Config::smsComponentKey()) . '",ajaxr: "' . $r . '", p: "storeparadata", ' . POST_PARAM_PARADATA . ': paradata},
                     async: true
                 });
             }
@@ -4356,10 +4415,11 @@ class Display {
 
     /* AUTO COMPLETE */
 
-    function displayAutoCompleteScripts($delimiters = array()) {
+    function displayAutoCompleteScripts($delimiters = array()) {  
+        $returnStr = "";
         if (!isRegisteredScript("js/jquery-textcomplete/jquery.textcomplete.min.css")) {
             registerScript('js/jquery-textcomplete/jquery.textcomplete.min.css');
-            $str .= getCSS("js/jquery-textcomplete/jquery.textcomplete.min.css");
+            $returnStr .= getCSS("js/jquery-textcomplete/jquery.textcomplete.min.css");
         }
         if (!isRegisteredScript("js/jquery-textcomplete/jquery.textcomplete-min.js")) {
             registerScript('js/jquery-textcomplete/jquery.textcomplete-min.js');
@@ -4430,7 +4490,7 @@ class Display {
                                 }
                             ]);
                         });") . "    
-                    </script>";
+                    </script>";        
         return $returnStr;
     }
 
@@ -4793,7 +4853,7 @@ function inputmaskCallbackError() {
 
     function displayAccessAfterCompletionReturn($name, $current, $generic = false, $type = -1) {
         $returnStr = "<select class='selectpicker show-tick' name='" . $name . "'>";
-        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", AFTER_COMPLETION_NO_REENTRY => "", AFTER_COMPLETION_FIRST_SCREEN => "", AFTER_COMPLETION_LAST_SCREEN => "", AFTER_COMPLETION_LAST_SCREEN_REDO => "", AFTER_COMPLETION_FROM_START);
+        $selected = array(SETTING_FOLLOW_GENERIC => "", SETTING_FOLLOW_TYPE => "", AFTER_COMPLETION_NO_REENTRY => "", AFTER_COMPLETION_FIRST_SCREEN => "", AFTER_COMPLETION_LAST_SCREEN => "", AFTER_COMPLETION_LAST_SCREEN_REDO => "", AFTER_COMPLETION_FROM_START => "");
         $selected[$current] = "selected";
         if ($type > 0) {
             $returnStr .= "<option " . $selected[SETTING_FOLLOW_TYPE] . " value=" . SETTING_FOLLOW_TYPE . ">" . Language::optionsFollowType() . "</option>";
@@ -4846,13 +4906,17 @@ function inputmaskCallbackError() {
         return $returnStr;
     }
 
-    function displayUsers($users, $key, $name = 'uridsel', $none = false) {
+    function displayUsers($users, $key, $name = 'uridsel', $none = false, $exclude = "") {
         $returnStr = "<select style='width:300px' class='form-control selectpicker show-tick' name='" . $name . "'>";
         if ($none) {
             $returnStr .= "<option value=-1>" . Language::labelNone() . "</option>";
         }
 
-        foreach ($users as $user) {
+        foreach ($users as $user) {            
+            if ($exclude == $user->getUrid()) {
+                continue;
+            }
+
             $selected = '';
             if ($key == $user->getUrid()) {
                 $selected = "selected";
@@ -5136,7 +5200,7 @@ function inputmaskCallbackError() {
         return $returnStr;
     }
 
-    function displaySupervisorSelect($urid) {
+    function displaySupervisorSelect($urid = "") {
         $returnStr = '<select name=selurid class="form-control" style="width:200px">';
         $selected = '';
         if (0 == $urid) {
@@ -5156,7 +5220,7 @@ function inputmaskCallbackError() {
         return $returnStr;
     }
 
-    function displayInterviewerSelect($urid) {
+    function displayInterviewerSelect($urid = "") {
         $returnStr = '<select name=selurid class="form-control" style="width:200px">';
         $selected = '';
         if (0 == $urid) {
@@ -5227,7 +5291,7 @@ function inputmaskCallbackError() {
         $returnStr = '<select class="form-control" name="communication">';
         $returnStr .= '<option value=' . SEND_RECEIVE_USB . $selected[SEND_RECEIVE_USB] . '>' . Language::labelUSB() . '</option>';
         $returnStr .= '<option value=' . SEND_RECEIVE_INTERNET . $selected[SEND_RECEIVE_INTERNET] . '>' . Language::labelInternet() . '</option>';
-        $returnStr .= '<option value=' . SEND_RECEIVE_EXPORTSQL . $selected[SEND_RECEIVE_EXPORTSQL] . '>' . Language::labelExportAsSql() . '</option>';
+        //$returnStr .= '<option value=' . SEND_RECEIVE_EXPORTSQL . $selected[SEND_RECEIVE_EXPORTSQL] . '>' . Language::labelExportAsSql() . '</option>';
         $returnStr .= '<option value=' . SEND_RECEIVE_WORKONSERVER . $selected[SEND_RECEIVE_WORKONSERVER] . '>' . Language::labelWorkOnServer() . '</option>';
         $returnStr .= '</select>';
         return $returnStr;
@@ -5271,14 +5335,14 @@ function inputmaskCallbackError() {
         $returnStr .= '<input type="hidden" name="paneltype" id="paneltype" value="' . $paneltype . '">';
 
         $returnStr .= '<div id="filterselector" class="btn-group">
-	  <button type="button" class="btn btn-default' . $active[1] . '" value=1>Households</button>
-	  <button type="button" class="btn btn-default' . $active[2] . '" value=2>Respondents</button>';
+	  <button type="button" class="btn btn-default' . $active[1] . '" value=1>' . Language::labelHouseholds() . '</button>
+	  <button type="button" class="btn btn-default' . $active[2] . '" value=2>' . Language::labelRespondents() . '</button>';
         $returnStr .= '</div>';
 
         $returnStr .= '<script>';
         $returnStr .= '$(\'#filterselector button\').click(function() {
 		  $(\'#filterselector button\').addClass(\'active\').not(this).removeClass(\'active\');
-		  $(\'#paneltype\').val("0");
+		  $(\'#paneltype\').val("2");
 		  if ($(this).val() == "1") {
 		    $(\'#paneltype\').val("1");
 		  }
@@ -5572,6 +5636,35 @@ function inputmaskCallbackError() {
         // https://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
         return str_replace($this->chrmap, "", $str);
     }
+    
+    function displaySelected($respondent, $showNone = true){
+       if (!$showNone){ //show 'none'? or leave empty?
+          if ($respondent->isSelected() == 0){
+            return '';    
+          }
+        }
+        if ($respondent->isSelected() == 1){
+            return ' selected';
+        }
+        return ' -';
+    }
+
+    function displayMovedOut($respondent, $showNone = true) {
+        if (!$showNone){ //show 'none'? or leave empty?
+          if ($respondent->getMovedOut() == 0){
+            return '';    
+          }
+        }
+        $statusCodes = Language::labelMovedOutStatus();
+        if (isset($statusCodes[$respondent->getMovedOut()])) {
+            if ($respondent->getMovedOut() == 1){ //new hh, show location!
+              return '<a href="#" data-toggle="modal" style="color:red" data-target="#myModal' . $respondent->getHhOrder() . '">' . $statusCodes[$respondent->getMovedOut()] . '</a>';
+            }
+            return $statusCodes[$respondent->getMovedOut()];
+        }
+        return '-';
+    }
+
 
 }
 

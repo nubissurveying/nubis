@@ -12,17 +12,22 @@
   ------------------------------------------------------------------------
  */
 
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
+error_reporting(0);
+ini_set('display_errors', 0);
 
 set_include_path(dirname(getcwd()));
 
 require_once('constants.php');
 require_once('functions.php');
-require_once('dbConfig.php');
-require_once('config.php');
+require_once("dbConfig.php");
+$loaded = dbConfig::load("../conf.php");
+require_once("config.php");
 
 if (Config::allowCommunication() == false) {
+    exit;
+}
+
+if (decryptC(loadvar("k"), Config::smsComponentKey()) != Config::communicationAccessKey()) {
     exit;
 }
 

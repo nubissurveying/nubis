@@ -12,8 +12,9 @@
   ------------------------------------------------------------------------
  */
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-ini_set("display_errors", 1);
 require_once("constants.php");
 require_once("functions.php");
 require_once("dbConfig.php");
@@ -46,7 +47,8 @@ if ((isset($_POST[POST_PARAM_FULLRESET]) && is_Numeric($_POST[POST_PARAM_FULLRES
 
 //ss: used for direct login start from SMS to reset the session, but keep the post parameters!
 if ((isset($_POST[POST_PARAM_RESET]) && is_Numeric($_POST[POST_PARAM_RESET])) || (isset($_GET[POST_PARAM_RESET]) && is_Numeric($_GET[POST_PARAM_RESET]))) { //reset session!
-    //endSession();
+    //endSession();    
+    $urid = $_SESSION["URID"];
     clearSession(); // resets session, but keeps session id
     $param = '';
     foreach ($_POST as $key => $value) {
@@ -55,6 +57,7 @@ if ((isset($_POST[POST_PARAM_RESET]) && is_Numeric($_POST[POST_PARAM_RESET])) ||
         }
     }
     $param = rtrim($param, '&');
+    $_SESSION["URID"] = $urid;
     header('Location: index.php?' . $param);
     exit;
 }
@@ -83,7 +86,6 @@ if ((isset($_POST[POST_PARAM_RESET_TEST]) && is_numeric($_POST[POST_PARAM_RESET_
         }
     }
     $param = rtrim($param, '&');
-    $_SESSION["URID"] = $urid;
     header('Location: index.php?' . $param);
     exit;
 }
@@ -150,11 +152,12 @@ if ($_SESSION['SYSTEM_ENTRY'] != USCIC_SMS) {
     }
 }
 
-if (loadvar(POST_PARAM_SMS_AJAX) == SMS_AJAX_CALL) { // sms ajax call
+if (loadvar(POST_PARAM_SMS_AJAX) == SMS_AJAX_CALL) { // sms ajax call    
     require_once('smsajax.php');
     $ajax = new SmsAjax();
     echo $ajax->getPage(loadvar('p'));
 } else { // handle action
+    
     $action = new Action($sesid);
     echo $action->getAction();
 

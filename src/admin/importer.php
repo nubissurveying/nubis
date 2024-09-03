@@ -31,7 +31,7 @@ class Importer {
 
         $this->sourcetable = loadvar("databaseTablename");
 
-        $this->targettable = Config::dbSurvey();
+        prepareDatabaseString($this->targettable) = Config::dbSurvey();
     }
 
     function import() {
@@ -73,7 +73,7 @@ class Importer {
             /* delete existing content */
             $tables = Common::surveyTables();
             foreach ($tables as $table) {
-                $query = "delete from " . Config::dbSurvey() . $table;
+                $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 $this->db->executeQuery($query);
             }
 
@@ -81,9 +81,9 @@ class Importer {
             $tables = Common::surveyDataTables();
             foreach ($tables as $table) {
                 if ($table == "_actions") {
-                    $query = "delete from " . Config::dbSurvey() . $table . " where suid != ''";
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table) . " where suid != ''";
                 } else {
-                    $query = "delete from " . Config::dbSurvey() . $table;
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 }
                 $this->db->executeQuery($query);
             }
@@ -92,9 +92,9 @@ class Importer {
             $tables = Common::surveyTestDataTables();
             foreach ($tables as $table) {
                 if ($table == "_actions") {
-                    $query = "delete from " . Config::dbSurvey() . $table . " where suid != ''";
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table) . " where suid != ''";
                 } else {
-                    $query = "delete from " . Config::dbSurvey() . $table;
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 }
                 $this->db->executeQuery($query);
             }
@@ -456,7 +456,7 @@ class Importer {
         $pid = 0;
         $sectionnames = array();
         $descriptions = array();
-        $this->suid = $this->addtosuid;
+        $this->suid = prepareDatabaseString($this->addtosuid);
 
         $survey->setSuid($this->suid);
 
@@ -475,7 +475,7 @@ class Importer {
                 $testsection = $survey->getSectionByName($name);
                 if ($testsection->getSeid() == "") {
 
-                    $query = "replace into " . $this->targettable . "_sections (suid, seid, name, position, pid) values (";
+                    $query = "replace into " . prepareDatabaseString($this->targettable) . "_sections (suid, seid, name, position, pid) values (";
                     $query .= prepareDatabaseString($this->addtosuid) . ",";
                     $query .= prepareDatabaseString($seid) . ",";
                     $query .= "'" . prepareDatabaseString($name) . "',";
@@ -594,7 +594,7 @@ class Importer {
 
         // process each variable
         $position = "";
-        $q = "select max(position) as maxposition from " . Config::dbSurvey() . "_variables where suid=" . $this->suid . " and seid=" . $fillseid;
+        $q = "select max(position) as maxposition from " . Config::dbSurvey() . "_variables where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($fillseid);
         $rst = $this->db->selectQuery($q);
         if ($rst) {
             $rtw = $this->db->getRow($rst);
@@ -768,7 +768,7 @@ class Importer {
             $position = "";
             if (array_search($sectionidentifier, $descriptions)) {
                 $seid = array_search($sectionidentifier, $descriptions);
-                $q = "select max(position) as maxposition from " . Config::dbSurvey() . "_variables where suid=" . $this->suid . " and seid=" . $seid;
+                $q = "select max(position) as maxposition from " . Config::dbSurvey() . "_variables where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($seid);
                 $rst = $this->db->selectQuery($q);
                 if ($rst) {
                     $rtw = $this->db->getRow($rst);
@@ -1455,7 +1455,7 @@ class Importer {
             /* delete existing content */
             $tables = Common::surveyTables();
             foreach ($tables as $table) {
-                $query = "delete from " . Config::dbSurvey() . $table;
+                $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 $this->db->executeQuery($query);
             }
 
@@ -1463,9 +1463,9 @@ class Importer {
             $tables = Common::surveyDataTables();
             foreach ($tables as $table) {
                 if ($table == "_actions") {
-                    $query = "delete from " . Config::dbSurvey() . $table . " where suid != ''";
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table) . " where suid != ''";
                 } else {
-                    $query = "delete from " . Config::dbSurvey() . $table;
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 }
                 $this->db->executeQuery($query);
             }
@@ -1474,9 +1474,9 @@ class Importer {
             $tables = Common::surveyTestDataTables();
             foreach ($tables as $table) {
                 if ($table == "_actions") {
-                    $query = "delete from " . Config::dbSurvey() . $table . " where suid != ''";
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table) . " where suid != ''";
                 } else {
-                    $query = "delete from " . Config::dbSurvey() . $table;
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 }
                 $this->db->executeQuery($query);
             }
@@ -1577,7 +1577,7 @@ class Importer {
             /* delete existing content */
             $tables = Common::surveyTables();
             foreach ($tables as $table) {
-                $query = "delete from " . Config::dbSurvey() . $table;
+                $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 $this->db->executeQuery($query);
             }
 
@@ -1585,9 +1585,9 @@ class Importer {
             $tables = Common::surveyDataTables();
             foreach ($tables as $table) {
                 if ($table == "_actions") {
-                    $query = "delete from " . Config::dbSurvey() . $table . " where suid != ''";
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table) . " where suid != ''";
                 } else {
-                    $query = "delete from " . Config::dbSurvey() . $table;
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 }
                 $this->db->executeQuery($query);
             }
@@ -1596,9 +1596,9 @@ class Importer {
             $tables = Common::surveyTestDataTables();
             foreach ($tables as $table) {
                 if ($table == "_actions") {
-                    $query = "delete from " . Config::dbSurvey() . $table . " where suid != ''";
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table) . " where suid != ''";
                 } else {
-                    $query = "delete from " . Config::dbSurvey() . $table;
+                    $query = "delete from " . Config::dbSurvey() . prepareDatabaseString($table);
                 }
                 $this->db->executeQuery($query);
             }
@@ -1613,9 +1613,9 @@ class Importer {
 
     function convertSurveys() {
 
-        $query = "select * from " . $this->sourcetable . "_surveys order by syid";
+        $query = "select * from " . prepareDatabaseString($this->sourcetable) . "_surveys order by syid";
         if (!$res = $this->importdb->selectQuery($query)) {
-            $query = "select * from " . $this->sourcetable . "_survey order by syid";
+            $query = "select * from " . prepareDatabaseString($this->sourcetable) . "_survey order by syid";
             $res = $this->importdb->selectQuery($query);
         }
 
@@ -1623,8 +1623,8 @@ class Importer {
             if ($this->importdb->getNumberOfRows($res) > 0) {
                 $user = new User($_SESSION['URID']);
                 while ($row = $this->importdb->getRow($res)) {
-                    $this->suid = $row["syid"] + $this->addtosuid;
-                    $this->syid = $row["syid"];
+                    $this->suid = prepareDatabaseString($row["syid"] + $this->addtosuid);
+                    $this->syid = prepareDatabaseString($row["syid"]);
                     $this->convertSurveySettings($row);
 
                     // get languages
@@ -1764,7 +1764,7 @@ class Importer {
 
                 while ($row = $this->importdb->getRow($res)) {
 
-                    $query = "replace into " . $this->targettable . "_sections (suid, seid, name, position, pid) values (";
+                    $query = "replace into " . prepareDatabaseString($this->targettable) . "_sections (suid, seid, name, position, pid) values (";
 
                     $query .= prepareDatabaseString($this->suid) . ",";
 
@@ -1792,7 +1792,7 @@ class Importer {
 
     function convertTemplates() {
 
-        $query = "select * from " . $this->sourcetable . "_template where syid=" . $this->syid . " order by teid";
+        $query = "select * from " . prepareDatabaseString($this->sourcetable) . "_template where syid=" . prepareDatabaseString($this->syid) . " order by teid";
 
         if ($res = $this->importdb->selectQuery($query)) {
 
@@ -1800,7 +1800,7 @@ class Importer {
 
                 while ($row = $this->importdb->getRow($res)) {
 
-                    $query = "replace into " . $this->targettable . "_groups (suid, gid, name) values (";
+                    $query = "replace into " . prepareDatabaseString($this->targettable) . "_groups (suid, gid, name) values (";
                     $query .= prepareDatabaseString($this->suid) . ",";
                     $query .= prepareDatabaseString($row["teid"]) . ",";
                     $query .= "'" . prepareDatabaseString($row["name"]) . "')";
@@ -1815,7 +1815,7 @@ class Importer {
                     $this->addSetting($row["teid"], OBJECT_GROUP, SETTING_GROUP_CUSTOM_TEMPLATE, $content);
 
                     /* convert translations */
-                    $q = "select * from " . $this->sourcetable . "_translation where syid=" . $this->syid . " and id=" . $row["teid"] . " order by source";
+                    $q = "select * from " . prepareDatabaseString($this->sourcetable) . "_translation where syid=" . prepareDatabaseString($this->syid) . " and id=" . prepareDatabaseString($row["teid"]) . " order by source";
                     if ($r = $this->importdb->selectQuery($q)) {
                         if ($this->importdb->getNumberOfRows($r) > 0) {
                             while ($rowtrans = $this->importdb->getRow($r)) {
@@ -1844,7 +1844,7 @@ class Importer {
 
     function convertVariables() {
 
-        $query = "select qnid as id, fullvariablename as variablename, questiontext as question, questiontype as answertype, description, answer as options, keep, arraysize, meid as seid, emptyallowed as requireanswer, visible as hidden, mmicparsetext as settings, fills, qorder from " . $this->sourcetable . "_question where syid=" . $this->syid . " order by qnid";
+        $query = "select qnid as id, fullvariablename as variablename, questiontext as question, questiontype as answertype, description, answer as options, keep, arraysize, meid as seid, emptyallowed as requireanswer, visible as hidden, mmicparsetext as settings, fills, qorder from " . prepareDatabaseString($this->sourcetable) . "_question where syid=" . prepareDatabaseString($this->syid) . " order by qnid";
 
         if ($res = $this->importdb->selectQuery($query)) {
 
@@ -1852,7 +1852,7 @@ class Importer {
 
                 while ($row = $this->importdb->getRow($res)) {
 
-                    $query = "replace into " . $this->targettable . "_variables (suid, vsid, seid, variablename, position) values (";
+                    $query = "replace into " . prepareDatabaseString($this->targettable) . "_variables (suid, vsid, seid, variablename, position) values (";
                     $query .= prepareDatabaseString($this->suid) . ",";
                     $query .= prepareDatabaseString($row["id"]) . ",";
                     $query .= prepareDatabaseString($row["seid"]) . ",";
@@ -1886,7 +1886,7 @@ class Importer {
                     $this->convertSettings($row);
 
                     /* convert translations */
-                    $q = "select * from " . $this->sourcetable . "_translation where syid=" . $this->syid . " and id=" . $row["id"] . " order by source";
+                    $q = "select * from " . $this->sourcetable . "_translation where syid=" . prepareDatabaseString($this->syid) . " and id=" . prepareDatabaseString($row["id"]) . " order by source";
                     if ($r = $this->importdb->selectQuery($q)) {
                         if ($this->importdb->getNumberOfRows($r) > 0) {
                             while ($rowtrans = $this->importdb->getRow($r)) {
@@ -1923,10 +1923,10 @@ class Importer {
 
                 // update names
                 $updates = array(
-                    "update " . $this->targettable . "_variables set variablename='" . VARIABLE_BEGIN . "' where suid = " . $this->suid . " and variablename='tsstart'",
-                    "update " . $this->targettable . "_variables set variablename='" . VARIABLE_END . "' where suid = " . $this->suid . " and variablename='tsend'",
-                    "update " . $this->targettable . "_variables set variablename='" . VARIABLE_THANKS . "' where suid = " . $this->suid . " and variablename='thanks1'",
-                    "update " . $this->targettable . "_variables set variablename='" . VARIABLE_COMPLETED . "' where suid = " . $this->suid . " and variablename='completed1'"
+                    "update " . prepareDatabaseString($this->targettable) . "_variables set variablename='" . VARIABLE_BEGIN . "' where suid = " . prepareDatabaseString($this->suid) . " and variablename='tsstart'",
+                    "update " . prepareDatabaseString($this->targettable) . "_variables set variablename='" . VARIABLE_END . "' where suid = " . prepareDatabaseString($this->suid) . " and variablename='tsend'",
+                    "update " . prepareDatabaseString($this->targettable) . "_variables set variablename='" . VARIABLE_THANKS . "' where suid = " . prepareDatabaseString($this->suid) . " and variablename='thanks1'",
+                    "update " . prepareDatabaseString($this->targettable) . "_variables set variablename='" . VARIABLE_COMPLETED . "' where suid = " . prepareDatabaseString($this->suid) . " and variablename='completed1'"
                 );
 
                 foreach ($updates as $update) {
@@ -1940,7 +1940,7 @@ class Importer {
 
                 foreach ($deletes as $delete) {
 
-                    $query = "delete from " . $this->targettable . "_variables where suid = " . $this->suid . " and variablename='" . prepareDatabaseString($delete) . "'";
+                    $query = "delete from " . prepareDatabaseString($this->targettable) . "_variables where suid = " . prepareDatabaseString($this->suid) . " and variablename='" . prepareDatabaseString($delete) . "'";
 
                     $this->db->executeQuery($query);
                 }
@@ -1950,7 +1950,7 @@ class Importer {
 
     function addSetting($object, $objecttype, $settingname, $value, $language = 1, $echo = false) {
 
-        $query = "replace into " . $this->targettable . "_settings (suid, object, objecttype, name, value, language, mode) values (";
+        $query = "replace into " . prepareDatabaseString($this->targettable) . "_settings (suid, object, objecttype, name, value, language, mode) values (";
 
         $query .= prepareDatabaseString($this->suid) . ",";
 
@@ -2295,7 +2295,7 @@ class Importer {
 
     function convertRouting() {
 
-        $query = "select meid as seid, rules from " . $this->sourcetable . "_module where syid=" . $this->syid . " order by meid";
+        $query = "select meid as seid, rules from " . prepareDatabaseString($this->sourcetable) . "_module where syid=" . prepareDatabaseString($this->syid) . " order by meid";
 
         if ($res = $this->importdb->selectQuery($query)) {
 
@@ -2311,7 +2311,7 @@ class Importer {
 
                     foreach ($rules as $rule) {
 
-                        $query = "replace into " . $this->targettable . "_routing (suid, seid, rgid, rule) values (";
+                        $query = "replace into " . prepareDatabaseString($this->targettable) . "_routing (suid, seid, rgid, rule) values (";
 
                         $query .= prepareDatabaseString($this->suid) . ",";
 
@@ -2329,7 +2329,7 @@ class Importer {
 
 
 
-                $query = "select * from " . $this->targettable . "_routing where suid=" . $this->suid . " and trim(rule) like 'begincombine%' order by rgid asc";
+                $query = "select * from " . prepareDatabaseString($this->targettable) . "_routing where suid=" . prepareDatabaseString($this->suid) . " and trim(rule) like 'begincombine%' order by rgid asc";
 
                 if ($res = $this->db->selectQuery($query)) {
                     $survey = new Survey($this->suid);
@@ -2344,7 +2344,7 @@ class Importer {
                                 $line = "shortcombinegroup";
                             }
 
-                            $query = "update " . $this->targettable . "_routing set rule='group." . $line . "' where suid=" . $this->suid . " and seid=" . $row["seid"] . " and rgid=" . $row["rgid"];
+                            $query = "update " . prepareDatabaseString($this->targettable) . "_routing set rule='group." . prepareDatabaseString($line) . "' where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($row["seid"]) . " and rgid=" . prepareDatabaseString($row["rgid"]);
 
                             $this->db->executeQuery($query);
 
@@ -2364,26 +2364,26 @@ class Importer {
 
 
 
-                $query = "select * from " . $this->targettable . "_routing where suid=" . $this->suid . " and rule like 'jumpback(%' order by rgid asc";
+                $query = "select * from " . prepareDatabaseString($this->targettable) . "_routing where suid=" . prepareDatabaseString($this->suid) . " and rule like 'jumpback(%' order by rgid asc";
                 if ($res = $this->db->selectQuery($query)) {
                     if ($this->db->getNumberOfRows($res) > 0) {
 
                         while ($row = $db->getRow($res)) {
                             $line = str_replace(")", "", substr($row["rule"], strpos($row["rule"], "(") + 1));
-                            $query = "update " . $this->targettable . "_routing set rule='moveBackward." . $line . "' where suid=" . $this->suid . " and seid=" . $row["seid"] . " and rgid=" . $row["rgid"];
+                            $query = "update " . prepareDatabaseString($this->targettable) . "_routing set rule='moveBackward." . prepareDatabaseString($line) . "' where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($row["seid"]) . " and rgid=" . prepareDatabaseString($row["rgid"]);
                             $this->db->executeQuery($query);
                         }
                     }
                 }
 
 
-                $query = "select * from " . $this->targettable . "_routing where suid=" . $this->suid . " and rule like 'jump(%' order by rgid asc";
+                $query = "select * from " . prepareDatabaseString($this->targettable) . "_routing where suid=" . prepareDatabaseString($this->suid) . " and rule like 'jump(%' order by rgid asc";
                 if ($res = $this->db->selectQuery($query)) {
                     if ($this->db->getNumberOfRows($res) > 0) {
 
                         while ($row = $this->importdb->getRow($res)) {
                             $line = str_replace(")", "", substr($row["rule"], strpos($row["rule"], "(") + 1));
-                            $query = "update " . $this->targettable . "_routing set rule='moveForward." . $line . "' where suid=" . $this->suid . " and seid=" . $row["seid"] . " and rgid=" . $row["rgid"];
+                            $query = "update " . prepareDatabaseString($this->targettable) . "_routing set rule='moveForward." . prepareDatabaseString($line) . "' where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($row["seid"]) . " and rgid=" . prepareDatabaseString($row["rgid"]);
 
                             $this->db->executeQuery($query);
                         }
@@ -2392,7 +2392,7 @@ class Importer {
 
 
 
-                $query = "update " . $this->targettable . "_routing set rule='endgroup' where suid=" . $this->suid . " and trim(rule)='endcombine'";
+                $query = "update " . prepareDatabaseString($this->targettable) . "_routing set rule='endgroup' where suid=" . prepareDatabaseString($this->suid) . " and trim(rule)='endcombine'";
 
                 $this->db->executeQuery($query);
             }
@@ -2401,7 +2401,7 @@ class Importer {
 
     function convertTypes() {
 
-        $query = "select teid as id, name as name, questiontype as answertype, answer as options from " . $this->sourcetable . "_type where syid=" . $this->syid . " order by teid";
+        $query = "select teid as id, name as name, questiontype as answertype, answer as options from " . prepareDatabaseString($this->sourcetable) . "_type where syid=" . prepareDatabaseString($this->syid) . " order by teid";
 
         if ($res = $this->importdb->selectQuery($query)) {
 
@@ -2409,7 +2409,7 @@ class Importer {
 
                 while ($row = $this->importdb->getRow($res)) {
 
-                    $query = "replace into " . $this->targettable . "_types (suid, tyd, name) values (";
+                    $query = "replace into " . prepareDatabaseString($this->targettable) . "_types (suid, tyd, name) values (";
                     $query .= prepareDatabaseString($this->suid) . ",";
                     $query .= prepareDatabaseString($row["id"]) . ",";
                     $query .= "'" . prepareDatabaseString($row["name"]) . "')";
@@ -2420,7 +2420,7 @@ class Importer {
                     $this->addSetting($row["id"], OBJECT_TYPE, SETTING_OPTIONS, $row["options"]);
 
                     /* add usage in variables */
-                    $query = "select * from " . $this->targettable . "_settings where suid=" . $this->suid . " and name='" . SETTING_OPTIONS . "' and objecttype=" . OBJECT_VARIABLEDESCRIPTIVE . " and value='" . $row["name"] . "'";
+                    $query = "select * from " . prepareDatabaseString($this->targettable) . "_settings where suid=" . prepareDatabaseString($this->suid) . " and name='" . prepareDatabaseString(SETTING_OPTIONS) . "' and objecttype=" . prepareDatabaseString(OBJECT_VARIABLEDESCRIPTIVE) . " and value='" . prepareDatabaseString($row["name"]) . "'";
 
                     $res1 = $this->db->selectQuery($query);
 
@@ -2428,11 +2428,11 @@ class Importer {
 
                         if ($this->db->getNumberOfRows($res1) > 0) {
                             while ($row1 = $this->db->getRow($res1)) {
-                                $q = "update " . $this->targettable . "_variables set tyd=" . $row["id"] . " where suid=" . $this->suid . " and vsid=" . $row1["object"];
+                                $q = "update " . prepareDatabaseString($this->targettable) . "_variables set tyd=" . prepareDatabaseString($row["id"]) . " where suid=" . prepareDatabaseString($this->suid) . " and vsid=" . prepareDatabaseString($row1["object"]);
                                 $this->db->executeQuery($q);
 
                                 // remove options in settings for variable, so it does not override the type's options
-                                $q = "delete from " . $this->targettable . "_settings where suid=" . $this->suid . " and object=" . $row1["object"] . " and name='" . SETTING_OPTIONS . "' and objecttype=" . OBJECT_VARIABLEDESCRIPTIVE;
+                                $q = "delete from " . prepareDatabaseString($this->targettable) . "_settings where suid=" . prepareDatabaseString($this->suid) . " and object=" . prepareDatabaseString($row1["object"]) . " and name='" . SETTING_OPTIONS . "' and objecttype=" . OBJECT_VARIABLEDESCRIPTIVE;
                                 $this->db->executeQuery($q);
                             }
                         }
@@ -2442,7 +2442,7 @@ class Importer {
                     $this->convertSettings($row, OBJECT_TYPE);
 
                     /* convert translations */
-                    $q = "select source, language, cast(translation as char) as translation from " . $this->sourcetable . "_translation where syid=" . $this->syid . " and id=" . $row["id"] . " order by source";
+                    $q = "select source, language, cast(translation as char) as translation from " . prepareDatabaseString($this->sourcetable) . "_translation where syid=" . prepareDatabaseString($this->syid) . " and id=" . prepareDatabaseString($row["id"]) . " order by source";
                     if ($r = $this->importdb->selectQuery($q)) {
                         if ($this->importdb->getNumberOfRows($r) > 0) {
                             while ($rowtrans = $this->importdb->getRow($r)) {
@@ -2464,10 +2464,10 @@ class Importer {
 
                 // update answer types
                 $updates = array(
-                    "update " . $this->targettable . "_settings set value=" . $this->convertAnswerType(3) . " where suid=" . $this->suid . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=3",
-                    "update " . $this->targettable . "_settings set value=" . $this->convertAnswerType(4) . " where suid=" . $this->suid . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=4",
-                    "update " . $this->targettable . "_settings set value=" . $this->convertAnswerType(5) . " where suid=" . $this->suid . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=5",
-                    "update " . $this->targettable . "_settings set value=" . $this->convertAnswerType(6) . " where suid=" . $this->suid . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=6"
+                    "update " . prepareDatabaseString($this->targettable) . "_settings set value=" . prepareDatabaseString($this->convertAnswerType(3)) . " where suid=" . prepareDatabaseString($this->suid) . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=3",
+                    "update " . prepareDatabaseString($this->targettable) . "_settings set value=" . prepareDatabaseString($this->convertAnswerType(4)) . " where suid=" . prepareDatabaseString($this->suid) . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=4",
+                    "update " . prepareDatabaseString($this->targettable) . "_settings set value=" . prepareDatabaseString($this->convertAnswerType(5)) . " where suid=" . prepareDatabaseString($this->suid) . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=5",
+                    "update " . prepareDatabaseString($this->targettable) . "_settings set value=" . prepareDatabaseString($this->convertAnswerType(6)) . " where suid=" . prepareDatabaseString($this->suid) . " and objecttype=" . OBJECT_TYPE . " and name='" . SETTING_ANSWERTYPE . "' and value=6"
                 );
 
                 foreach ($updates as $update) {

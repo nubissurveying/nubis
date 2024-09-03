@@ -106,7 +106,7 @@ class DataRecord {
         $key = $survey->getDataEncryptionKey();
         $data = "data as data_dec";
         if ($key != "") {
-            $data = "aes_decrypt(data, '" . $key . "') as data_dec";
+            $data = "aes_decrypt(data, '" . prepareDatabaseString($key) . "') as data_dec";
         }
 
         $q = "select suid, primkey, completed, $data from " . Config::dbSurveyData() . "_datarecords where suid=" . prepareDatabaseString($this->suid) . "  and primkey='" . prepareDatabaseString($this->primkey) . "'";
@@ -134,22 +134,22 @@ class DataRecord {
     function setToComplete() {
         global $db;
         if (Config::useDataRecords() == true) {
-            $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . INTERVIEW_COMPLETED . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
+            $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . prepareDatabaseString(INTERVIEW_COMPLETED) . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
             $db->executeQuery($query);
         }
 
-        $query = "update " . Config::dbSurveyData() . "_data set completed=" . INTERVIEW_COMPLETED . ", ts=ts where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
+        $query = "update " . Config::dbSurveyData() . "_data set completed=" . prepareDatabaseString(INTERVIEW_COMPLETED) . ", ts=ts where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
         $db->executeQuery($query);
     }
 
     function setToIncomplete() {
         global $db;
         if (Config::useDataRecords() == true) {
-            $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . INTERVIEW_NOTCOMPLETED . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
+            $query = "update " . Config::dbSurveyData() . "_datarecords set completed=" . prepareDatabaseString(INTERVIEW_NOTCOMPLETED) . " where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
             $db->executeQuery($query);
         }
 
-        $query = "update " . Config::dbSurveyData() . "_data set completed=" . INTERVIEW_NOTCOMPLETED . ", ts=ts where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
+        $query = "update " . Config::dbSurveyData() . "_data set completed=" . prepareDatabaseString(INTERVIEW_NOTCOMPLETED) . ", ts=ts where suid=" . prepareDatabaseString($this->suid) . " and primkey='" . prepareDatabaseString($this->primkey) . "'";
         $db->executeQuery($query);
     }
 

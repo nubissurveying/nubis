@@ -38,11 +38,13 @@ class Database {
                     if (strtolower($server) == "localhost") {
                         $server = null;
                     }
+                    @mysqli_report(MYSQLI_REPORT_OFF);
                     $this->db = @mysqli_connect($server, Config::dbUser(), Config::dbPassword(), null, $port);  //default mysql
                     if ($this->db != null) {
                         if (mysqli_select_db($this->db, Config::dbName())) {
                             @mysqli_query($this->db, 'SET CHARACTER SET utf8;');
-                            @mysqli_query($this->db, 'SET collation_connection = \'utf8_general_ci\';');
+                            @mysqli_query($this->db, 'SET collation_connection = \'utf8_general_ci\';');                            
+                            //@mysqli_query($this->db, 'SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,\'ONLY_FULL_GROUP_BY\',\'\'));');                            
                         } else {
                             $this->db = null;
                         }
@@ -65,6 +67,7 @@ class Database {
                     if (mysqli_select_db($this->db, $dbName)) {
                         @mysqli_query($this->db, 'SET CHARACTER SET utf8;');
                         @mysqli_query($this->db, 'SET collation_connection = \'utf8_general_ci\';');
+                        @mysqli_report(MYSQLI_REPORT_OFF);
                         return true;
                     }
                 }
@@ -95,7 +98,7 @@ class Database {
             case DB_SQLITE:
                 return $this->db->query($query);
             default:
-                return mysqli_query($this->db, $query);
+                return @mysqli_query($this->db, $query);
         }
     }
 
@@ -104,7 +107,7 @@ class Database {
             case DB_SQLITE:
                 $this->db->exec($query);
             default:
-                return mysqli_query($this->db, $query);
+                return @mysqli_query($this->db, $query);
         }
     }
 
@@ -132,6 +135,7 @@ class Database {
                 if ($result) {
                     return @mysqli_num_rows($result);
                 }
+                return 0; // failed
         }
     }
 
@@ -143,6 +147,7 @@ class Database {
                 if ($result) {    
                     return @mysqli_num_fields($result);
                 }
+                return 0; // failed
         }
     }
 
@@ -150,6 +155,7 @@ class Database {
         if ($result) {
             return @mysqli_fetch_fields($result);
         }
+        return array();
     }
 
     function getRow($result, $type = MYSQLI_BOTH) {
@@ -162,6 +168,7 @@ class Database {
                 if ($result) {    
                     return @mysqli_fetch_array($result, $type);
                 }
+                return false; // failed
         }
     }
 

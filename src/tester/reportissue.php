@@ -158,13 +158,12 @@ class ReportIssue {
         $query .= "'" . $db->escapeString(getFromSessionParams('reportdisplayed')) . "',";
         $query .= "'" . $db->escapeString(loadvar('reportcategory')) . "',";
         $query .= "'" . $db->escapeString(loadvar('reportcomment')) . "',";
-        $query .= ISSUE_REPORTED . ", ";
+        $query .= prepareDatabaseString(ISSUE_REPORTED) . ", ";
         $query .= "'" . $db->escapeString(getFromSessionParams('reportlanguage')) . "',";
         $query .= "'" . $db->escapeString(getFromSessionParams('reportmode')) . "',";
         $query .= "'" . $db->escapeString(getFromSessionParams('reportversion')) . "'";
         $query .= ")";
         $db->executeQuery($query);
-        //echo $query;
 
         $returnStr = $this->showHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';

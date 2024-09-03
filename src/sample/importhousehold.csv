@@ -1,0 +1,5 @@
+household identifier,puid,name,address1,address2,city,zip,state,longitude,latitude,telephone1,telephone2,status,test
+12345,0,Name1,Address here,Extra address here,City here,99999,State here,,,987-6543-210,,0,0
+65432,0,Name2,Address here,Extra address here,City here,99999,State here,,,987-6543-210,,0,0
+45362,0,Name3,Address here,Extra address here,City here,99999,State here,,,987-6543-210,,0,0
+76457,0,Name4,Address here,Extra address here,City here,99999,State here,,,987-6543-210,,0,0

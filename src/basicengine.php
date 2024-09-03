@@ -24,13 +24,12 @@ class BasicEngine extends NubisObject {
     var $groups;
     var $sections;
     var $sectionids;
-    //var $settings;
     var $endofsurvey; // indicates whether we are at the end of the survey
     var $prefix; // prefix for variables if e.g. mod1[1].Q1
     var $parentprefix;
     var $seid; // section identifier
     var $mainseid; // main section identifier (the section we started the interview with)
-    var $parentseid; // parent section identifier (empty if this is the top engine)
+    var $parentseid; // parent section identifier (empty if this is the top engine)    
     var $previousstateid;
     var $survey;
     var $getfillclasses;
@@ -68,6 +67,8 @@ class BasicEngine extends NubisObject {
     var $firstform;
     private $externalonly;
     private $reset;
+    var $reloadscreen;
+    var $parentrgid;
 
     function __construct($suid, $primkey, $phpid, $version, $seid, $doState = true, $doContext = true) {
 
@@ -75,6 +76,10 @@ class BasicEngine extends NubisObject {
         $this->phpid = $phpid;
         $this->setSuid($suid);
         if (isset($_SESSION['URID']) && $_SESSION['URID'] != '') {
+            require_once("user.php"); // needed here
+            require_once("users.php"); // needed here
+            require_once("contact.php"); // needed here
+            require_once("contacts.php"); // needed here
             $user = new User($_SESSION['URID']);
             if (isTestmode() && inArray($user->getUserType(), array(USER_SYSADMIN, USER_TRANSLATOR, USER_TESTER))) {
                 $this->display = new DisplayQuestionTest($this->primkey, $this);
@@ -146,6 +151,7 @@ class BasicEngine extends NubisObject {
         $this->forward = false;
         $this->firstform = false;
         $this->updateaction = false;
+        $this->reloadscreen = false;
         $this->reset = array();
 
         $this->dk = array();
@@ -174,9 +180,9 @@ class BasicEngine extends NubisObject {
     function loadContext() {
         global $db;
         if (Config::useUnserialize()) {
-            $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
+            $q = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->getSuid()) . " and version=" . prepareDatabaseString($this->version);
         } else {
-            $q = "select getfills, inlinefields, setfills, checks from " . Config::dbSurvey() . "_context where suid=" . $this->getSuid() . " and version=" . $this->version;
+            $q = "select getfills, inlinefields, setfills, checks from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->getSuid()) . " and version=" . prepareDatabaseString($this->version);
         }
         $r = $db->selectQuery($q);
         $this->variabledescriptives = array();
@@ -210,7 +216,7 @@ class BasicEngine extends NubisObject {
             if ($row["setfills"] != "") {
                 $this->setfillclasses = unserialize(gzuncompress($row["setfills"]));
             }
-            if ($row["checks"] != "") {
+            if (isset($row["checks"]) && $row["checks"] != "") {
                 $this->checkclasses = unserialize(gzuncompress($row["checks"]));
             }
         }
@@ -369,12 +375,16 @@ class BasicEngine extends NubisObject {
                     $fieldref = $field; //str_replace("[", "\[", str_replace("]", "\]", $field));
                     // only if in group we add inline fields
                     if ($temp != "") {
-                        $previousdata = strtr($this->getAnswer($realfield), array('\\' => '\\\\', '$' => '\$'));
+                        $tt = $this->getAnswer($realfield);
+                        if ($tt === null) {
+                            $tt = "";
+                        }
+                        $previousdata = strtr($tt, array('\\' => '\\\\', '$' => '\$'));
                         $variable = $this->getVariableDescriptive($field);
                         $cnt = "";
                         if (isset($displaynumbers[strtoupper($realfield)])) {
-                    	    $cnt = $displaynumbers[strtoupper($realfield)];
-						}
+                            $cnt = $displaynumbers[strtoupper($realfield)];
+                        }
 
                         // we have a cnt, then this is a field being displayed!
                         if ($cnt != "") {
@@ -586,7 +596,6 @@ class BasicEngine extends NubisObject {
         try {
             $fillcl = new ReflectionClass($fillclass);
             if ($fillcl) {
-                //return $engineclass->newInstance($suid, $primkey, $phpid, $version, $mainseid, $seid, $prefix, $parentseid, $parentprefix);
                 return $fillcl->newInstance($this);
             }
         } catch (Exception $e) {
@@ -686,7 +695,7 @@ class BasicEngine extends NubisObject {
         if (is_numeric($section)) {
             if (isset($this->sectionids[$section])) {
                 $section = $this->sectionids[$section];
-                //return $section;
+                return $section;
             } else {
                 $s = $this->survey->getSection($section);
                 $this->sections[strtoupper($s->getName())] = $s;
@@ -698,6 +707,7 @@ class BasicEngine extends NubisObject {
         if (isset($this->sections[strtoupper($section)])) {
             return $this->sections[strtoupper($section)];
         }
+
         /* something went wrong, so we get it from the db */
         $this->sections[strtoupper($section)] = $this->survey->getSectionByName($section);
         return $this->sections[strtoupper($section)];
@@ -730,7 +740,7 @@ class BasicEngine extends NubisObject {
 
     function updateRemarkStatus($dirty = DATA_DIRTY) {
         global $db;
-        $query = "update " . Config::dbSurveyData() . "_observations set dirty=$dirty where suid=" . prepareDatabaseString($this->getSuid()) . " and primkey='" . prepareDatabaseString($this->getPrimaryKey()) . "' and displayed='" . prepareDatabaseString(getFromSessionParams(SESSION_PARAM_VARIABLES)) . "'"; // stateid=" . $this->getStateID(); // . " and displayed='" . $this->getDisplayed() . "'";
+        $query = "update " . Config::dbSurveyData() . "_observations set dirty=" . prepareDatabaseString($dirty) . " where suid=" . prepareDatabaseString($this->getSuid()) . " and primkey='" . prepareDatabaseString($this->getPrimaryKey()) . "' and displayed='" . prepareDatabaseString(getFromSessionParams(SESSION_PARAM_VARIABLES)) . "'"; // stateid=" . $this->getStateID(); // . " and displayed='" . $this->getDisplayed() . "'";
         $db->executeQuery($query);
     }
 
@@ -739,7 +749,7 @@ class BasicEngine extends NubisObject {
         $key = $survey->getDataEncryptionKey();
         $extra = "remark";
         if ($key != "") {
-            $extra = "aes_decrypt(remark, '" . $key . "') as remark";
+            $extra = "aes_decrypt(remark, '" . prepareDatabaseString($key) . "') as remark";
         }
         //$stateid = $this->getStateID();
         //if ($this->getForward() == true) {
@@ -779,7 +789,7 @@ class BasicEngine extends NubisObject {
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
             $first = $row['stateid'];
-            $q = "delete from " . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and stateid > ' . $first;
+            $q = "delete from " . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and stateid > ' . prepareDatabaseString($first);
             $db->executeQuery($q);
         }
     }
@@ -823,7 +833,7 @@ class BasicEngine extends NubisObject {
 
     function loadLastState() {
         global $db;
-        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . $this->getMainSeid() . ' order by stateid desc limit 0,1');
+        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . prepareDatabaseString($this->getMainSeid()) . ' order by stateid desc limit 0,1');
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
             $result = $this->state->loadState($row['stateid'], $row["mainseid"], $row["seid"], $row["prefix"]);
@@ -842,7 +852,7 @@ class BasicEngine extends NubisObject {
 
     function loadLastSectionState() {
         global $db;
-        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . $this->getMainSeid() . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and displayed != "" order by stateid desc limit 0,1');
+        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . prepareDatabaseString($this->getMainSeid()) . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and displayed != "" order by stateid desc limit 0,1');
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
             $loopstring = $this->getLoopString(); // preserve from last state!
@@ -869,7 +879,7 @@ class BasicEngine extends NubisObject {
 
     function loadPreviousSectionEntryState() {
         global $db;
-        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . $this->getMainSeid() . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and displayed="" order by stateid desc limit 0,1');
+        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . prepareDatabaseString($this->getMainSeid()) . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and displayed="" order by stateid desc limit 0,1');
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
             $state = new State($this->primkey, $this->survey->getSuid());
@@ -982,7 +992,7 @@ class BasicEngine extends NubisObject {
     }
 
     function setParentRgid($rgid) {
-        $this->parentsrgid = $rgid;
+        $this->parentrgid = $rgid;
         $this->state->setParentRgid($rgid);
     }
 
@@ -1724,9 +1734,10 @@ class BasicEngine extends NubisObject {
 
         if ($this->validateAnswer($variablename, $answer)) {
             $vardesc = $this->getVariableDescriptive($variablename);
-            $variablename = $this->prefixVariableName($variablename);
-            $this->addLogs($variablename, $answer, $dirty);
-            return $this->state->setData($variablename, $answer, $dirty);
+            $variablename1 = $this->prefixVariableName($variablename);
+            $this->addLogs($variablename1, $answer, $dirty);
+
+            return $this->state->setData($variablename1, $answer, $dirty);
         }
 
         return false;
@@ -1764,6 +1775,9 @@ class BasicEngine extends NubisObject {
 
     function processAnswer($variablename) {
         $ans = $this->getAnswer($variablename);
+        if ($ans == null || $ans == "") {
+            return;
+        }
         if (strtoupper($ans) == ANSWER_DK) {
             $this->dk[] = strtoupper($variablename);
         } else if (strtoupper($ans) == ANSWER_RF) {
@@ -1820,6 +1834,11 @@ class BasicEngine extends NubisObject {
         if ($vardesc->isKeep()) {
             return; // skip if keep is set to yes
         }
+
+        // external storage only, don't store in assigments
+        if ($vardesc->getStoreLocation() == STORE_LOCATION_EXTERNAL) {
+            return;
+        }
         /* if ($vardesc->getSeid() == $this->getSeid()) {
           $full = $this->getParentPrefix() . $this->getPrefix();
           if (contains($full, "[")) {
@@ -1870,7 +1889,7 @@ class BasicEngine extends NubisObject {
         $result = $db->selectQuery('SET SESSION group_concat_max_len = 1000000;'); // increase default length of 1024!
         $result = $db->selectQuery('
 SELECT GROUP_CONCAT( displayed SEPARATOR \'~\' ) as totaldisplayed, GROUP_CONCAT( assigned SEPARATOR \'~\' ) as totalassigned
-FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' and primkey = "' . $this->primkey . '" and mainseid=' . $this->getMainSeid());
+FROM ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . prepareDatabaseString($this->getMainSeid()));
 
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
@@ -1982,7 +2001,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             // store loop data
             global $db;
             $query = "replace into " . Config::dbSurveyData() . "_loopdata (suid, primkey, mainseid, seid, looprgid, loopmin, loopmax, loopcounter,looptype, loopactions) values (";
-            $query .= $this->getSuid() . ", '" . $this->getPrimaryKey() . "', " . $this->getMainSeid() . "," . $this->getSeid() . ", " . $looprgid . "," . $min . "," . $max . ",'" . $counterfield . "'," . $normalfor . ",'" . implode("~", $loopactions) . "')";
+            $query .= prepareDatabaseString($this->getSuid()) . ", '" . prepareDatabaseString($this->getPrimaryKey()) . "', " . prepareDatabaseString($this->getMainSeid()) . "," . prepareDatabaseString($this->getSeid()) . ", " . prepareDatabaseString($looprgid) . "," . prepareDatabaseString($min) . "," . prepareDatabaseString($max) . ",'" . prepareDatabaseString($counterfield) . "'," . prepareDatabaseString($normalfor) . ",'" . prepareDatabaseString(implode("~", $loopactions)) . "')";
             $db->executeQuery($query);
 
             $this->reset[$looprgid] = false;
@@ -2588,7 +2607,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $this->locked = false;
         $this->firsttimelock = true;
         global $db;
-        $query = "select status from " . Config::dbSurveyData() . "_interviewstatus where suid = " . $this->getSuid() . " and primkey='" . $this->getPrimaryKey() . "'";
+        $query = "select status from " . Config::dbSurveyData() . "_interviewstatus where suid = " . prepareDatabaseString($this->getSuid()) . " and primkey='" . prepareDatabaseString($this->getPrimaryKey()) . "'";
         $res = $db->selectQuery($query);
         if ($res) {
 
@@ -2623,9 +2642,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         global $db;
         if ($this->firsttimelock == true) {
             $this->firsttimelock = false;
-            $query = "insert into " . Config::dbSurveyData() . "_interviewstatus (suid, primkey, mainseid, status) values(" . $this->getSuid() . ",'" . $this->getPrimaryKey() . "', " . $this->getMainSeid() . "," . INTERVIEW_LOCKED . ")";
+            $query = "insert into " . Config::dbSurveyData() . "_interviewstatus (suid, primkey, mainseid, status) values(" . prepareDatabaseString($this->getSuid()) . ",'" . prepareDatabaseString($this->getPrimaryKey()) . "', " . prepareDatabaseString($this->getMainSeid()) . "," . prepareDatabaseString(INTERVIEW_LOCKED) . ")";
         } else {
-            $query = "update " . Config::dbSurveyData() . "_interviewstatus set status=" . INTERVIEW_LOCKED . " WHERE suid = " . $this->getSuid() . " and primkey = '" . $this->getPrimaryKey() . "' and mainseid=" . $this->getMainSeid() . " LIMIT 1";
+            $query = "update " . Config::dbSurveyData() . "_interviewstatus set status=" . prepareDatabaseString(INTERVIEW_LOCKED) . " WHERE suid = " . prepareDatabaseString($this->getSuid()) . " and primkey = '" . prepareDatabaseString($this->getPrimaryKey()) . "' and mainseid=" . prepareDatabaseString($this->getMainSeid()) . " LIMIT 1";
         }
         $db->executeQuery($query);
     }
@@ -2639,9 +2658,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         global $db;
         if ($this->firsttimelock == true) {
             $this->firsttimelock = false;
-            $query = "insert into " . Config::dbSurveyData() . "_interviewstatus (suid, primkey, mainseid, status) values(" . $this->getSuid() . ",'" . $this->getPrimaryKey() . "', " . $this->getMainSeid() . "," . INTERVIEW_UNLOCKED . ")";
+            $query = "insert into " . Config::dbSurveyData() . "_interviewstatus (suid, primkey, mainseid, status) values(" . prepareDatabaseString($this->getSuid()) . ",'" . prepareDatabaseString($this->getPrimaryKey()) . "', " . prepareDatabaseString($this->getMainSeid()) . "," . prepareDatabaseString(INTERVIEW_UNLOCKED) . ")";
         } else {
-            $query = "update " . Config::dbSurveyData() . "_interviewstatus set status=" . INTERVIEW_UNLOCKED . " WHERE suid = " . $this->getSuid() . " and primkey = '" . $this->getPrimaryKey() . "' and mainseid=" . $this->getMainSeid() . " LIMIT 1";
+            $query = "update " . Config::dbSurveyData() . "_interviewstatus set status=" . prepareDatabaseString(INTERVIEW_UNLOCKED) . " WHERE suid = " . prepareDatabaseString($this->getSuid()) . " and primkey = '" . prepareDatabaseString($this->getPrimaryKey()) . "' and mainseid=" . prepareDatabaseString($this->getMainSeid()) . " LIMIT 1";
         }
 
         $db->executeQuery($query);
@@ -2703,56 +2722,62 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             /* find out where to go after section call */
             $torgid = 0;
-            $result = $db->selectQuery('select torgid from ' . Config::dbSurvey() . '_next where suid=' . prepareDatabaseString($this->getSuid()) . ' and seid=' . $this->seid . ' and fromrgid = ' . prepareDatabaseString($fromrgid));
-            if ($row = $db->getRow($result)) {
-                $torgid = $row["torgid"];
+            $result = $db->selectQuery('select torgid from ' . Config::dbSurvey() . '_next where suid=' . prepareDatabaseString($this->getSuid()) . ' and seid=' . prepareDatabaseString($this->seid) . ' and fromrgid = ' . prepareDatabaseString($fromrgid));
 
-                /* update section info from previous section state in this section */
-                $this->setSeid($seid);
-                $this->setMainSeid($mainseid);
-                $this->setParentSeid($parentseid);
-                $this->setPrefix($prefix);
-                $this->setParentPrefix($parentprefix);
-                $this->setParentRgid($parentrgid);
-
-                /* check if we are going back to a loop */
-                $query = "select primkey from " . Config::dbSurveyData() . "_loopdata where suid=" . prepareDatabaseString($this->getSuid()) . " and primkey='" . $this->getPrimaryKey() . "' and mainseid=" . $mainseid . " and seid=" . $seid . " and looprgid=" . $torgid;
-                $result = $db->selectQuery($query);
-                if ($db->getNumberOfRows($result) > 0) {
-                    $this->reset[$torgid] = false; // so we don't reset the loop counter when going back to the section loop
-                }
-
-                /* do action */
-                $this->doAction($torgid);
-
-                /* NOTE: we only get below if all the actions are assignments, i.e. no questions are asked 
-                 * OR we are doing data flooding so we never show a screen and keep on going
-                 */
-
-                if ($this->getFlooding()) {
-                    if ($this->stop != true) {
-                        $this->getDataRecord()->saveRecord();
-                        $this->saveState(true);
-                        $this->doFakeSubmit($this->getDisplayed(), $this->getRgid(), $this->getTemplate());
-                        $this->getNextQuestion();
-                    }
-                } else {
-                    /* save data record */
-                    $this->getDataRecord()->saveRecord();
-
-                    /* we finished everything and are showing a question if 
-                     * all went well so this is the moment to save the state
-                     */
-                    $this->saveState(true);
-                }
-
-
-                if ($this->getFlooding()) {
-                    $this->stop = true;
-                    return;
-                }
-                doExit();
+            // no entry, then this is the end
+            if ($db->getNumberOfRows($result) == 0) {
+                $torgid = '0';
             }
+            // entry, so get where need to go
+            else {
+                $row = $db->getRow($result);
+                $torgid = $row["torgid"];
+            }
+
+            /* update section info from previous section state in this section */
+            $this->setSeid($seid);
+            $this->setMainSeid($mainseid);
+            $this->setParentSeid($parentseid);
+            $this->setPrefix($prefix);
+            $this->setParentPrefix($parentprefix);
+            $this->setParentRgid($parentrgid);
+
+            /* check if we are going back to a loop */
+            $query = "select primkey from " . Config::dbSurveyData() . "_loopdata where suid=" . prepareDatabaseString($this->getSuid()) . " and primkey='" . prepareDatabaseString($this->getPrimaryKey()) . "' and mainseid=" . prepareDatabaseString($mainseid) . " and seid=" . prepareDatabaseString($seid) . " and looprgid=" . prepareDatabaseString($torgid);
+            $result = $db->selectQuery($query);
+            if ($db->getNumberOfRows($result) > 0) {
+                $this->reset[$torgid] = false; // so we don't reset the loop counter when going back to the section loop
+            }
+
+            /* do action */
+            $this->doAction($torgid);
+
+            /* NOTE: we only get below if all the actions are assignments, i.e. no questions are asked 
+             * OR we are doing data flooding so we never show a screen and keep on going
+             */
+
+            if ($this->getFlooding()) {
+                if ($this->stop != true) {
+                    $this->getDataRecord()->saveRecord();
+                    $this->saveState(true);
+                    $this->doFakeSubmit($this->getDisplayed(), $this->getRgid(), $this->getTemplate());
+                    $this->getNextQuestion();
+                }
+            } else {
+                /* save data record */
+                $this->getDataRecord()->saveRecord();
+
+                /* we finished everything and are showing a question if 
+                 * all went well so this is the moment to save the state
+                 */
+                $this->saveState(true);
+            }
+
+            if ($this->getFlooding()) {
+                $this->stop = true;
+                return;
+            }
+            doExit();
         }
     }
 
@@ -2786,6 +2811,11 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
         // we are fine
         return false;
+    }
+
+    // indicates if the action is a reload of the screen
+    function getReloadScreen() {
+        return $this->reloadscreen;
     }
 
     /*
@@ -2831,6 +2861,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             // returning to the survey
             if ($this->getDisplayed() != "") {
+
+                // set indicator
+                $this->reloadscreen = true;
 
                 // completed interview
                 if ($this->getDataRecord()->isCompleted()) {
@@ -3402,7 +3435,12 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
                 /* if (language different from state AND update) OR (mode different from state AND update) OR (version different from state), then wipe fill texts */
                 $redo = false;
-                if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getBackLanguage(getSurveyMode()) == LANGUAGE_BACK_YES) || ($this->state->getMode() != getSurveyMode() && $this->survey->getBackMode() == MODE_BACK_YES) || $this->state->getVersion() != getSurveyVersion()) {
+                $langback = $this->survey->getBackLanguage(getSurveyMode());
+                $modeback = $this->survey->getBackMode();
+                $statlang = $this->state->getLanguage();
+                $statmode = $this->state->getMode();
+                $statver = $this->state->getVersion();
+                if (($statlang != getSurveyLanguage() && $langback == LANGUAGE_BACK_YES) || ($statmode != getSurveyMode() && $modeback == MODE_BACK_YES) || $statver != getSurveyVersion()) {
                     $this->setFillTexts(array());
 
                     /* indicate to redo any fills */
@@ -3411,15 +3449,15 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                 }
 
                 /* if language different, but keeping from state, then update language */
-                if (($this->state->getLanguage() != getSurveyLanguage() && $this->survey->getBackLanguage() != LANGUAGE_BACK_YES)) {
-                    setSurveyLanguage($this->state->getLanguage());
+                if (($statlang != getSurveyLanguage() && $langback != LANGUAGE_BACK_YES)) {
+                    setSurveyLanguage($statlang);
                 }
 
-                if (($this->state->getMode() != getSurveyMode() && $this->survey->getBackMode() != MODE_BACK_YES)) {
-                    setSurveyMode($this->state->getMode());
+                if (($statmode != getSurveyMode() && $modeback != MODE_BACK_YES)) {
+                    setSurveyMode($statmode);
                 }
-                if ($this->state->getVersion() != getSurveyVersion()) {
-                    setSurveyVersion($this->state->getVersion());
+                if ($statver != getSurveyVersion()) {
+                    setSurveyVersion($statver);
                 }
 
                 /* check for on submit function */
@@ -4351,10 +4389,11 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
             $query .= "'" . prepareDatabaseString($var) . "',";
             $query .= "'" . prepareDatabaseString($beginwithload) . "',";
             $query .= "'" . prepareDatabaseString($beginonscreen) . "',";
-            $query .= "'" . date("Y-m-d H:i:s", $end) . "',";
-            $query .= "'" . date("Y-m-d H:i:s", loadvar("plets")) . "',";
-            $query .= ($time - getFromSessionParams(SESSION_PARAM_TIMESTAMP)) . ","; // difference between outputting of page and storing of timing entry
-            $query .= ($docend - loadvar("plts")) . ","; // difference between page ready and action (button clicked, language changed)
+            $query .= "'" . prepareDatabaseString(date("Y-m-d H:i:s", $end)) . "',";
+            $query .= "'" . prepareDatabaseString(date("Y-m-d H:i:s", $docend)) . "',";
+
+            $query .= prepareDatabaseString(($time - getFromSessionParams(SESSION_PARAM_TIMESTAMP))) . ","; // difference between outputting of page and storing of timing entry
+            $query .= prepareDatabaseString(($docend - loadvar("plts"))) . ","; // difference between page ready and action (button clicked, language changed)            
             $query .= prepareDatabaseString($lang) . ",";
             $query .= prepareDatabaseString($mode) . ",";
             $query .= prepareDatabaseString($version) . ")";
@@ -4384,6 +4423,8 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
         $ans = $answer;
         if ($ans == "") {
             $ans = null;
+        } else if (is_array($ans)) {
+            $ans = gzcompress(serialize($ans));
         }
 
         $prim = $this->getPrimaryKey();
@@ -4404,9 +4445,9 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
 
             $answer = '"' . prepareDatabaseString($ans) . '"';
             if ($key != "") {
-                $answer = "aes_encrypt('" . prepareDatabaseString($ans) . "', '" . $key . "')";
+                $answer = "aes_encrypt('" . prepareDatabaseString($ans) . "', '" . prepareDatabaseString($key) . "')";
             }
-            $localdb->executeQuery('INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (' . $suid . ',"' . $prim . '","' . $var . '",' . $answer . ',' . $dirty . ',' . $action . ',' . $version . ',' . $language . ',' . $mode . ')');
+            $localdb->executeQuery('INSERT INTO ' . Config::dbSurveyData() . '_logs (suid, primkey, variablename, answer, dirty, action, version, language, mode) VALUES (' . prepareDatabaseString($suid) . ',"' . prepareDatabaseString($prim) . '","' . prepareDatabaseString($var) . '",' . prepareDatabaseString($answer) . ',' . prepareDatabaseString($dirty) . ',' . prepareDatabaseString($action) . ',' . prepareDatabaseString($version) . ',' . prepareDatabaseString($language) . ',' . prepareDatabaseString($mode) . ')');
         } else {
 
             $bp = new BindParam();
@@ -5142,7 +5183,12 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     $filltext = DUMMY_INDICATOR_FILL_NOVALUE;
                 } else {
                     $fillref = $fill;
-                    $filltext = strtr($this->getFillValue(INDICATOR_FILL_NOVALUE . $fill), array('\\' => '\\\\', '$' => '\$'));
+
+                    $tt = $this->getFillValue(INDICATOR_FILL_NOVALUE . $fill);
+                    if ($tt === null) {
+                        $tt = "";
+                    }
+                    $filltext = strtr($tt, array('\\' => '\\\\', '$' => '\$'));
                 }
                 $pattern = "/\\" . INDICATOR_FILL_NOVALUE . preparePattern($fillref) . "/i";
                 $text = preg_replace($pattern, $filltext, $text);
@@ -5173,7 +5219,11 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . $this->getSuid() . ' a
                     $filltext = DUMMY_INDICATOR_FILL;
                 } else {
                     $fillref = $fill;
-                    $filltext = strtr($this->getDisplayValue($fill, $this->getFillValue($fill)), array('\\' => '\\\\', '$' => '\$'));
+                    $tt = $this->getDisplayValue($fill, $this->getFillValue($fill));
+                    if ($tt === null) {
+                        $tt = "";
+                    }
+                    $filltext = strtr($tt, array('\\' => '\\\\', '$' => '\$'));
                 }
                 $pattern = "/\\" . INDICATOR_FILL . preparePattern($fillref) . "/i";
                 $text = preg_replace($pattern, $filltext, $text);

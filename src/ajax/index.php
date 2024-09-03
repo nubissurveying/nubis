@@ -12,11 +12,8 @@
   ------------------------------------------------------------------------
  */
 
-
-error_reporting(E_ALL);
-
-ini_set("display_errors", 1);
-
+error_reporting(0);
+ini_set('display_errors', 0);
 
 // include constants
 require_once("../constants.php");
@@ -45,12 +42,12 @@ if ($db->getDb() == null) { //no connection with DB.. Errormessage!
     exit;
 }
 
-ini_set('xdebug.max_nesting_level', 2000);
-ini_set("error_reporting", "ALL");
-
 if (loadvar('ajaxr') != '') {
     $params = getAjaxParamsPost(loadvar('ajaxr'));
     $_SESSION[SURVEY_EXECUTION_MODE] = $params["executionmode"];
+}
+if (decryptC($params["k"], Config::smsComponentKey()) != Config::ajaxAccessKey()) {
+    exit;
 }
 
 require_once('surveyajax.php');

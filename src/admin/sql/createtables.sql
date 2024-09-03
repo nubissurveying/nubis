@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS `survey1_actions` (
 CREATE TABLE IF NOT EXISTS `survey1_communication` (
   `hnid` int(11) NOT NULL AUTO_INCREMENT,
   `urid` int(11) NOT NULL,
+  `datatype` int(11) NOT NULL DEFAULT '1',
+  `direction` int(11) NOT NULL DEFAULT '1',
   `insertts` datetime NOT NULL,
   `received` int(11) NOT NULL DEFAULT '0',
   `sqlcode` blob NOT NULL,
@@ -278,7 +280,8 @@ CREATE TABLE IF NOT EXISTS `survey1_interviewstatus` (
   `mainseid` int(11) NOT NULL,
   `status` int(11) NOT NULL,
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`suid`, `primkey`, `mainseid`)
+  PRIMARY KEY (`suid`, `primkey`, `mainseid`),
+  KEY `primkeyindex` (`suid`,`primkey`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
@@ -333,15 +336,15 @@ CREATE TABLE IF NOT EXISTS `survey1_lab` (
   `fielddbsclinicname` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
   `fielddbshivfinalanon` varchar(11) COLLATE utf8_unicode_ci NOT NULL,
   `labvisitts` datetime DEFAULT NULL,
-  `labdbsposition` int(11) NOT NULL,
-  `labdbslocation` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
-  `labbloodposition` int(11) NOT NULL,
-  `labbloodlocation` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
-  `labbloodsenttolab` text COLLATE utf8_unicode_ci NOT NULL,
+  `labdbsposition` varchar(25) NOT NULL DEFAULT '',
+  `labdbslocation` varchar(25) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `labbloodposition` varchar(25) NOT NULL DEFAULT '',
+  `labbloodlocation` varchar(25) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `labbloodsenttolab` text COLLATE utf8_unicode_ci,
   `labbloodnotcollected` text COLLATE utf8_unicode_ci,
   `labbloodstatus` int(11) NOT NULL DEFAULT '0',
-  `labbloodshipmentdate` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
-  `labbloodshipmentreturneddate` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
+  `labbloodshipmentdate` varchar(25) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `labbloodshipmentreturneddate` varchar(25) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `requestform` blob,
   `urid` int(11) NOT NULL DEFAULT '0',
   `consenturid` int(11) NOT NULL DEFAULT '0',
@@ -467,8 +470,8 @@ CREATE TABLE IF NOT EXISTS `survey1_paradata` (
 
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  PRIMARY KEY (`pid`,`primkey`,`suid`)
-
+  PRIMARY KEY (`pid`,`primkey`,`suid`),
+  KEY `primkeyindex` (`suid`,`primkey`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
@@ -592,12 +595,12 @@ CREATE TABLE IF NOT EXISTS `survey1_respondents` (
   `sex` blob,
   `age` blob,
   `birthdate` blob,
-  `schoolingyears` int(11) DEFAULT NULL,
+  `schoolingyears` int(11) NOT NULL DEFAULT '0',
   `educationlevel` varchar(11) DEFAULT NULL,
-  `occupationalstatus` int(11) DEFAULT NULL,
+  `occupationalstatus` int(11) NOT NULL DEFAULT '0',
   `relationshiphh` varchar(11) DEFAULT NULL,
   `spouseprimkey` varchar(25) DEFAULT NULL,
-  `consenttype` int(11) DEFAULT NULL,
+  `consenttype` int(11) NOT NULL DEFAULT '0',
   `movedout` int(11) NOT NULL DEFAULT '0',
   `validation` int(11) NOT NULL DEFAULT '0',
   `dummy1` blob,
@@ -797,13 +800,14 @@ CREATE TABLE IF NOT EXISTS `survey1_states` (
 CREATE TABLE IF NOT EXISTS `survey1_surveys` (
 
   `suid` int(11) NOT NULL AUTO_INCREMENT,
-
   `name` varchar(150) NOT NULL,
-
   `description` text,
-
   `position` int(11) DEFAULT 1,
-
+  `nurselab` INT(11) NULL DEFAULT NULL,  
+  `nursevision` INT(11) NULL DEFAULT NULL,
+  `nurseantropometrics` INT(11) NULL DEFAULT NULL,
+  `nursefollowup` INT(11) NULL DEFAULT NULL,
+  `nursedatasheet` INT(11) NULL DEFAULT NULL,
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`suid`)
@@ -927,7 +931,8 @@ CREATE TABLE IF NOT EXISTS `survey1_test_interviewstatus` (
   `mainseid` int(11) NOT NULL,
   `status` int(11) NOT NULL,
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`suid`, `primkey`, `mainseid`)
+  PRIMARY KEY (`suid`, `primkey`, `mainseid`),
+  KEY `primkeyindex` (`suid`,`primkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -1078,7 +1083,8 @@ CREATE TABLE IF NOT EXISTS `survey1_test_paradata` (
 
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  PRIMARY KEY (`pid`,`primkey`,`suid`)
+  PRIMARY KEY (`pid`,`primkey`,`suid`),
+  KEY `primkeyindex` (`suid`,`primkey`)
 
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
@@ -1270,8 +1276,8 @@ CREATE TABLE IF NOT EXISTS `survey1_test_times` (
 
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  PRIMARY KEY (`tmid`,`suid`,`primkey`)
-
+  PRIMARY KEY (`tmid`,`suid`,`primkey`),
+  KEY `primkeyindex` (`suid`,`primkey`)
 ) ENGINE=MyIsam DEFAULT CHARSET=utf8;
 
 
@@ -1310,8 +1316,8 @@ CREATE TABLE IF NOT EXISTS `survey1_times` (
 
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  PRIMARY KEY (`tmid`,`suid`,`primkey`)
-
+  PRIMARY KEY (`tmid`,`suid`,`primkey`),
+  KEY `primkeyindex` (`suid`,`primkey`)
 ) ENGINE=MyIsam  DEFAULT CHARSET=utf8;
 
 
@@ -1352,9 +1358,9 @@ CREATE TABLE IF NOT EXISTS `survey1_types` (
 CREATE TABLE IF NOT EXISTS `survey1_users` (
   `urid` int(11) NOT NULL,
   `status` int(11) NOT NULL DEFAULT '1',
-  `name` varchar(250) NOT NULL,
-  `username` varchar(250) NOT NULL,
-  `password` blob NOT NULL,
+  `name` varchar(250) NULL DEFAULT NULL,
+  `username` varchar(250) NULL DEFAULT NULL,
+  `password` blob NULL DEFAULT NULL,
   `usertype` int(11) NOT NULL DEFAULT '0',
   `usersubtype` int(11) NOT NULL DEFAULT '0',
   `sup` int(11) DEFAULT NULL,
@@ -1362,7 +1368,7 @@ CREATE TABLE IF NOT EXISTS `survey1_users` (
   `regionfilter` int(11) NOT NULL DEFAULT '0',
   `testmode` int(11) NOT NULL DEFAULT '0',
   `communication` int(11) NOT NULL DEFAULT '2',
-  `settings` blob,
+  `settings` blob NULL DEFAULT NULL,
   `access` blob NULL DEFAULT NULL,
   `lastdata` DATETIME NULL DEFAULT NULL,
   `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

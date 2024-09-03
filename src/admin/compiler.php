@@ -71,10 +71,11 @@ class Compiler {
     private $extranode;
 
     function __construct($suid, $version) {
-        $this->suid = $suid;
-        $this->version = $version;
+        $this->suid = prepareDatabaseString($suid);
+        $this->version = prepareDatabaseString($version);
         $this->survey = new Survey($this->suid);
         $this->extranode = null;
+        $this->messages = array();
     }
 
     /* FILL FUNCTIONS */
@@ -154,15 +155,24 @@ class Compiler {
             }
         } else {
 
+            $whilearr = array();
+            if (isset($this->whileactions[end($this->whiles)])) {
+                $whilearr = $this->whileactions[end($this->whiles)];
+            }
+            $looparr = array();
+            if (isset($this->loopactions[end($this->loops)])) {
+                $looparr = $this->loopactions[end($this->loops)];
+            }
+
             // loop action
-            if (inArray($rgid, $this->loopactions[end($this->loops)])) {
+            if (inArray($rgid, $looparr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
                 $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
                 $fillfunctionnode->addStmt($stmt);
             }
             // while action
-            else if (inArray($rgid, $this->whileactions[end($this->whiles)])) {
+            else if (inArray($rgid, $whilearr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
                 $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -224,8 +234,25 @@ class Compiler {
                 /* in group, then link */
                 if (sizeof($this->groups) > 0) {
 
+                    $la = end($this->loopactions);
+                    if (!is_array($la)) {
+                        $la = array();
+                    }
+                    $wl = end($this->whileactions);
+                    if (!is_array($wl)) {
+                        $wl = array();
+                    }
+                    $gr = end($this->groupactions);
+                    if (!is_array($gr)) {
+                        $gr = array();
+                    }
+                    $ge = null;
+                    if (isset($this->groupsend[end($this->groups)])) {
+                        $ge = $this->groupsend[end($this->groups)];
+                    }
+
                     // don't link if the next statement is the loop OR the last loop action OR OR the last while action OR it is a group action
-                    if ($nextrgid != end($this->whiles) && $nextrgid != end($this->loops) && $nextrgid < $this->groupsend[end($this->groups)] && !inArray($nextrgid, end($this->loopactions)) && !inArray($nextrgid, end($this->whileactions)) && !inArray($nextrgid, end($this->groupactions))) {
+                    if ($nextrgid != end($this->whiles) && $nextrgid != end($this->loops) && $nextrgid < $ge && !inArray($nextrgid, $la) && !inArray($nextrgid, $wl) && !inArray($nextrgid, $gr)) {
                         $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
                         $stmt = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsaction));
                         $fillfunctionnode->addStmt($stmt);
@@ -250,7 +277,7 @@ class Compiler {
 
     function loadSetFills() {
         global $db;
-        $q = "select setfills from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select setfills from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             if ($row["setfills"] != "") {
@@ -280,7 +307,7 @@ class Compiler {
         /* go through all variable(s) if none provided */
         global $db;
         if (sizeof($variables) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . $this->suid . " order by vsid asc";
+            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . prepareDatabaseString($this->suid) . " order by vsid asc";
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
                     while ($row = $db->getRow($result)) {
@@ -305,13 +332,11 @@ class Compiler {
                     $rootnode = $this->factory->class(CLASS_SETFILL . "_" . $this->currentfillvariable)->extend(CLASS_BASICFILL);
 
                     /* preset trackers */
-
+                    
                     $this->looptimes = 1;
-
                     $this->lasttimesloop = array();
-
                     $this->lastloopactions = array();
-
+                    $this->loopactions = array();
                     $this->loops = array();
                     $this->groups = array();
                     $this->groupsend = array();
@@ -319,9 +344,13 @@ class Compiler {
                     $this->instructions = array();
                     $this->whiles = array();
                     $this->lastwhileactions = array();
-
+                    $this->loopcounters = array();
+                    $this->loopnextrgids = array();
+                    $this->whileactions = array();
+                    $this->whilenextrgids = array();
                     $this->doaction_cases = array();
                     $this->actions = array();
+                    
                     $stmts = array();
 
                     //$var = $this->survey->getVariableDescriptiveByName(getBasicName($rule));
@@ -340,9 +369,8 @@ class Compiler {
 
                     /* process setfillvalue cases */
                     for ($this->cnt = 1; $this->cnt <= sizeof($this->instructions); $this->cnt++) {
-
                         if (isset($this->instructions[$this->cnt])) {
-                            $this->addRule($rootnode, $this->instructions[$this->cnt]);
+                            $this->addRule($rootnode, $this->instructions[$this->cnt]);                            
                         }
                     }
 
@@ -411,7 +439,8 @@ class Compiler {
             /* store in db */
             global $db;
             $bp = new BindParam();
-            $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($setfillclasses), 9));
+            $fills = gzcompress(serialize($setfillclasses), 9);
+            $bp->add(MYSQL_BINDING_STRING, $fills);
             $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
             $bp->add(MYSQL_BINDING_INTEGER, $this->version);
             $query = "update " . Config::dbSurvey() . "_context set setfills = ? where suid=? and version = ? ";
@@ -423,7 +452,7 @@ class Compiler {
 
     function loadGetFillClasses() {
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             if ($row["getfills"] != "") {
@@ -458,7 +487,8 @@ class Compiler {
             /* store in db */
             global $db;
             $bp = new BindParam();
-            $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($getfillclasses), 9));
+            $ug = gzcompress(serialize($getfillclasses), 9);
+            $bp->add(MYSQL_BINDING_STRING, $ug);
             $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
             $bp->add(MYSQL_BINDING_INTEGER, $this->version);
             $query = "update " . Config::dbSurvey() . "_context set getfills = ? where suid=? and version = ? ";
@@ -490,7 +520,8 @@ class Compiler {
         /* store in db */
         global $db;
         $bp = new BindParam();
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($getfillclasses), 9));
+        $gf = gzcompress(serialize($getfillclasses), 9);
+        $bp->add(MYSQL_BINDING_STRING, $gf);
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
         $bp->add(MYSQL_BINDING_INTEGER, $this->version);
         $query = "update " . Config::dbSurvey() . "_context set getfills = ? where suid=? and version = ? ";
@@ -504,7 +535,7 @@ class Compiler {
         /* go through all group(s) if none provided */
         global $db;
         if (sizeof($groups) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_groups where suid=" . $this->suid . " order by gid asc";
+            $q = "select * from " . Config::dbSurvey() . "_groups where suid=" . prepareDatabaseString($this->suid) . " order by gid asc";
 
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
@@ -590,7 +621,7 @@ class Compiler {
         /* go through all group(s) if none provided */
         global $db;
         if (sizeof($sections) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_sections where suid=" . $this->suid . " order by seid asc";
+            $q = "select * from " . Config::dbSurvey() . "_sections where suid=" . prepareDatabaseString($this->suid) . " order by seid asc";
 
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
@@ -622,7 +653,7 @@ class Compiler {
         /* go through all group(s) if none provided */
         global $db;
         $text = array();
-        $q = "select rule from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $seid . " and rule like '%group.^%' order by rgid asc";
+        $q = "select rule from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($seid) . " and rule like '%group.^%' order by rgid asc";
         if ($result = $db->selectQuery($q)) {
             if ($db->getNumberOfRows($result) > 0) {
                 while ($row = $db->getRow($result)) {
@@ -647,7 +678,7 @@ class Compiler {
         /* go through all variable(s) if none provided */
         global $db;
         if (sizeof($variables) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . $this->suid . " order by vsid asc";
+            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . prepareDatabaseString($this->suid) . " order by vsid asc";
 
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
@@ -669,6 +700,7 @@ class Compiler {
             $text[] = $var->getEmptyMessage();
             $text[] = $var->getMinimum();
             $text[] = $var->getMaximum();
+
             $text[] = $var->getOtherValues();
             $text[] = $var->getMinimumLength();
             $text[] = $var->getMaximumLength();
@@ -679,6 +711,7 @@ class Compiler {
             $text[] = $var->getExactSelected();
             $text[] = $var->getMaximumDatesSelected();
             $text[] = $var->getFillText();
+
             $text[] = $var->getPageHeader();
             $text[] = $var->getPageFooter();
             $text[] = $var->getLabelBackButton();
@@ -1041,7 +1074,7 @@ class Compiler {
 
     function loadInlineFieldClasses() {
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             if ($row["inlinefields"] != "") {
@@ -1077,7 +1110,8 @@ class Compiler {
         /* store in db */
         global $db;
         $bp = new BindParam();
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($classes), 9));
+        $cl = gzcompress(serialize($classes), 9);
+        $bp->add(MYSQL_BINDING_STRING, $cl);
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
         $bp->add(MYSQL_BINDING_INTEGER, $this->version);
         $query = "update " . Config::dbSurvey() . "_context set inlinefields = ? where suid=? and version = ? ";
@@ -1091,7 +1125,7 @@ class Compiler {
         /* go through all variable(s) if none provided */
         global $db;
         if (sizeof($variables) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . $this->suid . " order by vsid asc";
+            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . prepareDatabaseString($this->suid) . " order by vsid asc";
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
                     while ($row = $db->getRow($result)) {
@@ -1187,7 +1221,7 @@ class Compiler {
         /* go through all group(s) if none provided */
         global $db;
         if (sizeof($groups) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_groups where suid=" . $this->suid . " order by gid asc";
+            $q = "select * from " . Config::dbSurvey() . "_groups where suid=" . prepareDatabaseString($this->suid) . " order by gid asc";
 
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
@@ -1239,7 +1273,7 @@ class Compiler {
         /* go through all group(s) if none provided */
         global $db;
         if (sizeof($sections) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_sections where suid=" . $this->suid . " order by seid asc";
+            $q = "select * from " . Config::dbSurvey() . "_sections where suid=" . prepareDatabaseString($this->suid) . " order by seid asc";
 
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
@@ -1269,20 +1303,20 @@ class Compiler {
         set_time_limit(0);
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         global $db;
-        $this->seid = $seid;
-        $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $this->seid . " order by rgid asc";
+        $this->seid = prepareDatabaseString($seid);
+        $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid) . " order by rgid asc";
         if ($rules = $db->selectQuery($q)) {
 
             if ($db->getNumberOfRows($rules) > 0) {
 
                 if ($compile == true) {
-                    $query = "replace into " . Config::dbSurvey() . "_engines (suid, version, seid) values (" . $this->suid . "," . $this->version . ", " . $this->seid . ")";
+                    $query = "replace into " . Config::dbSurvey() . "_engines (suid, version, seid) values (" . prepareDatabaseString($this->suid) . "," . prepareDatabaseString($this->version) . ", " . prepareDatabaseString($this->seid) . ")";
                     $db->executeQuery($query);
                 }
 
                 // get section name
                 $this->sectionname = "";
-                $q = "select name from " . Config::dbSurvey() . "_sections where suid=" . $this->suid . " and seid=" . $this->seid . "";
+                $q = "select name from " . Config::dbSurvey() . "_sections where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid). "";
                 if ($res = $db->selectQuery($q)) {
                     if ($db->getNumberOfRows($res) > 0) {
                         $row = $db->getRow($res);
@@ -1317,24 +1351,30 @@ class Compiler {
 
                 /* clear */
                 if ($compile == true) {
-                    $q = "delete from " . Config::dbSurvey() . "_next where suid=" . $this->suid . " and seid=" . $this->seid;
+                    $q = "delete from " . Config::dbSurvey() . "_next where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid);
                     $db->executeQuery($q);
-                    $q = "delete from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $this->seid;
+                    $q = "delete from " . Config::dbSurvey() . "_screens where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid);
                     $db->executeQuery($q);
                 }
 
                 /* add rules */
+                
                 $this->looptimes = 1;
                 $this->lasttimesloop = array();
                 $this->lastloopactions = array();
                 $this->loops = array();
                 $this->whiles = array();
+                $this->loopactions = array();
+                $this->loopcounters = array();
+                $this->loopnextrgids = array();
+                $this->whileactions = array();
+                $this->whilenextrgids = array();
                 $this->lastwhileactions = array();
                 $this->groups = array();
                 $this->groupsend = array();
                 $this->groupactions = array();
                 $this->messages = array();
-
+                
                 while ($row = $db->getRow($rules)) {
                     $this->instructions[$row["rgid"]] = new RoutingInstruction($this->suid, $this->seid, $row["rgid"], $row["rule"]);
                 }
@@ -1395,8 +1435,10 @@ class Compiler {
 
                         /* store in db */
                         $bp = new BindParam();
-                        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($engine), 9));
-                        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($this->instructions), 9));
+                        $out = gzcompress(serialize($engine), 9);
+                        $instr = gzcompress(serialize($this->instructions), 9);
+                        $bp->add(MYSQL_BINDING_STRING, $out);
+                        $bp->add(MYSQL_BINDING_STRING, $instr);
                         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
                         $bp->add(MYSQL_BINDING_INTEGER, $this->version);
                         $bp->add(MYSQL_BINDING_INTEGER, $this->seid);
@@ -1419,7 +1461,7 @@ class Compiler {
 
     function loadChecks() {
         global $db;
-        $q = "select checks from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select checks from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             if ($row["checks"] != "") {
@@ -1450,7 +1492,7 @@ class Compiler {
         /* go through all variable(s) if none provided */
         global $db;
         if (sizeof($variables) == 0) {
-            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . $this->suid . " order by vsid asc";
+            $q = "select * from " . Config::dbSurvey() . "_variables where suid=" . prepareDatabaseString($this->suid) . " order by vsid asc";
             if ($result = $db->selectQuery($q)) {
                 if ($db->getNumberOfRows($result) > 0) {
                     while ($row = $db->getRow($result)) {
@@ -1578,7 +1620,8 @@ class Compiler {
             /* store in db */
             global $db;
             $bp = new BindParam();
-            $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($checkclasses), 9));
+            $ch = gzcompress(serialize($checkclasses), 9);
+            $bp->add(MYSQL_BINDING_STRING, $ch);
             $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
             $bp->add(MYSQL_BINDING_INTEGER, $this->version);
             $query = "update " . Config::dbSurvey() . "_context set checks = ? where suid=? and version = ? ";
@@ -1606,13 +1649,21 @@ class Compiler {
         }
 
 
-
         /* empty line */
 
         if ($rule == "") {
             
         }
+        // multi line comment
+        else if (startsWith($rule, "/*")) {
+            $this->skipComments($this->cnt, $this->cnt);
+        }
 
+        // single line comment
+        else if (startsWith($rule, "//")) {
+
+            /* do nothing */
+        }
         // if condition 
         else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
 
@@ -1859,18 +1910,6 @@ class Compiler {
                 $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
                 $this->actions[] = $rgid;
             }
-        }
-
-        // multi line comment
-        else if (startsWith($rule, "/*")) {
-
-            $this->skipComments($this->cnt, $this->cnt);
-        }
-
-        // single line comment
-        else if (startsWith($rule, "//")) {
-
-            /* do nothing */
         }
 
         // end if
@@ -2134,14 +2173,24 @@ class Compiler {
                 // hide brackets before parsing
                 //$prefix = str_replace("[", TEXT_BRACKET_LEFT, $prefix);
                 //$prefix = str_replace("]", TEXT_BRACKET_RIGHT, $prefix);
+
+                $whilearr = array();
+                if (isset($this->whileactions[end($this->whiles)])) {
+                    $whilearr = $this->whileactions[end($this->whiles)];
+                }
+                $looparr = array();
+                if (isset($this->loopactions[end($this->loops)])) {
+                    $looparr = $this->loopactions[end($this->loops)];
+                }
+
                 // loop action
-                if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
+                if (sizeof($this->loops) > 0 && inArray($rgid, $looparr)) {
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
                     $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
                 }
                 // while action
-                else if (sizeof($this->whiles) > 0 && inArray($rgid, $this->whileactions[end($this->whiles)])) {
+                else if (sizeof($this->whiles) > 0 && inArray($rgid, $whilearr)) {
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
                     $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -2230,24 +2279,23 @@ class Compiler {
 
 
         // split off moveForward. part
-
         // split off moveBackward. part
         global $db;
         $split = explode(".", $rule);
         if (sizeof($split) == 2 && is_numeric($split[1])) {
             $targetrgid = $split[1];
-        }
-        else {
-            
+        } else {
+            $target = "";
             if (sizeof($split) == 2) {
                 $target = $split[1];
-            }
-            else {
+            } else {
                 unset($split[0]); // remove first
-                $target = implode(".", $split);
+                if (is_array($split)) {
+                    $target = implode(".", $split);
+                }
             }
 
-            $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $this->seid . " and rgid < " . $rgid . " and rule='" . $target . "' order by rgid desc";
+            $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid) . " and rgid < " . prepareDatabaseString($rgid) . " and rule='" . prepareDatabaseString($target) . "' order by rgid desc";
             $targetrgid = null;
 
             if ($result = $db->selectQuery($query)) {
@@ -2340,24 +2388,24 @@ class Compiler {
 
 
         // split off moveBackward. part
-
         // split off moveBackward. part
         global $db;
         $split = explode(".", $rule);
         if (is_numeric($split[1])) {
             $targetrgid = $split[1];
-        }
-        else {
-            
+        } else {
+
             if (sizeof($split) == 2 && sizeof($split) == 2) {
                 $target = $split[1];
-            }
-            else {
+            } else {
+                $target = "";
                 unset($split[0]); // remove first
-                $target = implode(".", $split);
+                if (is_array($split)) {
+                    $target = implode(".", $split);
+                }
             }
-            
-            $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $this->seid . " and rgid < " . $rgid . " and rule='" . $target . "' order by rgid desc";
+
+            $query = "select rgid from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid) . " and rgid < " . prepareDatabaseString($rgid) . " and rule='" . prepareDatabaseString($target) . "' order by rgid desc";
             $targetrgid = null;
 
             if ($result = $db->selectQuery($query)) {
@@ -2477,7 +2525,7 @@ class Compiler {
         $currentcount = $this->cnt; // remember where we are with group
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            if (isset($this->instructions[$cnt])) {
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
 
                 if ($this->instructions[$cnt]->getRgid() == $endrgid) {
 
@@ -2492,16 +2540,24 @@ class Compiler {
         // determine group
         $groupnode = new PHPParser_Node_Scalar_String(trim($group[1]));
 
+        $whilearr = array();
+        if (isset($this->whileactions[end($this->whiles)])) {
+            $whilearr = $this->whileactions[end($this->whiles)];
+        }
+        $looparr = array();
+        if (isset($this->loopactions[end($this->loops)])) {
+            $looparr = $this->loopactions[end($this->loops)];
+        }
 
         // loop action
-        if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
+        if (sizeof($this->loops) > 0 && inArray($rgid, $looparr)) {
             $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
             $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
             $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
             $groupfunctionnode->addStmt($stmt);
         }
         // while action
-        else if (sizeof($this->whiles) > 0 && inArray($rgid, $this->whileactions[end($this->whiles)])) {
+        else if (sizeof($this->whiles) > 0 && inArray($rgid, $whilearr)) {
             $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
             $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
             $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -2514,7 +2570,11 @@ class Compiler {
 
 
         // add group actions statement
-        $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $groupactions)));
+        $str = "";
+        if (is_array($groupactions)) {
+            $str = implode("~", $groupactions);
+        }
+        $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String($str));
         $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
         $args[] = new PHPParser_Node_Arg($groupnode);
         $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
@@ -2565,69 +2625,71 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                $loopactions[] = $cnt;
+                } else if ($rule == "") {
 
-                $cnt = $this->findEndDo($cnt); /* skip to the end */
-                if ($cnt == "") {
-                    //    $this->addErrorMessage(Language::errorForLoopMissingEnddo());
-                    return;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
+
+                    $loopactions[] = $cnt;
+
+                    $cnt = $this->findEndDo($cnt); /* skip to the end */
+                    if ($cnt == "") {
+                        //    $this->addErrorMessage(Language::errorForLoopMissingEnddo());                    
+                        return;
+                    }
+                } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+
+                    $loopactions[] = $cnt;
+
+                    $cnt = $this->findEndWhile($cnt); /* skip to the end */
+                    if ($cnt == "") {
+                        //    $this->addErrorMessage(Language::errorForLoopMissingEnddo());
+                        return;
+                    }
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP)) {
+
+                    $level--;
+
+                    if ($level > 0) {/* end of a group */
+
+                        //    $level--;
+                    } else {/* end of the group, so return whatever comes after the endgroup */
+
+                        break;
+                    }
                 }
-            } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
 
-                $loopactions[] = $cnt;
+                // if statement, then we add it and then skip to end 
+                else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
 
-                $cnt = $this->findEndWhile($cnt); /* skip to the end */
-                if ($cnt == "") {
-                    //    $this->addErrorMessage(Language::errorForLoopMissingEnddo());
-                    return;
+                    $loopactions[] = $cnt;
+
+                    $cnt = $this->findEndIf($cnt, ROUTING_IDENTIFY_IF);
                 }
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP)) {
 
-                $level--;
+                // sub group statement, then we add it and skip to the end
+                else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
 
-                if ($level > 0) {/* end of a group */
+                    $loopactions[] = $cnt;
 
-                    //    $level--;
-                } else {/* end of the group, so return whatever comes after the endgroup */
-
-                    break;
+                    $cnt = $this->findEndSubGroup($cnt);
+                    if ($cnt == "") {
+                        return;
+                    }
                 }
-            }
 
-            // if statement, then we add it and then skip to end 
-            else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
+                // if it is not an elseif, else, endif, endgroup or endsubgroup statement we add; i.e. assignment or question
+                else if (!(endsWith($rule, ROUTING_IDENTIFY_KEEP) || startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDDO) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
 
-                $loopactions[] = $cnt;
-
-                $cnt = $this->findEndIf($cnt, ROUTING_IDENTIFY_IF);
-            }
-
-            // sub group statement, then we add it and skip to the end
-            else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
-
-                $loopactions[] = $cnt;
-
-                $cnt = $this->findEndSubGroup($cnt);
-                if ($cnt == "") {
-                    return;
+                    $loopactions[] = $cnt;
                 }
-            }
-
-            // if it is not an elseif, else, endif, endgroup or endsubgroup statement we add; i.e. assignment or question
-            else if (!(endsWith($rule, ROUTING_IDENTIFY_KEEP) || startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDDO) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
-
-                $loopactions[] = $cnt;
             }
         }
 
@@ -2642,62 +2704,64 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                $loopactions[] = $cnt;
+                } else if ($rule == "") {
 
-                $cnt = $this->findEndDo($cnt); /* skip to the end */
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP)) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
 
-                $level--;
+                    $loopactions[] = $cnt;
 
-                if ($level > 0) {/* end of a sub group */
+                    $cnt = $this->findEndDo($cnt); /* skip to the end */
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP)) {
 
-                    //    $level--;
-                } else {/* end of the sub group, so return whatever comes after the endsubgroup */
+                    $level--;
 
-                    break;
+                    if ($level > 0) {/* end of a sub group */
+
+                        //    $level--;
+                    } else {/* end of the sub group, so return whatever comes after the endsubgroup */
+
+                        break;
+                    }
                 }
-            }
 
-            // if statement, then we add it and then skip to end 
-            else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
+                // if statement, then we add it and then skip to end 
+                else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
 
-                $loopactions[] = $cnt;
+                    $loopactions[] = $cnt;
 
-                $cnt = $this->findEndIf($cnt, ROUTING_IDENTIFY_IF);
-            }
-
-            // group statement: not allowed in subgroup, so ignore it
-            else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
-
-                $cnt = $this->findEndGroup($cnt);
-            }
-
-            // sub group statement, then we add it and skip to the end
-            else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
-
-                $loopactions[] = $cnt;
-
-                $cnt = $this->findEndSubGroup($cnt);
-                if ($cnt == "") {
-                    return;
+                    $cnt = $this->findEndIf($cnt, ROUTING_IDENTIFY_IF);
                 }
-            }
 
-            // if it is not an elseif, else, endif, endgroup or endsubgroup statement we add; i.e. assignment or question
-            else if (!(endsWith($rule, ROUTING_IDENTIFY_KEEP) || startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDDO) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
+                // group statement: not allowed in subgroup, so ignore it
+                else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
 
-                $loopactions[] = $cnt;
+                    $cnt = $this->findEndGroup($cnt);
+                }
+
+                // sub group statement, then we add it and skip to the end
+                else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
+
+                    $loopactions[] = $cnt;
+
+                    $cnt = $this->findEndSubGroup($cnt);
+                    if ($cnt == "") {
+                        return;
+                    }
+                }
+
+                // if it is not an elseif, else, endif, endgroup or endsubgroup statement we add; i.e. assignment or question
+                else if (!(endsWith($rule, ROUTING_IDENTIFY_KEEP) || startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDDO) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
+
+                    $loopactions[] = $cnt;
+                }
             }
         }
 
@@ -2737,14 +2801,10 @@ class Compiler {
         /* add these sub group actions to the top group, so we know they are part of the group structure! */
         $current = $this->groupactions[end($this->realgroups)];
         $this->groupactions[end($this->realgroups)] = array_merge($current, $groupactions);
-
         $this->groupactions[$this->groups[sizeof($this->groups) - 1]] = $groupactions;
 
-
         // add sub group function        
-
         $subgroupfunctionnode = $this->factory->method($function);
-
         $subgroupfunctionnode->makePrivate();
 
 
@@ -2753,8 +2813,12 @@ class Compiler {
 
 
         // get group actions and add statement
-
-        $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $groupactions)));
+        $str = "";
+        if (is_array($groupactions)) {
+            $str = implode("~", $groupactions);
+        }
+        
+        $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String($str));
 
         $args[] = new PHPParser_Node_Arg($groupnode);
 
@@ -2879,11 +2943,11 @@ class Compiler {
             if ($this->fillclass) {
 
                 // don't link back for fill class or next statement that is itself a loop statement
-                if ((sizeof($this->loops) > 0 && $nextrgid == end($this->loops)) || inArray($nextrgid, end($this->loopactions))) {
+                if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextrgid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextrgid, end($this->loopactions)))) {
                     $nextrgid = 0;
                 }
                 // don't link back for fill class or next statement that is itself a while statement
-                else if ((sizeof($this->whiles) > 0 && $nextrgid == end($this->whiles)) || inArray($nextrgid, end($this->whileactions))) {
+                else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextrgid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextrgid, end($this->whileactions)))) {
                     $nextrgid = 0;
                 }
 
@@ -2896,12 +2960,11 @@ class Compiler {
             // group!
             else {
                 // don't link back for group to loop begin OR next statement that is itself a loop statement OR next statement that itself is a while statement
-                //if ((sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || inArray($nextfalsergid, end($this->groupactions))) { // OLD ONE
-                if ((sizeof($this->loops) > 0 && $nextrgid == end($this->loops)) || inArray($nextrgid, end($this->loopactions))) {
+                if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextrgid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextrgid, end($this->loopactions)))) {
                     $nextrgid = 0;
-                } else if ((sizeof($this->whiles) > 0 && $nextrgid == end($this->whiles)) || inArray($nextrgid, end($this->whileactions))) {
+                } else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextrgid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextrgid, end($this->whileactions)))) {
                     $nextrgid = 0;
-                } else if ((sizeof($this->groups) > 0 && $nextrgid == end($this->groupsend)) || inArray($nextrgid, end($this->groupactions))) {
+                } else if ((is_array($this->groups) && sizeof($this->groups) > 0 && $nextrgid == end($this->groupsend)) || (is_array(end($this->groupactions)) && inArray($nextrgid, end($this->groupactions)))) {
                     $nextrgid = 0;
                 }
                 if ($nextrgid > 0 && $nextrgid < end($this->groupsend)) {
@@ -2942,7 +3005,7 @@ class Compiler {
             $found = false;
             for ($cnt = ($this->cnt + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-                if (isset($this->instructions[$cnt])) {
+                if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
 
                     $text = trim($this->instructions[$cnt]->getRule());
                     if (startsWith($text, "/*")) {
@@ -3151,7 +3214,7 @@ class Compiler {
         $rgid = trim($instruction->getRgid());
         $this->ifrgidafter = $rgid;
 
-        $ifstmt = $this->analyzeIf($rule);
+        $ifstmt = $this->analyzeIf($rule, false, $rgid);
         if (!$ifstmt) {
             return;
         }
@@ -3250,15 +3313,24 @@ class Compiler {
 
         if ($iftype == ROUTING_IDENTIFY_IF && sizeof($this->groups) == 0) {
 
+            $whilearr = array();
+            if (isset($this->whileactions[end($this->whiles)])) {
+                $whilearr = $this->whileactions[end($this->whiles)];
+            }
+            $looparr = array();
+            if (isset($this->loopactions[end($this->loops)])) {
+                $looparr = $this->loopactions[end($this->loops)];
+            }
+            
             // loop action
-            if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
+            if (sizeof($this->loops) > 0 && inArray($rgid, $looparr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
                 $setstatement = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
                 $iffunctionnode->addStmt($setstatement);
             }
             // while action
-            else if (sizeof($this->whiles) > 0 && inArray($rgid, $this->whileactions[end($this->whiles)])) {
+            else if (sizeof($this->whiles) > 0 && inArray($rgid, $whilearr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
                 $setstatement = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -3331,9 +3403,9 @@ class Compiler {
             if ($this->fillclass) {
 
                 // don't link back for fill class or next statement that is itself a loop statement
-                if ((sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || inArray($nextfalsergid, end($this->loopactions))) {
+                if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextfalsergid, end($this->loopactions)))) {
                     $nextfalsergid = 0;
-                } else if ((sizeof($this->whiles) > 0 && $nextfalsergid == end($this->whiles)) || inArray($nextfalsergid, end($this->whileactions))) {
+                } else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextfalsergid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextfalsergid, end($this->whileactions)))) {
                     $nextfalsergid = 0;
                 }
 
@@ -3345,11 +3417,11 @@ class Compiler {
             } else {
                 // don't link back for group to loop begin OR next statement that is itself a loop statement OR next statement that is itself a while statement
                 //if ((sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || inArray($nextfalsergid, end($this->groupactions))) { // OLD ONE
-                if ((sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || inArray($nextfalsergid, end($this->loopactions))) {
+                if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextfalsergid, end($this->loopactions)))) {
                     $nextfalsergid = 0;
-                } else if ((sizeof($this->whiles) > 0 && $nextfalsergid == end($this->whiles)) || inArray($nextfalsergid, end($this->whileactions))) {
+                } else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextfalsergid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextfalsergid, end($this->whileactions)))) {
                     $nextfalsergid = 0;
-                } else if ((sizeof($this->groups) > 0 && $nextfalsergid == end($this->groupsend)) || inArray($nextfalsergid, end($this->groupactions))) {
+                } else if ((is_array($this->group) && sizeof($this->groups) > 0 && $nextfalsergid == end($this->groupsend)) || (is_array(end($this->groupactions)) && inArray($nextfalsergid, end($this->groupactions)))) {
                     $nextfalsergid = 0;
                 }
                 if ($nextfalsergid > 0 && $nextfalsergid < end($this->groupsend)) {
@@ -3463,7 +3535,7 @@ class Compiler {
 
                     // check routing for .KEEP
                     global $db;
-                    $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and rule='" . trim(getBasicName($name)) . trim(ROUTING_KEEP) . "'";
+                    $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($this->suid) . " and rule='" . prepareDatabaseString(trim(getBasicName($name))) . prepareDatabaseString(trim(ROUTING_KEEP)) . "'";
                     if ($res = $db->selectQuery($q)) {
                         if ($db->getNumberOfRows($res) > 0) {
                             $keep = true;
@@ -3524,12 +3596,21 @@ class Compiler {
 
             // loop action and not fill class or group, then we keep track of where we are
             if ($this->fillclass != true && sizeof($this->groups) == 0) {
-                if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
+                
+                $whilearr = array();
+                if (isset($this->whileactions[end($this->whiles)])) {
+                    $whilearr = $this->whileactions[end($this->whiles)];
+                }
+                $looparr = array();
+                if (isset($this->loopactions[end($this->loops)])) {
+                    $looparr = $this->loopactions[end($this->loops)];
+                }
+                if (sizeof($this->loops) > 0 && inArray($rgid, $looparr)) {
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
                     $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
                     $assignfunctionnode->addStmt($stmt);
-                } else if (sizeof($this->whiles) > 0 && inArray($rgid, $this->whileactions[end($this->whiles)])) {
+                } else if (sizeof($this->whiles) > 0 && inArray($rgid, $whilearr)) {
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                     $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
                     $stmt = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -3583,8 +3664,17 @@ class Compiler {
                 /* in group, then link */
                 if (sizeof($this->groups) > 0) {
 
+                    $gr = end($this->groupactions);
+                    if (!is_array($gr)) {
+                        $gr = array();
+                    }
+                    $ge = null;
+                    if (isset($this->groupsend[end($this->groups)])) {
+                        $ge = $this->groupsend[end($this->groups)];
+                    }
+
                     // don't link if the next statement is the loop OR the last loop action OR it is a group action
-                    if ($nextrgid != $endpoint && $nextrgid < $this->groupsend[end($this->groups)] && !inArray($nextrgid, $acts) && !inArray($nextrgid, end($this->groupactions))) {
+                    if ($nextrgid != $endpoint && $nextrgid < $ge && !inArray($nextrgid, $acts) && !inArray($nextrgid, $gr)) {
                         $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
                         $stmt = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsaction));
                         $assignfunctionnode->addStmt($stmt);
@@ -3762,13 +3852,22 @@ class Compiler {
             // store where we go next from here
             $nextrgid = $this->findNextStatementAfterQuestion($rgid);
             $this->addNext($rgid, $nextrgid);
+            
+            $whilearr = array();
+            if (isset($this->whileactions[end($this->whiles)])) {
+                $whilearr = $this->whileactions[end($this->whiles)];
+            }
+            $looparr = array();
+            if (isset($this->loopactions[end($this->loops)])) {
+                $looparr = $this->loopactions[end($this->loops)];
+            }
 
             // loop action
-            if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
+            if (sizeof($this->loops) > 0 && inArray($rgid, $looparr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
                 $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
-            } else if (sizeof($this->whiles) > 0 && inArray($rgid, $this->whileactions[end($this->whiles)])) {
+            } else if (sizeof($this->whiles) > 0 && inArray($rgid, $whilearr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
                 $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -3795,12 +3894,26 @@ class Compiler {
 
             /* if this is a loop action, then loop statement will link to the next action, so no need to specify anything */
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
-            if ((sizeof($this->loops) == 0 || !inArray($rgid, $this->loopactions[end($this->loops)])) && (sizeof($this->whiles) == 0 || !inArray($rgid, $this->whileactions[end($this->whiles)]))) {
+            
+            $whilearr = array();
+            if (isset($this->whileactions[end($this->whiles)])) {
+                $whilearr = $this->whileactions[end($this->whiles)];
+            }
+            $looparr = array();
+            if (isset($this->loopactions[end($this->loops)])) {
+                $looparr = $this->loopactions[end($this->loops)];
+            }
+            $grouparr = array();
+            if (isset($this->groupactions[end($this->groups)])) {
+                $grouparr = $this->groupactions[end($this->groups)];
+            }
+            
+            if ((sizeof($this->loops) == 0 || !inArray($rgid, $looparr)) && (sizeof($this->whiles) == 0 || !inArray($rgid, $whilearr))) {
                 $groupendrgid = end($this->groupsend);
                 $nextrgid = $this->findNextStatementAfterQuestionInGroup($rgid, $groupendrgid);
 
                 /* we have an action that is not itself a group action */
-                if ($nextrgid > 0 && $nextrgid < $groupendrgid && !inArray($nextrgid, $this->groupactions[end($this->groups)]) && !inArray($nextrgid, $this->loopactions[end($this->loops)]) && !inArray($nextrgid, $this->whileactions[end($this->whiles)])) {
+                if ($nextrgid > 0 && $nextrgid < $groupendrgid && !inArray($nextrgid, $grouparr) && !inArray($nextrgid, $looparr) && !inArray($nextrgid, $whilearr)) {
                     $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
                     $stmt = new PHPParser_Node_Expr_Assign(new PHPParser_Node_Expr_Variable("temp"), new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsaction));
 
@@ -3900,12 +4013,22 @@ class Compiler {
 
             $stmts = array();
             // store where we go next from here
+            
+            $whilearr = array();
+            if (isset($this->whileactions[end($this->whiles)])) {
+                $whilearr = $this->whileactions[end($this->whiles)];
+            }
+            $looparr = array();
+            if (isset($this->loopactions[end($this->loops)])) {
+                $looparr = $this->loopactions[end($this->loops)];
+            }
+     
             // loop action
-            if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
+            if (sizeof($this->loops) > 0 && inArray($rgid, $looparr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
                 $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
-            } else if (sizeof($this->whiles) > 0 && inArray($rgid, $this->whileactions[end($this->whiles)])) {
+            } else if (sizeof($this->whiles) > 0 && inArray($rgid, $whilearr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
                 $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -4001,13 +4124,22 @@ class Compiler {
             // store where we go next from here
             $nextrgid = $this->findNextStatementAfterQuestion($rgid);
             $this->addNext($rgid, $nextrgid);
+            
+            $whilearr = array();
+            if (isset($this->whileactions[end($this->whiles)])) {
+                $whilearr = $this->whileactions[end($this->whiles)];
+            }
+            $looparr = array();
+            if (isset($this->loopactions[end($this->loops)])) {
+                $looparr = $this->loopactions[end($this->loops)];
+            }
 
             // loop action
-            if (sizeof($this->loops) > 0 && inArray($rgid, $this->loopactions[end($this->loops)])) {
+            if (sizeof($this->loops) > 0 && inArray($rgid, $looparr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->loops) - 1));
                 $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
-            } else if (sizeof($this->whiles) > 0 && inArray($rgid, $this->whileactions[end($this->whiles)])) {
+            } else if (sizeof($this->whiles) > 0 && inArray($rgid, $whilearr)) {
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
                 $s[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber(sizeof($this->whiles) - 1));
                 $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_WHILE_LEFTOFF)), $s);
@@ -4050,16 +4182,38 @@ class Compiler {
 
             /* if this is a loop action, then loop statement will link to the next action, so no need to specify anything */
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
-            if ((sizeof($this->loops) == 0 || !inArray($rgid, $this->loopactions[end($this->loops)])) && (sizeof($this->whiles) == 0 || !inArray($rgid, $this->whileactions[end($this->whiles)]))) {
+            $whilearr = array();
+            if (isset($this->whileactions[end($this->whiles)])) {
+                $whilearr = $this->whileactions[end($this->whiles)];
+            }
+            $looparr = array();
+            if (isset($this->loopactions[end($this->loops)])) {
+                $looparr = $this->loopactions[end($this->loops)];
+            }
+
+            if ((sizeof($this->loops) == 0 || !inArray($rgid, $looparr)) && (sizeof($this->whiles) == 0 || !inArray($rgid, $whilearr))) {
                 $groupendrgid = end($this->groupsend);
                 $nextrgid = $this->findNextStatementAfterQuestionInGroup($rgid, $groupendrgid);
 
                 /* we have an action that is not itself a group action */
+   
+                $grouparr = array();
+                if (isset($this->groupactions[end($this->groups)])) {
+                    $grouparr = $this->groupactions[end($this->groups)];
+                }
+                $looparr = array();
+                if (isset($this->loopactions[end($this->loops)])) {
+                    $looparr = $this->loopactions[end($this->loops)];
+                }
+                $whilearr = array();
+                if (isset($this->whileactions[end($this->whiles)])) {
+                    $whilearr = $this->whileactions[end($this->whiles)];
+                }
 
                 // next statement is redo loop, then don't
                 if ($nextrgid == end($this->loops)) {
                     $stmts[] = new PHPParser_Node_Stmt_Return($args[0]);
-                } else if ($nextrgid > 0 && $nextrgid < $groupendrgid && !inArray($nextrgid, $this->groupactions[end($this->groups)]) && !inArray($nextrgid, $this->loopactions[end($this->loops)]) && !inArray($nextrgid, $this->whileactions[end($this->whiles)])) {
+                } else if ($nextrgid > 0 && $nextrgid < $groupendrgid && !inArray($nextrgid, $grouparr) && !inArray($nextrgid, $looparr) && !inArray($nextrgid, $whilearr)) {
                     $argsaction[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
                     $stmt = new PHPParser_Node_Expr_Assign(new PHPParser_Node_Expr_Variable("temp"), new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsaction));
 
@@ -4074,6 +4228,7 @@ class Compiler {
                 } else {
                     $stmts[] = new PHPParser_Node_Stmt_Return($args[0]);
                 }
+                
             } else {
                 $stmts[] = new PHPParser_Node_Stmt_Return($args[0]);
             }
@@ -4091,19 +4246,25 @@ class Compiler {
         $looprgid = -1;
         $looptimes = -1;
         $whilergid = -1;
-        if (sizeof($this->loops) > 0) { // nested loop, then store any previous loop times
-            $looptimes = implode("~", $this->lasttimesloop); //end($this->loops);
-            $looprgid = implode("~", $this->loops); //end($this->loops);
+        if (is_array($this->loops)&& sizeof($this->loops) > 0) { // nested loop, then store any previous loop times
+            if (is_array($this->lasttimesloop)) {
+                $looptimes = implode("~", $this->lasttimesloop); //end($this->loops);
+            }
+            if (is_array($this->loops)) {
+                $looprgid = implode("~", $this->loops); //end($this->loops);
+            }
         }
-        if (sizeof($this->whiles) > 0) { // nested loop, then store any previous loop times
-            $whilergid = implode("~", $this->whiles); //end($this->loops);
+        if (is_array($this->whiles) && sizeof($this->whiles) > 0) { // nested loop, then store any previous loop times
+            if (is_array($this->whiles)) {
+                $whilergid = implode("~", $this->whiles); //end($this->loops);
+            }
         }
         $ifrgid = 0;
-        if (sizeof($this->elseifreset) > 0) {
+        if (is_array($this->elseifreset) && sizeof($this->elseifreset) > 0) {
             $ifrgid = end($this->elseifreset);
             array_pop($this->elseifreset);
         }
-        if (sizeof($this->groups) > 0) {
+        if (is_array($this->groups) && sizeof($this->groups) > 0) {
             $ifrgid = 0;
         }
 
@@ -4157,7 +4318,7 @@ class Compiler {
         //if ($pos < 0) {
         if (endsWith(strtoupper($rule), ROUTING_IDENTIFY_DO) == false) {
             for ($cnt = ($this->cnt + 1); $cnt <= sizeof($this->instructions); $cnt++) {
-                if (isset($this->instructions[$cnt])) {
+                if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
                     $text = trim($this->instructions[$cnt]->getRule());
                     if (startsWith($text, "/*")) {
                         $this->skipComments($cnt, $cnt);
@@ -4308,7 +4469,7 @@ class Compiler {
         //    return;
         //}
         // not in group
-        $outerlooprgids = implode("~", $this->loops);
+        $outerlooprgids = implode("~", $this->loops);        
         $this->loops[] = $rgid;
         if (sizeof($this->groups) == 0 && $this->fillclass != true) {
             $this->actions[] = $rgid;
@@ -4360,7 +4521,11 @@ class Compiler {
                 }
             }
 
-            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $this->findStatementsInLoop($rgid))));
+            $arr = $this->findStatementsInLoop($rgid);
+            if (!is_array($arr)) {
+                $arr = array();
+            }
+            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $arr)));
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String($outerloopcounters));
@@ -4382,8 +4547,12 @@ class Compiler {
         // in group OR fill class
         else {
 
+            $arr = $this->findStatementsInLoop($rgid);
+            if (!is_array($arr)) {
+                $arr = array();
+            }
             $nextrgid = $this->findNextAfterForLoop($rgid); // always go to next
-            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $this->findStatementsInLoop($rgid))));
+            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $arr)));
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($reversefor));
@@ -4409,74 +4578,76 @@ class Compiler {
         $level = 1;
         $loopactions = array();
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
-            $rule = trim($this->instructions[$cnt]->getRule());
-            if (startsWith($rule, "/*")) {
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_FOR)) {
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
+                if (startsWith($rule, "/*")) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested for loop */
-                $loopactions[] = $cnt; // . LOOP_MARKER;
-                $cnt = $this->findEndDo($cnt); /* skip to the end */
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
-                $level--;
-                if ($level > 0) {/* end of a for loop */
-                    //    $level--;
-                } else {/* end of the if, so return whatever comes after the endif */
-                    break;
+                } else if ($rule == "") {
+
+                } else if (startsWith($rule, ROUTING_IDENTIFY_FOR)) {
+
+                    /* nested for loop */
+                    $loopactions[] = $cnt; // . LOOP_MARKER;
+                    $cnt = $this->findEndDo($cnt); /* skip to the end */
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
+                    $level--;
+                    if ($level > 0) {/* end of a for loop */
+                        //    $level--;
+                    } else {/* end of the if, so return whatever comes after the endif */
+                        break;
+                    }
                 }
-            }
 
-            // if statement, then we add it and then skip to end 
-            else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
-                $loopactions[] = $cnt;
-                $cnt = $this->findEndIf($cnt);
-            }
-            // while statement, then we add it and then skip to end 
-            else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
-                $loopactions[] = $cnt;
-                $cnt = $this->findEndWhile($cnt);
-            }
-            // group statement we add 
-            else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
-                $loopactions[] = $cnt;
-                $cnt = $this->findEndGroup($cnt);
-            }
-            // sub group statement we add/ignore 
-            else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
-
-                // treat as loop action if overall group is not a loop action itself
-                if (inArray(end($this->groups), $loopactions) == false) {
+                // if statement, then we add it and then skip to end 
+                else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
                     $loopactions[] = $cnt;
+                    $cnt = $this->findEndIf($cnt);
                 }
-                $cnt = $this->findEndSubGroup($cnt);
-                if ($cnt == "") {
-                    return;
+                // while statement, then we add it and then skip to end 
+                else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+                    $loopactions[] = $cnt;
+                    $cnt = $this->findEndWhile($cnt);
                 }
-            }
-            // if it is not an elseif, else, endif, or endcombine statement we add; i.e. assignment or question
-            else if (!(startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
+                // group statement we add 
+                else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
+                    $loopactions[] = $cnt;
+                    $cnt = $this->findEndGroup($cnt);
+                }
+                // sub group statement we add/ignore 
+                else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
 
-                if ($this->fillclass == false) {
-                    // check for .KEEP
-                    if (!endsWith($rule, ROUTING_IDENTIFY_KEEP)) {
+                    // treat as loop action if overall group is not a loop action itself
+                    if (inArray(end($this->groups), $loopactions) == false) {
                         $loopactions[] = $cnt;
                     }
-                } else {
+                    $cnt = $this->findEndSubGroup($cnt);
+                    if ($cnt == "") {
+                        return;
+                    }
+                }
+                // if it is not an elseif, else, endif, or endcombine statement we add; i.e. assignment or question
+                else if (!(startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
 
-                    // hide quoted text
-                    $excluded = array();
-                    $rule = excludeText($rule, $excluded);
+                    if ($this->fillclass == false) {
+                        // check for .KEEP
+                        if (!endsWith($rule, ROUTING_IDENTIFY_KEEP)) {
+                            $loopactions[] = $cnt;
+                        }
+                    } else {
 
-                    // hide module dot notations
-                    $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+                        // hide quoted text
+                        $excluded = array();
+                        $rule = excludeText($rule, $excluded);
 
-                    // only allow assignments (no questions OR .KEEP)
-                    if (contains($rule, ":=")) {
-                        $loopactions[] = $cnt;
+                        // hide module dot notations
+                        $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+
+                        // only allow assignments (no questions OR .KEEP)
+                        if (contains($rule, ":=")) {
+                            $loopactions[] = $cnt;
+                        }
                     }
                 }
             }
@@ -4494,76 +4665,78 @@ class Compiler {
         $whileactions = array();
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
-            if (startsWith($rule, "/*")) {
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
+                if (startsWith($rule, "/*")) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested while loop */
-                $whileactions[] = $cnt; // . LOOP_MARKER;
-                $cnt = $this->findEndWhile($cnt); /* skip to the end */
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
-                $level--;
-                if ($level > 0) {/* end of a for loop */
-                    //    $level--;
-                } else {/* end of the while, so return whatever comes after the endwhile */
-                    break;
+                } else if ($rule == "") {
+
+                } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+
+                    /* nested while loop */
+                    $whileactions[] = $cnt; // . LOOP_MARKER;
+                    $cnt = $this->findEndWhile($cnt); /* skip to the end */
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
+                    $level--;
+                    if ($level > 0) {/* end of a for loop */
+                        //    $level--;
+                    } else {/* end of the while, so return whatever comes after the endwhile */
+                        break;
+                    }
                 }
-            }
 
-            // if statement, then we add it and then skip to end 
-            else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
-                $whileactions[] = $cnt;
-                $cnt = $this->findEndIf($cnt);
-            }
-            // for statement, then we add it and then skip to end 
-            else if (startsWith($rule, ROUTING_IDENTIFY_FOR)) {
-                $whileactions[] = $cnt;
-                $cnt = $this->findEndDo($cnt);
-            }
-
-            // group statement we add 
-            else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
-                $whileactions[] = $cnt;
-                $cnt = $this->findEndGroup($cnt);
-            }
-            // sub group statement we add/ignore 
-            else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
-
-                // treat as loop action if overall group is not a loop action itself
-                if (inArray(end($this->groups), $loopactions) == false) {
+                // if statement, then we add it and then skip to end 
+                else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
                     $whileactions[] = $cnt;
+                    $cnt = $this->findEndIf($cnt);
                 }
-                $cnt = $this->findEndSubGroup($cnt);
-                if ($cnt == "") {
-                    return;
+                // for statement, then we add it and then skip to end 
+                else if (startsWith($rule, ROUTING_IDENTIFY_FOR)) {
+                    $whileactions[] = $cnt;
+                    $cnt = $this->findEndDo($cnt);
                 }
-            }
 
-            // if it is not an elseif, else, endif, or endcombine statement we add; i.e. assignment or question
-            else if (!(startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
+                // group statement we add 
+                else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
+                    $whileactions[] = $cnt;
+                    $cnt = $this->findEndGroup($cnt);
+                }
+                // sub group statement we add/ignore 
+                else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
 
-                if ($this->fillclass == false) {
-                    // check for .KEEP
-                    if (!endsWith($rule, ROUTING_IDENTIFY_KEEP)) {
+                    // treat as loop action if overall group is not a loop action itself
+                    if (inArray(end($this->groups), $loopactions) == false) {
                         $whileactions[] = $cnt;
                     }
-                } else {
+                    $cnt = $this->findEndSubGroup($cnt);
+                    if ($cnt == "") {
+                        return;
+                    }
+                }
 
-                    // hide quoted text
-                    $excluded = array();
-                    $rule = excludeText($rule, $excluded);
+                // if it is not an elseif, else, endif, or endcombine statement we add; i.e. assignment or question
+                else if (!(startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE) || startsWith($rule, ROUTING_IDENTIFY_ENDIF) || startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP))) {
 
-                    // hide module dot notations
-                    $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+                    if ($this->fillclass == false) {
+                        // check for .KEEP
+                        if (!endsWith($rule, ROUTING_IDENTIFY_KEEP)) {
+                            $whileactions[] = $cnt;
+                        }
+                    } else {
 
-                    // only allow assignments (no questions OR .KEEP)
-                    if (contains($rule, ":=")) {
-                        $whileactions[] = $cnt;
+                        // hide quoted text
+                        $excluded = array();
+                        $rule = excludeText($rule, $excluded);
+
+                        // hide module dot notations
+                        $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+
+                        // only allow assignments (no questions OR .KEEP)
+                        if (contains($rule, ":=")) {
+                            $whileactions[] = $cnt;
+                        }
                     }
                 }
             }
@@ -4600,7 +4773,7 @@ class Compiler {
         //if ($pos < 0) {
         if (endsWith(strtoupper($rule), ROUTING_IDENTIFY_DO) == false) {
             for ($cnt = ($this->cnt + 1); $cnt <= sizeof($this->instructions); $cnt++) {
-                if (isset($this->instructions[$cnt])) {
+                if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
                     $text = trim($this->instructions[$cnt]->getRule());
                     if (startsWith($text, "/*")) {
                         $this->skipComments($cnt, $cnt);
@@ -4630,7 +4803,7 @@ class Compiler {
 
         // strip do
         $rule = trim(substr($rule, 0, $pos));
-        $condition = $this->analyzeIf(ROUTING_IDENTIFY_IF . $rule . ' ' . ROUTING_THEN, true);
+        $condition = $this->analyzeIf(ROUTING_IDENTIFY_IF . $rule . ' ' . ROUTING_THEN, true, $rgid);
 
         /* create do function */
         $whilefunctionnode = $this->factory->method($function);
@@ -4684,8 +4857,13 @@ class Compiler {
                     $stmts[] = new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_LOOP_LEFTOFF)), $s);
                 }
             }
+            
+            $arr = $this->findStatementsInWhile($rgid);
+            if (!is_array($arr)) {
+                $arr = array();
+            }
 
-            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $this->findStatementsInWhile($rgid))));
+            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $arr)));
             $condition = rtrim($condition, ';');
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($condition));  //there is no boolean?
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
@@ -4698,9 +4876,14 @@ class Compiler {
 
         // in group OR fill class
         else {
+            
+            $arr = $this->findStatementsInWhile($rgid);
+            if (!is_array($arr)) {
+                $arr = array();
+            }
 
             $nextrgid = $this->findNextAfterWhile($rgid); // always go to next            
-            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $this->findStatementsInWhile($rgid))));
+            $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_String(implode("~", $arr)));
             //$args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($condition));  //there is no boolean?
             //$args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
             //$args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($nextrgid));
@@ -4744,39 +4927,41 @@ class Compiler {
 
         $level = 1;
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
-            $rule = trim($this->instructions[$cnt]->getRule());
-            if (startsWith($rule, "/*")) {
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_FOR)) {
-                $level++;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
-                $level--;
-                if ($level > 0) {/* end of a for loop */
-                    //    $level--;
-                } else {/* end of the do */
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
+                if (startsWith($rule, "/*")) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                    // not nested, so return whatever comes after the enddo
-                    if ($nestedloop == false) {
-                        return $this->findNextStatement($cnt, true);
-                    }
+                } else if ($rule == "") {
 
-                    // nested loop, then see if we have a statement BEFORE the outer enddo
-                    else {
-                        $endouterdo = $this->findEndDo($cnt, $this->instructions);
-                        $next = $this->findNextStatement($cnt, true);
+                } else if (startsWith($rule, ROUTING_IDENTIFY_FOR)) {
+                    $level++;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
+                    $level--;
+                    if ($level > 0) {/* end of a for loop */
+                        //    $level--;
+                    } else {/* end of the do */
 
-                        // next statement before end of outer loop
-                        if ($next < $endouterdo) {
-                            return $next;
+                        // not nested, so return whatever comes after the enddo
+                        if ($nestedloop == false) {
+                            return $this->findNextStatement($cnt, true);
                         }
 
-                        // not next statement before end of outer loop, then back to outer loop statement
+                        // nested loop, then see if we have a statement BEFORE the outer enddo
                         else {
-                            return $this->loops[sizeof($this->loops) - 2];
+                            $endouterdo = $this->findEndDo($cnt, $this->instructions);
+                            $next = $this->findNextStatement($cnt, true);
+
+                            // next statement before end of outer loop
+                            if ($next < $endouterdo) {
+                                return $next;
+                            }
+
+                            // not next statement before end of outer loop, then back to outer loop statement
+                            else {
+                                return $this->loops[sizeof($this->loops) - 2];
+                            }
                         }
                     }
                 }
@@ -4792,39 +4977,41 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {    
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
-                $level++;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
-                $level--;
-                if ($level > 0) {/* end of a for loop */
-                    //    $level--;
-                } else {/* end of the do */
+                if (startsWith($rule, "/*")) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                    // not nested, so return whatever comes after the enddo
-                    if ($nestedloop == false) {
-                        return $this->findNextStatement($cnt, true);
-                    }
+                } else if ($rule == "") {
 
-                    // nested loop, then see if we have a statement BEFORE the outer endwhile
-                    else {
-                        $endouterdo = $this->findEndWhile($cnt, $this->instructions);
-                        $next = $this->findNextStatement($cnt, true);
+                } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+                    $level++;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
+                    $level--;
+                    if ($level > 0) {/* end of a for loop */
+                        //    $level--;
+                    } else {/* end of the do */
 
-                        // next statement before end of outer loop
-                        if ($next < $endouterdo) {
-                            return $next;
+                        // not nested, so return whatever comes after the enddo
+                        if ($nestedloop == false) {
+                            return $this->findNextStatement($cnt, true);
                         }
-                        // not next statement before end of outer while, then back to outer while statement
+
+                        // nested loop, then see if we have a statement BEFORE the outer endwhile
                         else {
-                            return $this->whiles[sizeof($this->whiles) - 2];
+                            $endouterdo = $this->findEndWhile($cnt, $this->instructions);
+                            $next = $this->findNextStatement($cnt, true);
+
+                            // next statement before end of outer loop
+                            if ($next < $endouterdo) {
+                                return $next;
+                            }
+                            // not next statement before end of outer while, then back to outer while statement
+                            else {
+                                return $this->whiles[sizeof($this->whiles) - 2];
+                            }
                         }
                     }
                 }
@@ -4838,7 +5025,7 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            if (isset($this->instructions[$cnt])) {
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
 
                 $rule = trim($this->instructions[$cnt]->getRule());
 
@@ -4905,27 +5092,29 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {    
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested if inside an if/elseif */
+                } else if ($rule == "") {
 
-                $level++;
-            } else if (startsWith($rule, ROUTING_ENDIF)) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
 
-                $level--;
+                    /* nested if inside an if/elseif */
 
-                if ($level == 0) {
+                    $level++;
+                } else if (startsWith($rule, ROUTING_ENDIF)) {
 
-                    return $cnt;
+                    $level--;
+
+                    if ($level == 0) {
+
+                        return $cnt;
+                    }
                 }
             }
         }
@@ -4939,28 +5128,30 @@ class Compiler {
 
         for ($cnt = ($rgid - 1); $cnt > 0; $cnt--) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {    
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "*/")) {
+                if (startsWith($rule, "*/")) {
 
-                $this->skipReverseComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
+                    $this->skipReverseComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested for inside a for */
+                } else if ($rule == "") {
 
-                $level--;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
 
-                if ($level == 0) {
+                    /* nested for inside a for */
 
-                    return $cnt;
+                    $level--;
+
+                    if ($level == 0) {
+
+                        return $cnt;
+                    }
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDIF)) {
+
+                    $level++;
                 }
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDIF)) {
-
-                $level++;
             }
         }
     }
@@ -4971,26 +5162,28 @@ class Compiler {
 
         for ($cnt = ($rgid - 1); $cnt > 0; $cnt--) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested for inside a for */
+                } else if ($rule == "") {
 
-                $level--;
-                if ($level == 0) {
-                    return $cnt;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
+
+                    /* nested for inside a for */
+
+                    $level--;
+                    if ($level == 0) {
+                        return $cnt;
+                    }
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
+
+                    $level++;
                 }
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
-
-                $level++;
             }
         }
     }
@@ -5006,27 +5199,28 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {    
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested for inside a for */
+                } else if ($rule == "") {
 
-                $level++;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_FOR) || startsWith($rule, ROUTING_IDENTIFY_FORREVERSE)) {
 
-                $level--;
+                    /* nested for inside a for */
 
-                if ($level == 0) {
+                    $level++;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {
 
-                    return $cnt;
+                    $level--;
+
+                    if ($level == 0) {
+                        return $cnt;
+                    }
                 }
             }
         }
@@ -5040,26 +5234,28 @@ class Compiler {
 
         for ($cnt = ($rgid - 1); $cnt > 0; $cnt--) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested while inside a while */
+                } else if ($rule == "") {
 
-                $level--;
-                if ($level == 0) {
-                    return $cnt;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+
+                    /* nested while inside a while */
+
+                    $level--;
+                    if ($level == 0) {
+                        return $cnt;
+                    }
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
+
+                    $level++;
                 }
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
-
-                $level++;
             }
         }
     }
@@ -5075,27 +5271,29 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested for inside a for */
+                } else if ($rule == "") {
 
-                $level++;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_WHILE)) {
 
-                $level--;
+                    /* nested for inside a for */
 
-                if ($level == 0) {
+                    $level++;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {
 
-                    return $cnt;
+                    $level--;
+
+                    if ($level == 0) {
+
+                        return $cnt;
+                    }
                 }
             }
         }
@@ -5109,27 +5307,29 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested combine (should never happen) */
+                } else if ($rule == "") {
 
-                $level++;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP)) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_GROUP)) {
 
-                $level--;
+                    /* nested combine (should never happen) */
 
-                if ($level == 0) {
+                    $level++;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP)) {
 
-                    return $cnt;
+                    $level--;
+
+                    if ($level == 0) {
+
+                        return $cnt;
+                    }
                 }
             }
         }
@@ -5143,27 +5343,29 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested subgroup */
+                } else if ($rule == "") {
 
-                $level++;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP)) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
 
-                $level--;
+                    /* nested subgroup */
 
-                if ($level == 0) {
+                    $level++;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP)) {
 
-                    return $cnt;
+                    $level--;
+
+                    if ($level == 0) {
+
+                        return $cnt;
+                    }
                 }
             }
         }
@@ -5177,48 +5379,120 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            $rule = trim($this->instructions[$cnt]->getRule());
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                /* nested if inside an if/elseif */
+                } else if ($rule == "") {
 
-                $level++;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ELSEIF)) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_IF)) {
 
-                if ($level == 1) { /* not a nested elseif */
+                    /* nested if inside an if/elseif */
 
-                    return $cnt;
-                } else { /* nested elseif */
+                    $level++;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ELSEIF)) {
+
+                    if ($level == 1) { /* not a nested elseif */
+
+                        return $cnt;
+                    } else { /* nested elseif */
+                    }
+                } else if (startsWith($rule, ROUTING_ENDIF)) {
+
+                    $level--;
+
+                    if ($level > 0) {/* end of a nested if */
+                    } else {/* end of the if, so return whatever comes after the endif */
+
+                        return $this->findNextStatement($cnt, true); // todo: do we need to call this ignore an else/elseif?
+                    }
+                } else if (startsWith($rule, ROUTING_ELSE)) {
+
+                    // if/elseif statement, so this else could be the next one
+
+                    if ($level == 1) { /* not a nested else */
+
+                        return $cnt;
+                    } else { /* nested else */
+                    }
+                } else {
+
+                    if ($level == 0) {
+
+
+
+                        // not a fill class, then allow more
+
+                        if ($this->fillclass == false) {
+
+                            /* ignore. KEEP */
+                            if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false) {
+                                return $cnt;
+                            }
+                        } else {
+
+
+
+                            // no groups
+
+                            if (startsWith($rule, ROUTING_IDENTIFY_GROUP) || startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
+
+                            } else {
+
+                                // hide quoted text
+
+                                $excluded = array();
+
+                                $rule = excludeText($rule, $excluded);
+
+
+
+                                // hide module dot notations
+                                $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+
+
+
+                                // only allow if/for/assignments (no questions OR .KEEP)
+                                if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false && contains($rule, " ")) {
+                                    return $cnt;
+                                }
+                            }
+                        }
+                    }
                 }
-            } else if (startsWith($rule, ROUTING_ENDIF)) {
+            }
+        }
+    }
 
-                $level--;
+    function findNextStatementAfterQuestion($rgid) {
 
-                if ($level > 0) {/* end of a nested if */
-                } else {/* end of the if, so return whatever comes after the endif */
+        for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-                    return $this->findNextStatement($cnt, true); // todo: do we need to call this ignore an else/elseif?
-                }
-            } else if (startsWith($rule, ROUTING_ELSE)) {
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-                // if/elseif statement, so this else could be the next one
+                if (startsWith($rule, "/*")) {
 
-                if ($level == 1) { /* not a nested else */
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                    return $cnt;
-                } else { /* nested else */
-                }
-            } else {
+                } else if ($rule == "") {
 
-                if ($level == 0) {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE)) {
+
+                    $cnt = $this->findEndIf($cnt);
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {// we were inside a loop, then go back to start of loop (we exit only inside the loop code, not here)
+                    $cnt = $this->findFor($cnt) - 1;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {// we were inside a while, then go back to start of while (we exit only inside the while code, not here)
+                    $cnt = $this->findWhile($cnt) - 1;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDIF)) {
+
+                    /* we were inside a complex statement and are going out now, so find the next statement on the level above */
+                } else {
 
 
 
@@ -5237,7 +5511,7 @@ class Compiler {
                         // no groups
 
                         if (startsWith($rule, ROUTING_IDENTIFY_GROUP) || startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
-                            
+
                         } else {
 
                             // hide quoted text
@@ -5249,6 +5523,7 @@ class Compiler {
 
 
                             // hide module dot notations
+
                             $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
 
 
@@ -5257,75 +5532,6 @@ class Compiler {
                             if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false && contains($rule, " ")) {
                                 return $cnt;
                             }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    function findNextStatementAfterQuestion($rgid) {
-
-        for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
-
-            $rule = trim($this->instructions[$cnt]->getRule());
-
-            if (startsWith($rule, "/*")) {
-
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE)) {
-
-                $cnt = $this->findEndIf($cnt);
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {// we were inside a loop, then go back to start of loop (we exit only inside the loop code, not here)
-                $cnt = $this->findFor($cnt) - 1;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDWHILE)) {// we were inside a while, then go back to start of while (we exit only inside the while code, not here)
-                $cnt = $this->findWhile($cnt) - 1;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDIF)) {
-
-                /* we were inside a complex statement and are going out now, so find the next statement on the level above */
-            } else {
-
-
-
-                // not a fill class, then allow more
-
-                if ($this->fillclass == false) {
-
-                    /* ignore. KEEP */
-                    if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false) {
-                        return $cnt;
-                    }
-                } else {
-
-
-
-                    // no groups
-
-                    if (startsWith($rule, ROUTING_IDENTIFY_GROUP) || startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
-                        
-                    } else {
-
-                        // hide quoted text
-
-                        $excluded = array();
-
-                        $rule = excludeText($rule, $excluded);
-
-
-
-                        // hide module dot notations
-
-                        $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
-
-
-
-                        // only allow if/for/assignments (no questions OR .KEEP)
-                        if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false && contains($rule, " ")) {
-                            return $cnt;
                         }
                     }
                 }
@@ -5341,62 +5547,65 @@ class Compiler {
             if ($cnt == $groupend) {
                 break;
             }
-            $rule = trim($this->instructions[$cnt]->getRule());
+            
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
+                $rule = trim($this->instructions[$cnt]->getRule());
 
-            if (startsWith($rule, "/*")) {
+                if (startsWith($rule, "/*")) {
 
-                $this->skipComments($cnt, $cnt);
-            } else if (startsWith($rule, "//")) {
-                
-            } else if ($rule == "") {
-                
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE)) {
+                    $this->skipComments($cnt, $cnt);
+                } else if (startsWith($rule, "//")) {
 
-                $cnt = $this->findEndIf($cnt);
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {// we were inside a loop, then go back to start of loop (we exit only inside the loop code, not here)
-                $cnt = $this->findFor($cnt) - 1;
-            } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDIF)) {
+                } else if ($rule == "") {
 
-                /* we were inside a complex statement and are going out now, so find the next statement on the level above */
-            } else {
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ELSEIF) || startsWith($rule, ROUTING_IDENTIFY_ELSE)) {
 
+                    $cnt = $this->findEndIf($cnt);
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDDO)) {// we were inside a loop, then go back to start of loop (we exit only inside the loop code, not here)
+                    $cnt = $this->findFor($cnt) - 1;
+                } else if (startsWith($rule, ROUTING_IDENTIFY_ENDGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDSUBGROUP) || startsWith($rule, ROUTING_IDENTIFY_ENDIF)) {
 
-
-                // groups cannot occur in a fill class
-
-                if ($this->fillclass == false) {
-
-                    /* ignore. KEEP */
-                    if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false) {
-                        return $cnt;
-                    }
+                    /* we were inside a complex statement and are going out now, so find the next statement on the level above */
                 } else {
 
 
 
-                    // no groups
+                    // groups cannot occur in a fill class
 
-                    if (startsWith($rule, ROUTING_IDENTIFY_GROUP) || startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
-                        
+                    if ($this->fillclass == false) {
+
+                        /* ignore. KEEP */
+                        if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false) {
+                            return $cnt;
+                        }
                     } else {
 
-                        // hide quoted text
-
-                        $excluded = array();
-
-                        $rule = excludeText($rule, $excluded);
 
 
+                        // no groups
 
-                        // hide module dot notations
+                        if (startsWith($rule, ROUTING_IDENTIFY_GROUP) || startsWith($rule, ROUTING_IDENTIFY_SUBGROUP)) {
 
-                        $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+                        } else {
+
+                            // hide quoted text
+
+                            $excluded = array();
+
+                            $rule = excludeText($rule, $excluded);
 
 
 
-                        // only allow if/for/assignments (no questions OR .KEEP)
-                        if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false && contains($rule, " ")) {
-                            return $cnt;
+                            // hide module dot notations
+
+                            $rule = hideModuleNotations($rule, TEXT_MODULE_DOT);
+
+
+
+                            // only allow if/for/assignments (no questions OR .KEEP)
+                            if (endsWith($rule, ROUTING_IDENTIFY_KEEP) == false && contains($rule, " ")) {
+                                return $cnt;
+                            }
                         }
                     }
                 }
@@ -5431,7 +5640,7 @@ class Compiler {
 
         for ($cnt = ($rgid + 1); $cnt <= sizeof($this->instructions); $cnt++) {
 
-            if (isset($this->instructions[$cnt])) {
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
 
                 $rule = trim($this->instructions[$cnt]->getRule());
 
@@ -5472,7 +5681,7 @@ class Compiler {
 
         for ($cnt = ($rgid - 1); $cnt >= 0; $cnt--) {
 
-            if (isset($this->instructions[$cnt])) {
+            if (isset($this->instructions[$cnt]) && $this->instructions[$cnt] !=  null) {
 
                 $rule = trim($this->instructions[$cnt]->getRule());
 
@@ -5782,7 +5991,7 @@ class Compiler {
 
                 // real function call
                 if (function_exists($name)) {
-                    
+
                     if (!inArray($name, getAllowedRoutingFunctions()) || inArray($name, getForbiddenRoutingFunctions())) {
                         $this->addErrorMessage(Language::messageCheckerFunctionNotAllowed($name));
                         $name = "INVALID";
@@ -5938,7 +6147,13 @@ class Compiler {
                 $stmt_name = new PHPParser_Node_Stmt_Return($stmt->value->args[0]);
                 //$stmt = new PHPParser_Node_Stmt_Return($stmt->value);
             } else {
-                $stmt_name = new PHPParser_Node_Stmt_Return($stmt->value->name->args[0]->value);
+                if (!isset($stmt->value->name->args[0]->value)) {
+                    $stmt_name = new PHPParser_Node_Scalar_String($rule);
+                    $this->messages[] = $this->addErrorMessage(Language::errorVariableNotFound($rule));
+                }
+                else {
+                    $stmt_name = new PHPParser_Node_Stmt_Return($stmt->value->name->args[0]->value);
+                }
                 //$stmt = new PHPParser_Node_Stmt_Return($stmt->value->name);
             }
         } catch (PHPParser_Error $e) {
@@ -6179,13 +6394,13 @@ class Compiler {
 
         global $db;
 
-        $query = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $query = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
 
         $result = $db->selectQuery($query);
 
         if ($db->getNumberOfRows($result) == 0) {
 
-            $query = "replace into " . Config::dbSurvey() . "_context (suid, version) values (" . $this->suid . "," . $this->version . ")";
+            $query = "replace into " . Config::dbSurvey() . "_context (suid, version) values (" . prepareDatabaseString($this->suid) . "," . prepareDatabaseString($this->version) . ")";
 
             $db->executeQuery($query);
         }
@@ -6208,7 +6423,7 @@ class Compiler {
 
     function loadVariableDescriptives() {
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             return unserialize(gzuncompress($row["variables"]));
@@ -6246,7 +6461,8 @@ class Compiler {
         /* store in db */
         global $db;
         $bp = new BindParam();
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($current), 9));
+        $varstex = gzcompress(serialize($current), 9);
+        $bp->add(MYSQL_BINDING_STRING, $varstex);
 
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
         $bp->add(MYSQL_BINDING_INTEGER, $this->version);
@@ -6258,7 +6474,7 @@ class Compiler {
 
     function loadSections() {
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             return unserialize(gzuncompress($row["sections"]));
@@ -6294,7 +6510,8 @@ class Compiler {
         /* store in db */
         global $db;
         $bp = new BindParam();
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($current), 9));
+        $ss = gzcompress(serialize($current), 9);
+        $bp->add(MYSQL_BINDING_STRING, $ss);
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
         $bp->add(MYSQL_BINDING_INTEGER, $this->version);
         $query = "update " . Config::dbSurvey() . "_context set sections = ? where suid= ? and version = ?";
@@ -6305,7 +6522,7 @@ class Compiler {
 
     function loadTypes() {
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             return unserialize(gzuncompress($row["types"]));
@@ -6339,7 +6556,8 @@ class Compiler {
         /* store in db */
         global $db;
         $bp = new BindParam();
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($current), 9));
+        $typ = gzcompress(serialize($current), 9);
+        $bp->add(MYSQL_BINDING_STRING, $typ);
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
         $bp->add(MYSQL_BINDING_INTEGER, $this->version);
         $query = "update " . Config::dbSurvey() . "_context set types = ? where suid= ? and version = ?";
@@ -6350,7 +6568,7 @@ class Compiler {
 
     function loadGroups() {
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . $this->suid . " and version=" . $this->version;
+        $q = "select * from " . Config::dbSurvey() . "_context where suid=" . prepareDatabaseString($this->suid) . " and version=" . prepareDatabaseString($this->version);
         $r = $db->selectQuery($q);
         if ($row = $db->getRow($r)) {
             return unserialize(gzuncompress($row["groups"]));
@@ -6386,7 +6604,8 @@ class Compiler {
         /* store in db */
         global $db;
         $bp = new BindParam();
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($current), 9));
+        $grtext = gzcompress(serialize($current), 9);
+        $bp->add(MYSQL_BINDING_STRING, $grtext);
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
         $bp->add(MYSQL_BINDING_INTEGER, $this->version);
         $query = "update " . Config::dbSurvey() . "_context set groups = ? where suid= ? and version = ?";
@@ -6421,8 +6640,8 @@ class Compiler {
         /* store in db */
 
         $bp = new BindParam();
-
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($settings), 9));
+        $set = gzcompress(serialize($settings), 9);
+        $bp->add(MYSQL_BINDING_STRING, $set);
 
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
 
@@ -6443,7 +6662,7 @@ class Compiler {
         // check for any missing for loop statements prior to a nested for loop
         //$q1 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $seid . " and locate('~', outerlooptimes) != 0";
 
-        $q1 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $seid;
+        $q1 = "select * from " . Config::dbSurvey() . "_screens where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($seid);
 
         $toprocess = array();
 
@@ -6506,7 +6725,7 @@ class Compiler {
 
                 $maxback = "";
 
-                $q2 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $seid . " and number < " . $lookbefore . " and outerlooptimes=-1 order by number desc";
+                $q2 = "select * from " . Config::dbSurvey() . "_screens where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($seid) . " and number < " . prepareDatabaseString($lookbefore) . " and outerlooptimes=-1 order by number desc";
 
                 $res2 = $db->selectQuery($q2);
 
@@ -6522,7 +6741,7 @@ class Compiler {
 
                 // any entries that are with the right loop count
 
-                $q2 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $seid . " and number > " . $maxback . " and number < " . $lookbefore . " and looptimes=" . $o . " order by number desc";
+                $q2 = "select * from " . Config::dbSurvey() . "_screens where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($seid) . " and number > " . prepareDatabaseString($maxback) . " and number < " . prepareDatabaseString($lookbefore) . " and looptimes=" . prepareDatabaseString($o) . " order by number desc";
 
                 $res2 = $db->selectQuery($q2);
 
@@ -6570,7 +6789,7 @@ class Compiler {
 
 
         // delete existing
-        $query = "delete from " . Config::dbSurvey() . "_progressbars where suid=" . $this->suid . " and seid=" . $seid;
+        $query = "delete from " . Config::dbSurvey() . "_progressbars where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($seid);
         $db->executeQuery($query);
 
         $progressbar = new Progressbar($this->suid, $seid);
@@ -6584,8 +6803,8 @@ class Compiler {
         /* store compiled in db */
 
         $bp = new BindParam();
-
-        $bp->add(MYSQL_BINDING_STRING, gzcompress(serialize($progressbar), 9));
+        $pro = gzcompress(serialize($progressbar), 9);
+        $bp->add(MYSQL_BINDING_STRING, $pro);
 
         $bp->add(MYSQL_BINDING_INTEGER, $this->suid);
 
@@ -6604,7 +6823,7 @@ class Compiler {
 
         global $db;
 
-        $q1 = "select * from " . Config::dbSurvey() . "_screens where suid=" . $this->suid . " and seid=" . $sectionseid . " order by number asc, rgid asc, dummy asc";
+        $q1 = "select * from " . Config::dbSurvey() . "_screens where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($sectionseid) . " order by number asc, rgid asc, dummy asc";
 
         $res1 = $db->selectQuery($q1);
 

@@ -146,6 +146,8 @@ class Nurse {
                     case 'nurse.followup.info': return $this->ShowFollowupInfo(getFromSessionParams('primkey'));
                         break;
 
+                    case 'nurse.preferences': return $this->showPreferences();
+                    case 'nurse.preferencesres': return $this->showPreferencesRes();    
 
                     default: return $this->mainPage();
                 }
@@ -159,6 +161,22 @@ class Nurse {
     function mainPage($message = '') {
         $displayNurse = new DisplayNurse();
         return $displayNurse->showMain($message);
+    }
+    
+    function showPreferencesRes() {
+        //$this->user->setFilter(loadvar('filter'));
+        //$this->user->setRegionFilter(loadvar('region'));
+        $this->user->setTestMode(loadvar('testmode'));
+        //$this->user->setCommunication(loadvar('communication'));
+        //$this->user->setPuid(loadvar('puid'));
+        $this->user->saveChanges();
+        $display = new Display();
+        return $this->mainPage($display->displaySuccess(Language::messagePreferencesSaved()));
+    }
+
+    function showPreferences() {
+        $displayNurse = new DisplayNurse();
+        return $displayNurse->showPreferences($this->user);
     }
 
     function showSearchRes() {
@@ -181,8 +199,11 @@ class Nurse {
 
     function showRespondentInfo($primkey, $message = '') {
         $respondent = new Respondent($primkey);
-        $displayNurse = new DisplayNurse();
-        return $displayNurse->showRespondentInfo($respondent, $message);
+        $displayNurse = new DisplayNurse();        
+        if ($respondent->getPrimkey() != '') {
+            return $displayNurse->showRespondentInfo($respondent, $message);
+        }
+        return $displayNurse->showMain($message);
     }
 
     function showRespondentConsent($primkey) {
@@ -342,6 +363,7 @@ body
         $respondent = new Respondent($primkey);
         $lab = new Lab($primkey);
         ob_clean();
+        $_SESSION[CONFIGURATION_ENCRYPTION_COMMUNICATION_UPLOAD] = encryptC(Config::uploadAccessKey(), Config::smsComponentKey()); // set key for access
         require_once('lab/upload/index.php');
         echo uploadFile($respondent->getPrimkey(), $lab->getLabBarcode());
         exit;
@@ -391,7 +413,7 @@ body
         global $db;
         $user = new User($_SESSION['URID']);
         //CHECK ON USER!!!!
-        $query = 'select *, AES_DECRYPT(content, "' . Config::filePictureKey() . '") as content from ' . Config::dbSurveyData() . '_files where id="' . $id . '"';
+        $query = 'select *, AES_DECRYPT(content, "' . Config::filePictureKey() . '") as content from ' . Config::dbSurveyData() . '_files where id="' . prepareDatabaseString($id) . '"';
         $result = $db->selectQuery($query);
         if ($result != null) {
             ob_clean();
@@ -406,7 +428,7 @@ body
 
     function showRespondentFieldDBSShipToLabMark() {
         global $db;
-        $query = 'update ' . Config::dbSurveyData() . '_lab set fielddbsstatus = 2, fielddbsshipmentdate="' . date('Y-m-d') . '" where fielddbsstatus = 1';
+        $query = 'update ' . Config::dbSurveyData() . '_lab set fielddbsstatus = 2, fielddbsshipmentdate="' . prepareDatabaseString(date('Y-m-d')) . '" where fielddbsstatus = 1';
         $result = $db->selectQuery($query);
 
         $display = new Display();
@@ -550,9 +572,11 @@ body
     }
 
     function showRespondentBackFromSms($primkey, $urid) {
-
-        $display = new Display();
-        return $this->showRespondentInfo($primkey);
+        $respondent = new Respondent($primkey);      
+        if ($respondent->getPrimkey() != '') {
+            return $this->showRespondentInfo($primkey);
+        }
+        return $this->mainPage();
     }
 
     function showSurveyCompleted($primkey, $suid = 1) {
@@ -620,7 +644,7 @@ body
         $lab = new Lab(null);
         $tests = $lab->getBloodTests();
         global $db;
-        $query = 'select labdbsposition, labvisitts, aes_decrypt(labbarcode, "' . Config::labKey() . '") as labbarcode from ' . Config::dbSurveyData() . '_lab where labdbslocation = "' . $box . '~' . $rack . '~' . $shelf . '~' . $freezer . '"';
+        $query = 'select labdbsposition, labvisitts, aes_decrypt(labbarcode, "' . Config::labKey() . '") as labbarcode from ' . Config::dbSurveyData() . '_lab where labdbslocation = "' . prepareDatabaseString($box . '~' . $rack . '~' . $shelf . '~' . $freezer) . '"';
         $result = $db->selectQuery($query);
         if ($result != null) {
             while ($row = $db->getRow($result)) {
@@ -721,7 +745,7 @@ body
         $lab = new Lab(null);
         $tests = $lab->getBloodTests();
         global $db;
-        $query = 'select labbloodposition, labbloodsenttolab, labbloodnotcollected, labvisitts, aes_decrypt(labbarcode, "' . Config::labKey() . '") as labbarcode from ' . Config::dbSurveyData() . '_lab where labbloodlocation = "' . $box . '~' . $rack . '~' . $shelf . '~' . $freezer . '"';
+        $query = 'select labbloodposition, labbloodsenttolab, labbloodnotcollected, labvisitts, aes_decrypt(labbarcode, "' . Config::labKey() . '") as labbarcode from ' . Config::dbSurveyData() . '_lab where labbloodlocation = "' . prepareDatabaseString($box . '~' . $rack . '~' . $shelf . '~' . $freezer) . '"';
         $result = $db->selectQuery($query);
         if ($result != null) {
             while ($row = $db->getRow($result)) {
@@ -889,17 +913,13 @@ body
 
         $lab = new Lab($primkey);
         $selurid = loadvar('urid');
-
         $lab->setUrid($selurid);
         $lab->saveChanges();
 
         //set urid for lab
         //add to communication:   _lab, _household, _respondent
-
-
         $communication = new Communication();
         $communication->assignLab($household, $respondent, $lab, $selurid);
-
 
         $display = new Display();
         return $this->showRespondentInfo($primkey, $display->displaySuccess(Language::labelNurseFieldNurseAssigned()));
@@ -927,7 +947,7 @@ body
         $respondents = new Respondents();
         $respondents = $respondents->getRespondentsByUrid($_SESSION['URID']);
         foreach ($respondents as $respondent) {
-            $data = 'UPDATE ' . Config::dbSurveyData() . '_lab set status = ' . $respondent->getStatus() . ' where primkey = \'' . prepareDatabaseString($respondent->getPrimkey()) . '\'' . ";\n";
+            $data = 'UPDATE ' . Config::dbSurveyData() . '_lab set status = ' . prepareDatabaseString($respondent->getStatus()) . ' where primkey = \'' . prepareDatabaseString($respondent->getPrimkey()) . '\'' . ";\n";
         }
 
         if ($communication->sendToServerAsFile($data, $this->user->getUrid())) { //success sending data to server

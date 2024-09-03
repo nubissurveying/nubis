@@ -432,7 +432,7 @@ class DisplayOutput extends DisplaySysAdmin {
 
         $returnStr .= '<tr><td>' . Language::labelOutputDataFileName() . '</td><td>';
         $returnStr .= "<div class='input-group'><input type=text class='form-control' name='" . DATA_OUTPUT_FILENAME . "' ><span class='input-group-addon'>" . Language::labelOutputDataFileNameNoExtension() . "</span></div>";
-        $returnStr .= "</td></tr>";        
+        $returnStr .= "</td></tr>";
 
         $returnStr .= '<tr><td>' . Language::labelOutputDataFileType() . '</td><td>';
         $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_FILETYPE . ">";
@@ -505,7 +505,7 @@ class DisplayOutput extends DisplaySysAdmin {
         $returnStr .= '<tr><td>' . Language::labelOutputDataTable() . '</td><td>';
         $returnStr .= "<select class='selectpicker show-tick' name=" . DATA_OUTPUT_TYPE . ">";
         //$returnStr .= "<option></option>";
-        $returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATARECORD_TABLE . ">" . Language::optionsDataDataRecordTable() . "</option>";
+        //$returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATARECORD_TABLE . ">" . Language::optionsDataDataRecordTable() . "</option>";
         $returnStr .= "<option value=" . DATA_OUTPUT_TYPE_DATA_TABLE . ">" . Language::optionsDataDataTable() . "</option>";
         $returnStr .= "</select>";
         $returnStr .= "</td></tr>";
@@ -1481,15 +1481,38 @@ var chart = new Highcharts.Chart({
         $returnStr .= $arr[$answertype] . "</td></tr>";
         if (inArray($answertype, array(ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_MULTIDROPDOWN, ANSWER_TYPE_RANK))) {
             $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditGeneralCategories() . ": </td><td valign=top>";
-            $returnStr .= str_replace("\r\n", "<br/>", $variable->getOptionsText()) . "</td></tr>";
+            $text = $variable->getOptionsText();
+            if ($text == SETTING_FOLLOW_TYPE && $variable->getTyd() > 0) {
+                $type = $survey->getType($variable->getTyd());
+                $text = $type->getOptionsText();
+            }
+            $returnStr .= str_replace("\r\n", "<br/>", $text) . "</td></tr>";
         } else if (inArray($answertype, array(ANSWER_TYPE_RANGE, ANSWER_TYPE_SLIDER, ANSWER_TYPE_KNOB))) {
             $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditRangeMinimum() . ": </td><td valign=top>";
-            $returnStr .= $variable->getMinimum() . "</td></tr>";
+
+            $mintext = $variable->getMinimum();
+            if ($mintext == SETTING_FOLLOW_TYPE && $variable->getTyd() > 0) {
+                $type = $survey->getType($variable->getTyd());
+                $mintext = $type->getMinimum();
+            }
+            $maxtext = $variable->getMaximum();
+            if ($maxtext == SETTING_FOLLOW_TYPE && $variable->getTyd() > 0) {
+                $type = $survey->getType($variable->getTyd());
+                $maxtext = $type->getMaximum();
+            }
+
+            $returnStr .= $mintext . "</td></tr>";
             $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditRangeMaximum() . ": </td><td valign=top>";
-            $returnStr .= $variable->getMaximum() . "</td></tr>";
+            $returnStr .= $maxtext . "</td></tr>";
         }
 
-        if ($variable->isArray()) {
+        $isarray = $variable->isArray();
+        if ($isarray == SETTING_FOLLOW_TYPE && $variable->getTyd() > 0) {
+            $type = $survey->getType($variable->getTyd());
+            $isarray = $type->isArray();
+        }
+
+        if ($isarray) {
             $returnStr .= $this->displayComboBox();
             $returnStr .= '<tr><td valign=top>' . Language::labelTypeEditGeneralArrayInstance() . ": </td><td valign=top>";
             $options = $this->getArrayData($_SESSION['SUID'], $variable->getName());
@@ -1532,6 +1555,7 @@ var chart = new Highcharts.Chart({
                     $varname = $varname . "[1]";
                 }
             }
+
             $aggdata = $data->getAggregrateData($variable, $varname, $brackets);
 
             //$aggdata = array(2,5);
@@ -1549,7 +1573,7 @@ var chart = new Highcharts.Chart({
                     case ANSWER_TYPE_SETOFENUMERATED:
                     /* fall through */
                     case ANSWER_TYPE_RANK:
-                    /* fall through */    
+                    /* fall through */
                     case ANSWER_TYPE_DROPDOWN:
                     /* fall through */
                     case ANSWER_TYPE_MULTIDROPDOWN:
@@ -1570,7 +1594,7 @@ var chart = new Highcharts.Chart({
                     case ANSWER_TYPE_RANGE:
                     /* fall through */
                     case ANSWER_TYPE_KNOB:
-                    /* fall through */    
+                    /* fall through */
                     case ANSWER_TYPE_DOUBLE:
                         $brackets[] = Language::labelOutputEmptyBracket();
                         $brackets[] = Language::labelOutputDKBracket();
@@ -1905,7 +1929,7 @@ var chart = new Highcharts.Chart({
 
         //99900174
 
-        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data where suid = ' . $survey . ' and variablename="' . $fieldname . '" and length(primkey) > ' . Config::getMinimumPrimaryKeyLength() . ' and length(primkey) < ' . Config::getMaximumPrimaryKeyLength() . '  and answer is not null group by DATE(ts) order by DATE(ts) asc';
+        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data where suid = ' . prepareDatabaseString($survey) . ' and variablename="' . prepareDatabaseString($fieldname) . '" and length(primkey) > ' . prepareDatabaseString(Config::getMinimumPrimaryKeyLength()) . ' and length(primkey) < ' . prepareDatabaseString(Config::getMaximumPrimaryKeyLength()) . '  and answer is not null group by DATE(ts) order by DATE(ts) asc';
         $total = 0;
         $dataStr .= "[Date.UTC(2014,  6, 20), 0   ],";
         $result = $db->selectQuery($query);
@@ -1921,7 +1945,7 @@ var chart = new Highcharts.Chart({
     function getArrayData($survey, $fieldname) {
         global $db;
         $array = array();
-        $query = 'select distinct variablename from ' . Config::dbSurveyData() . '_data where suid = ' . $survey . ' and variablename like "' . $fieldname . '[%" and length(primkey) > ' . Config::getMinimumPrimaryKeyLength() . ' and length(primkey) < ' . Config::getMaximumPrimaryKeyLength();
+        $query = 'select distinct variablename from ' . Config::dbSurveyData() . '_data where suid = ' . prepareDatabaseString($survey) . ' and variablename like "' . prepareDatabaseString($fieldname) . '[%" and length(primkey) > ' . prepareDatabaseString(Config::getMinimumPrimaryKeyLength()) . ' and length(primkey) < ' . prepareDatabaseString(Config::getMaximumPrimaryKeyLength());
         $result = $db->selectQuery($query);
         if ($db->getNumberOfRows($result) > 0) {
             while ($row = $db->getRow($result)) {
@@ -1935,7 +1959,7 @@ var chart = new Highcharts.Chart({
         $title = Language::messageSMSTitle();
         $sub = Language::labelResponseDataContactsSub();
         $names = Language::labelResponseDataContacts();
-        $actiontype = array(101, 103, 109, 502, 504);
+        $actiontype = Language::labelResponseDataContactCodes();
 
 
         //$returnStr = '<script src="js/export-csv.js"></script>';
@@ -2004,7 +2028,7 @@ var chart = new Highcharts.Chart({
         global $db;
         $dataStr = '';
         $actions = array();
-        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts where code = ' . $code . ' group by DATE(ts) order by DATE(ts) asc';
+        $query = 'select DATE(ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts where code = ' . prepareDatabaseString($code) . ' group by DATE(ts) order by DATE(ts) asc';
         $total = 0;
         $dataStr .= "[Date.UTC(2014,  6, 20), 0   ],";
         $result = $db->selectQuery($query);
@@ -2022,15 +2046,13 @@ var chart = new Highcharts.Chart({
 
         $user = new User($_SESSION['URID']);
         $utype = $user->getUserType();
+
         $ut = "";
         switch ($utype) {
             case USER_SYSADMIN:
                 $ut = "sysadmin";
                 $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.output'), Language::headerOutput()), 'label' => Language::headerOutput());
                 $headers[] = array('link' => '', 'label' => Language::headerOutputDocumentation());
-                break;
-            case USER_ADMIN:
-                $ut = "admin";
                 break;
             case USER_TRANSLATOR:
                 $ut = "translator";
@@ -2061,7 +2083,7 @@ var chart = new Highcharts.Chart({
         //$default = $survey->getDefaultLanguage();
         //echo'yyy';
         //if (!inArray($default, $langs)) {
-            //$langs[] = $default;
+        //$langs[] = $default;
         //}
 
         $returnStr .= '<tr><td>' . Language::labelOutputDocumentationLanguage() . '</td><td>' . $this->displayLanguagesAdmin("surveylanguage", "surveylanguage", getSurveyLanguage(), true, false, true, "", implode("~", $langs)) . '</tr>';
@@ -2228,9 +2250,6 @@ var chart = new Highcharts.Chart({
             case USER_SYSADMIN:
                 $ut = "sysadmin";
                 break;
-            case USER_ADMIN:
-                $ut = "admin";
-                break;
             case USER_TRANSLATOR:
                 $ut = "translator";
                 break;
@@ -2310,7 +2329,7 @@ var chart = new Highcharts.Chart({
         }
         $returnStr .= "</table>";
 
-        
+
         $returnStr .= "<hr>";
 
         /* loop through sections */
@@ -2368,7 +2387,7 @@ var chart = new Highcharts.Chart({
                         $table .= "<tr><td width='200px'>Text after enumerated text box</td>";
                         $table .= "<td class='uscic-dictionary-posttext'>" . str_replace("\r\n", "<br/>", convertHTLMEntities($this->replaceFills($var->getEnumeratedTextBoxPostText()))) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getFillText()) != "") {
                         $table .= "<tr><td width='200px'>Dynamic text</td>";
                         $table .= "<td class='uscic-dictionary-filltext'>" . str_replace("\r\n", "<br/>", convertHTLMEntities($this->replaceFills($var->getFillText()))) . "</td></tr>";
@@ -2403,97 +2422,97 @@ var chart = new Highcharts.Chart({
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceEmptyMessage() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getEmptyMessage())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInteger()) != "" && trim($var->getErrorMessageInteger()) != trim($survey->getErrorMessageInteger())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInteger() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInteger())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageDouble()) != "" && trim($var->getErrorMessageDouble()) != trim($survey->getErrorMessageDouble())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageDouble() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageDouble())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessagePattern()) != "" && trim($var->getErrorMessagePattern()) != trim($survey->getErrorMessagePattern())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessagePattern() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessagePattern())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageRange()) != "" && trim($var->getErrorMessageRange()) != trim($survey->getErrorMessageRange())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageRange() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageRange())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMaximumCalendar()) != "" && trim($var->getErrorMessageMaximumCalendar()) != trim($survey->getErrorMessageMaximumCalendar())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxCalendar() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMaximumCalendar())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMinimumLength()) != "" && trim($var->getErrorMessageMinimumLength()) != trim($survey->getErrorMessageMinimumLength())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMinLength() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMinimumLength())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMaximumLength()) != "" && trim($var->getErrorMessageMaximumLength()) != trim($survey->getErrorMessageMaximumLength())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxLength() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMaximumLength())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMinimumWords()) != "" && trim($var->getErrorMessageMinimumWords()) != trim($survey->getErrorMessageMinimumWords())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMinWords() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMinimumWords())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMaximumWords()) != "" && trim($var->getErrorMessageMaximumWords()) != trim($survey->getErrorMessageMaximumWords())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxWords() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMaximumWords())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectMinimum()) != "" && trim($var->getErrorMessageSelectMinimum()) != trim($survey->getErrorMessageSelectMinimum())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMinSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectMinimum())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectMaximum()) != "" && trim($var->getErrorMessageSelectMaximum()) != trim($survey->getErrorMessageSelectMaximum())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectMaximum())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectExact()) != "" && trim($var->getErrorMessageSelectExact()) != trim($survey->getErrorMessageSelectExact())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageExactSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectExact())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectInvalidSubset()) != "" && trim($var->getErrorMessageSelectInvalidSubset()) != trim($survey->getErrorMessageSelectInvalidSubset())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectInvalidSubset())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectInvalidSet()) != "" && trim($var->getErrorMessageSelectInvalidSet()) != trim($survey->getErrorMessageSelectInvalidSet())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectInvalidSet())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineExclusive()) != "" && trim($var->getErrorMessageInlineExclusive()) != trim($survey->getErrorMessageInlineExclusive())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineExclusive())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineInclusive()) != "" && trim($var->getErrorMessageInlineInclusive()) != trim($survey->getErrorMessageInlineInclusive())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineInclusive())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineMinimumRequired()) != "" && trim($var->getErrorMessageInlineMinimumRequired()) != trim($survey->getErrorMessageInlineMinimumRequired())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineMinimumRequired())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineMaximumRequired()) != "" && trim($var->getErrorMessageInlineMaximumRequired()) != trim($survey->getErrorMessageInlineMaximumRequired())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineMaximumRequired())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineExactRequired()) != "" && trim($var->getErrorMessageInlineExactRequired()) != trim($survey->getErrorMessageInlineExactRequired())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineExactRequired())) . "</td></tr>";
@@ -2503,57 +2522,57 @@ var chart = new Highcharts.Chart({
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineAnswered())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageEnumeratedEntered()) != "" && trim($var->getErrorMessageEnumeratedEntered()) != trim($survey->getErrorMessageEnumeratedEntered())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageEnumeratedEntered() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageEnumeratedEntered())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSetOfEnumeratedEntered()) != "" && trim($var->getErrorMessageSetOfEnumeratedEntered()) != trim($survey->getErrorMessageSetOfEnumeratedEntered())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageSetOfEnumeratedEntered() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSetOfEnumeratedEntered())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonEqualTo()) != "" && trim($var->getErrorMessageComparisonEqualTo()) != trim($survey->getErrorMessageComparisonEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonNotEqualTo()) != "" && trim($var->getErrorMessageComparisonNotEqualTo()) != trim($survey->getErrorMessageComparisonNotEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageNotEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonNotEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonEqualToIgnoreCase()) != "" && trim($var->getErrorMessageComparisonEqualToIgnoreCase()) != trim($survey->getErrorMessageComparisonEqualToIgnoreCase())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageEqualToIgnoreCase() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonEqualToIgnoreCase())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonNotEqualToIgnoreCase()) != "" && trim($var->getErrorMessageComparisonNotEqualToIgnoreCase()) != trim($survey->getErrorMessageComparisonNotEqualToIgnoreCase())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageNotEqualToIgnoreCase() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonNotEqualToIgnoreCase())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonGreaterEqualTo()) != "" && trim($var->getErrorMessageComparisonGreaterEqualTo()) != trim($survey->getErrorMessageComparisonGreaterEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageGreaterEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonGreaterEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonGreater()) != "" && trim($var->getErrorMessageComparisonGreater()) != trim($survey->getErrorMessageComparisonGreater())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageGreater() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonGreater())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonSmallerEqualTo()) != "" && trim($var->getErrorMessageComparisonSmallerEqualTo()) != trim($survey->getErrorMessageComparisonSmallerEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageSmallerEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonSmallerEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonSmaller()) != "" && trim($var->getErrorMessageComparisonSmaller()) != trim($survey->getErrorMessageComparisonSmaller())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageSmaller() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonSmaller())) . "</td></tr>";
                     }
-                    
+
                     if ($table != "") {
                         $returnStr .= "<div class='uscic-dictionary-question'>Question: " . $var->getName() . "</div>";
                         $returnStr .= "<table class='table table-bordered'>";
@@ -2589,9 +2608,6 @@ var chart = new Highcharts.Chart({
             case USER_SYSADMIN:
                 $ut = "sysadmin";
                 break;
-            case USER_ADMIN:
-                $ut = "admin";
-                break;
             case USER_TRANSLATOR:
                 $ut = "translator";
                 break;
@@ -2609,7 +2625,7 @@ var chart = new Highcharts.Chart({
         /* loop through sections */
         $sections = $survey->getSections();
         $fills = array();
-        foreach ($sections as $section) {            
+        foreach ($sections as $section) {
             $vars = $survey->getVariableDescriptives($section->getSeid());
             $fillstr = "";
             foreach ($vars as $var) {
@@ -2621,7 +2637,7 @@ var chart = new Highcharts.Chart({
                     }
 
                     $table = "";
-                    
+
                     if (trim($var->getFillText()) != "") {
                         $table .= "<tr><td width='200px'>Dynamic text</td>";
                         $table .= "<td class='uscic-dictionary-filltext'>" . str_replace("\r\n", "<br/>", convertHTLMEntities($this->replaceFills($var->getFillText()))) . "</td></tr>";
@@ -2643,8 +2659,7 @@ var chart = new Highcharts.Chart({
         //$returnStr .= '<script type="text/javascript">$( document ).ready(function() {$("#editor").wysiwyg();});</script>';
         if (sizeof($fills) > 0) {
             $returnStr .= implode("", $fills);
-        }
-        else {
+        } else {
             $returnStr .= '<br/><br/><h3>No texts to be translated</h3>';
         }
 
@@ -2656,7 +2671,7 @@ var chart = new Highcharts.Chart({
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
         return $returnStr;
     }
-    
+
     function showOutputTranslationAssistance() {
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         $survey = new Survey($_SESSION['SUID']);
@@ -2668,9 +2683,6 @@ var chart = new Highcharts.Chart({
         switch ($utype) {
             case USER_SYSADMIN:
                 $ut = "sysadmin";
-                break;
-            case USER_ADMIN:
-                $ut = "admin";
                 break;
             case USER_TRANSLATOR:
                 $ut = "translator";
@@ -2688,9 +2700,9 @@ var chart = new Highcharts.Chart({
 
         /* loop through sections */
         $sectionsstr = array();
-        $sections = $survey->getSections();        
+        $sections = $survey->getSections();
         foreach ($sections as $section) {
-            $sectionstr = "";            
+            $sectionstr = "";
             $vars = $survey->getVariableDescriptives($section->getSeid());
             foreach ($vars as $var) {
                 if ($var->isHiddenTranslation() == false) {
@@ -2706,97 +2718,97 @@ var chart = new Highcharts.Chart({
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceEmptyMessage() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getEmptyMessage())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInteger()) != "" && trim($var->getErrorMessageInteger()) != trim($survey->getErrorMessageInteger())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInteger() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInteger())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageDouble()) != "" && trim($var->getErrorMessageDouble()) != trim($survey->getErrorMessageDouble())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageDouble() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageDouble())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessagePattern()) != "" && trim($var->getErrorMessagePattern()) != trim($survey->getErrorMessagePattern())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessagePattern() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessagePattern())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageRange()) != "" && trim($var->getErrorMessageRange()) != trim($survey->getErrorMessageRange())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageRange() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageRange())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMaximumCalendar()) != "" && trim($var->getErrorMessageMaximumCalendar()) != trim($survey->getErrorMessageMaximumCalendar())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxCalendar() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMaximumCalendar())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMinimumLength()) != "" && trim($var->getErrorMessageMinimumLength()) != trim($survey->getErrorMessageMinimumLength())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMinLength() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMinimumLength())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMaximumLength()) != "" && trim($var->getErrorMessageMaximumLength()) != trim($survey->getErrorMessageMaximumLength())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxLength() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMaximumLength())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMinimumWords()) != "" && trim($var->getErrorMessageMinimumWords()) != trim($survey->getErrorMessageMinimumWords())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMinWords() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMinimumWords())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageMaximumWords()) != "" && trim($var->getErrorMessageMaximumWords()) != trim($survey->getErrorMessageMaximumWords())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxWords() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageMaximumWords())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectMinimum()) != "" && trim($var->getErrorMessageSelectMinimum()) != trim($survey->getErrorMessageSelectMinimum())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMinSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectMinimum())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectMaximum()) != "" && trim($var->getErrorMessageSelectMaximum()) != trim($survey->getErrorMessageSelectMaximum())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectMaximum())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectExact()) != "" && trim($var->getErrorMessageSelectExact()) != trim($survey->getErrorMessageSelectExact())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageExactSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectExact())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectInvalidSubset()) != "" && trim($var->getErrorMessageSelectInvalidSubset()) != trim($survey->getErrorMessageSelectInvalidSubset())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectInvalidSubset())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSelectInvalidSet()) != "" && trim($var->getErrorMessageSelectInvalidSet()) != trim($survey->getErrorMessageSelectInvalidSet())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSelectInvalidSet())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineExclusive()) != "" && trim($var->getErrorMessageInlineExclusive()) != trim($survey->getErrorMessageInlineExclusive())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineExclusive())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineInclusive()) != "" && trim($var->getErrorMessageInlineInclusive()) != trim($survey->getErrorMessageInlineInclusive())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineInclusive())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineMinimumRequired()) != "" && trim($var->getErrorMessageInlineMinimumRequired()) != trim($survey->getErrorMessageInlineMinimumRequired())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineMinimumRequired())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineMaximumRequired()) != "" && trim($var->getErrorMessageInlineMaximumRequired()) != trim($survey->getErrorMessageInlineMaximumRequired())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineMaximumRequired())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageInlineExactRequired()) != "" && trim($var->getErrorMessageInlineExactRequired()) != trim($survey->getErrorMessageInlineExactRequired())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineExactRequired())) . "</td></tr>";
@@ -2806,57 +2818,57 @@ var chart = new Highcharts.Chart({
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageInlineAnswered())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageEnumeratedEntered()) != "" && trim($var->getErrorMessageEnumeratedEntered()) != trim($survey->getErrorMessageEnumeratedEntered())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageEnumeratedEntered() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageEnumeratedEntered())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageSetOfEnumeratedEntered()) != "" && trim($var->getErrorMessageSetOfEnumeratedEntered()) != trim($survey->getErrorMessageSetOfEnumeratedEntered())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageSetOfEnumeratedEntered() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageSetOfEnumeratedEntered())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonEqualTo()) != "" && trim($var->getErrorMessageComparisonEqualTo()) != trim($survey->getErrorMessageComparisonEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonNotEqualTo()) != "" && trim($var->getErrorMessageComparisonNotEqualTo()) != trim($survey->getErrorMessageComparisonNotEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageNotEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonNotEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonEqualToIgnoreCase()) != "" && trim($var->getErrorMessageComparisonEqualToIgnoreCase()) != trim($survey->getErrorMessageComparisonEqualToIgnoreCase())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageEqualToIgnoreCase() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonEqualToIgnoreCase())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonNotEqualToIgnoreCase()) != "" && trim($var->getErrorMessageComparisonNotEqualToIgnoreCase()) != trim($survey->getErrorMessageComparisonNotEqualToIgnoreCase())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageNotEqualToIgnoreCase() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonNotEqualToIgnoreCase())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonGreaterEqualTo()) != "" && trim($var->getErrorMessageComparisonGreaterEqualTo()) != trim($survey->getErrorMessageComparisonGreaterEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageGreaterEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonGreaterEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonGreater()) != "" && trim($var->getErrorMessageComparisonGreater()) != trim($survey->getErrorMessageComparisonGreater())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageGreater() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonGreater())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonSmallerEqualTo()) != "" && trim($var->getErrorMessageComparisonSmallerEqualTo()) != trim($survey->getErrorMessageComparisonSmallerEqualTo())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageSmallerEqualTo() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonSmallerEqualTo())) . "</td></tr>";
                     }
-                    
+
                     if (trim($var->getErrorMessageComparisonSmaller()) != "" && trim($var->getErrorMessageComparisonSmaller()) != trim($survey->getErrorMessageComparisonSmaller())) {
                         $table .= "<tr><td width='200px'>" . Language::labelTypeEditAssistanceErrorMessageSmaller() . "</td>";
                         $table .= "<td class='uscic-dictionary-text'>" . convertHTLMEntities($this->replaceFills($var->getErrorMessageComparisonSmaller())) . "</td></tr>";
                     }
-                    
+
                     if ($table != "") {
                         $sectionstr .= "<div class='uscic-dictionary-question'>Question: " . $var->getName() . "</div>";
                         $sectionstr .= "<table class='table table-bordered'>";
@@ -2865,7 +2877,7 @@ var chart = new Highcharts.Chart({
                     }
                 }
             }
-            
+
             if (trim($sectionstr) != "") {
                 $sectionsstr[] = "<div class='uscic-dictionary-section'>Section: " . $section->getName() . "</div>" . $sectionstr . "<hr>";
             }
@@ -2873,8 +2885,7 @@ var chart = new Highcharts.Chart({
 
         if (sizeof($sectionsstr) > 0) {
             $returnStr .= implode("", $sectionsstr);
-        }
-        else {
+        } else {
             $returnStr .= '<br/><br/><h3>No texts to be translated</h3>';
         }
         $returnStr .= '</p></div>    </div>'; //container and wrap
@@ -2884,10 +2895,10 @@ var chart = new Highcharts.Chart({
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
         return $returnStr;
     }
-    
+
     function showOutputRoutingDash() {
         $survey = new Survey($_SESSION['SUID']);
-        $returnStr = $this->showOutputHeader($headers, false);
+        $returnStr = $this->showOutputHeader(array(), false);
 
         require_once('papergenerator.php');
         $gen = new PaperGenerator($_SESSION['SUID'], getSurveyVersion(), 1);
@@ -2901,7 +2912,7 @@ var chart = new Highcharts.Chart({
 
     function showOutputRouting() {
         $survey = new Survey($_SESSION['SUID']);
-        $returnStr = $this->showOutputHeader($headers, false);
+        $returnStr = $this->showOutputHeader(array(), false);
 
         require_once('papergenerator.php');
         $gen = new PaperGenerator($_SESSION['SUID'], getSurveyVersion());
@@ -3212,24 +3223,26 @@ var chart = new Highcharts.Chart({
                 $othercount++;
             }
 
-            $browser = new Browser($d);
-            $name = $browser->getBrowser();
-            if ($name == 'Navigator') { // rename if android mobile browser
+            $browser = new Wolfcast\BrowserDetection($d);
+            $name = $browser->getName();
+
+            if ($name == 'Samsung Internet') { // rename if Samsung internet browser to Android browser
                 $name = "Android browser";
             }
             if (isset($browsercounts[ucwords($name)])) {
-                $browsercounts[ucwords($name)]++;
+                $browsercounts[ucwords($name)] ++;
             } else {
                 $browsercounts[ucwords($name)] = 1;
             }
 
-            //$os = new Os($d);
-            //$name = $os->getName();
-            $platform = $browser->getPlatform();
-            if (isset($oscounts[ucwords($platform)])) {
-                $oscounts[ucwords($platform)]++;
+            $name = $browser->getPlatform();
+            if ($name == 'Macintosh') { // rename if Macintosh
+                $name = "Apple/Macintosh";
+            }
+            if (isset($oscounts[ucwords($name)])) {
+                $oscounts[ucwords($name)] ++;
             } else {
-                $oscounts[ucwords($platform)] = 1;
+                $oscounts[ucwords($name)] = 1;
             }
         }
 
@@ -3624,17 +3637,17 @@ var chart = new Highcharts.Chart({
                 if (isset($errorlabels[$k])) {
                     $brackets[] = $errorlabels[$k];
                 }
-            }            
+            }
             $returnStr .= $this->createParadataChart($variable->getName(), implode(",", array_values($paradata)), $brackets);
         }
-        $returnStr .= "</div>";        
+        $returnStr .= "</div>";
 
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();
         $returnStr .= $this->showFooter(false);
         return $returnStr;
     }
-    
+
     function createParaDataChart($title, $data, $brackets = array()) {
 
         $bracks = '';

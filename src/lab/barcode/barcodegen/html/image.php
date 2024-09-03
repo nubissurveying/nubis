@@ -1,4 +1,5 @@
 <?php
+
 define('IN_CB', true);
 include_once('include/function.php');
 
@@ -78,31 +79,24 @@ try {
 
 
 
-				$chars = substr($text, 0, 2);
-				$numbers = substr($text, 2, 4);
+        $chars = substr($text, 0, 2);
+        $numbers = substr($text, 2, 4);
 
-				if (is_numeric($numbers)){
-          $text = array(array(CODE128_B, $chars), array(CODE128_C, $numbers));
-				}
+        if (is_numeric($numbers)) {
+            $text = array(array(CODE128_B, $chars), array(CODE128_C, $numbers));
+        }
 
-//        $text = 'AG1788';
-
-
-/*$setB = '%'.substr($vars->code, 0, 7);
-$setC = substr($vars->code, 7);
-
-$code_array = array(array(CODE128_B, $setB), array(CODE128_C, $setC));
-*/
         $code_generated->parse($text);
     }
-} catch(Exception $exception) {
+} catch (Exception $exception) {
     $drawException = $exception;
 }
 
 $drawing = new BCGDrawing('', $color_white);
-if($drawException) {
+if ($drawException) {
     $drawing->drawException($drawException);
 } else {
+    
     $drawing->setBarcode($code_generated);
     $drawing->setRotationAngle($_GET['rotation']);
     $drawing->setDPI($_GET['dpi'] === 'NULL' ? null : max(72, min(300, intval($_GET['dpi']))));

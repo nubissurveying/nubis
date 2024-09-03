@@ -14,9 +14,9 @@
 
 class DisplayQuestionSms extends DisplayQuestionBasic {
 
-    function showHeader($title, $style = '') {
+    function showHeader($title, $style = '', $extra = '') {        
         $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
-        $returnStr .= $this->showNavBar();
+        $returnStr .= $this->showNavBar();        
 
 //        $returnStr .= $this->engine->getDisplayed();
         $this->padding = true;
@@ -26,8 +26,9 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
         return $returnStr;
     }
     
-    function showSurveyHeader($title, $style = '') {
-        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
+    function showSurveyHeader($title, $style = '', $extra = '') {
+        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="css/uscic.css" rel="stylesheet">
+                  <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= $this->showNavBar();
 
 //        $returnStr .= $this->engine->getDisplayed();
@@ -101,10 +102,10 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
         $returnStr .= '<li><a href="#" data-toggle="modal" data-target="#calculator"><span class="glyphicon glyphicon-th"></span> ' . Language::linkCalculator() . '</a></li>';
 
         
-        $windowopen = 'window.open(\'tester/' . setSessionParams(array('type' => "2", 'testpage' => 'watch', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=770,height=650,scrollbars=yes,top=100,left=100\'); return false;';
+        $windowopen = 'window.open(\'tester/' . setSessionParams(array('k' => encryptC(Config::testerKey(), Config::smsComponentKey()), 'type' => "2", 'testpage' => 'watch', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=770,height=650,scrollbars=yes,top=100,left=100\'); return false;';
         $javascript = ' onclick="' . $windowopen . '"';
         $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-zoom-in"></span> ' . Language::linkWatch() . '</a></li>';
-        $windowopen = 'window.open(\'tester/' . setSessionParams(array('type' => "2", 'testpage' => 'update', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=1200,height=650,scrollbars=yes,top=100,left=100\'); return false;';
+        $windowopen = 'window.open(\'tester/' . setSessionParams(array('k' => encryptC(Config::testerKey(), Config::smsComponentKey()),'type' => "2", 'testpage' => 'update', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=1200,height=650,scrollbars=yes,top=100,left=100\'); return false;';
         $javascript = ' onclick="' . $windowopen . '"';
         $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-zoom-in"></span> ' . Language::linkUpdate() . '</a></li>';
         $first = $this->engine->isFirstState();   
@@ -116,7 +117,7 @@ class DisplayQuestionSms extends DisplayQuestionBasic {
             else {
                 $stateid = $this->engine->getStateId();
             }            
-            $windowopen = 'window.open(\'tester/' . setSessionParams(array('type' => "2", 'testpage' => 'jumpback', 'jumpurid' => $_SESSION['URID'], 'jumpsuid' => $this->engine->getSuid(), 'jumpstateid' => $stateid, 'jumpprimkey' => $this->engine->getPrimaryKey())) . '\', \'popupWindow\', \'width=770,height=300,scrollbars=yes,top=100,left=100\'); return false;';
+            $windowopen = 'window.open(\'tester/' . setSessionParams(array('k' => encryptC(Config::testerKey(), Config::smsComponentKey()), 'type' => "2", 'testpage' => 'jumpback', 'jumpurid' => $_SESSION['URID'], 'jumpsuid' => $this->engine->getSuid(), 'jumpstateid' => $stateid, 'jumpprimkey' => $this->engine->getPrimaryKey())) . '\', \'popupWindow\', \'width=770,height=300,scrollbars=yes,top=100,left=100\'); return false;';
             $javascript = ' onclick="' . $windowopen . '"';
             $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-arrow-left"></span> ' . Language::linkJumpBack() . '</a></li>';
         }

@@ -58,7 +58,10 @@ class Survey extends Component {
     }
 
     function getSuid() {
-        return $this->survey['suid'];
+        if (isset($this->survey['suid'])) {
+            return $this->survey['suid'];
+        }
+        return '';
     }
 
     function setSuid($suid) {
@@ -74,8 +77,10 @@ class Survey extends Component {
         }
         $variables = array();
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . $seid);
-        while ($row = $db->getRow($result)) {
-            $variables[] = new Variable($row);
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $variables[] = new Variable($row);
+            }
         }
         return $variables;
     }
@@ -99,14 +104,19 @@ class Survey extends Component {
 
         $variables = array();
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . $seid . $order);
-        while ($row = $db->getRow($result)) {
-            $variables[] = new VariableDescriptive($row);
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $variables[] = new VariableDescriptive($row);
+            }
         }
         return $variables;
     }
 
     function getVariableDescriptive($vsid) {
         global $db;
+        if ($vsid == "") {
+            return new VariableDescriptive("");
+        }
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and vsid = ' . prepareDatabaseString($vsid));
         return new VariableDescriptive($db->getRow($result));
     }
@@ -114,6 +124,9 @@ class Survey extends Component {
     function getVariableDescriptiveByName($name) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and variablename = "' . prepareDatabaseString($name) . '"');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new VariableDescriptive("");
+        }
         return new VariableDescriptive($db->getRow($result));
     }
 
@@ -130,8 +143,10 @@ class Survey extends Component {
 
         $variables = array();
         $result = $db->selectQuery('select variablename from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . $seid . $order);
-        while ($row = $db->getRow($result)) {
-            $variables[] = $row["variablename"];
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $variables[] = $row["variablename"];
+            }
         }
         return $variables;
     }
@@ -139,21 +154,31 @@ class Survey extends Component {
     function getPreviousVariableDescriptive($var) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and seid= ' . prepareDatabaseString($var->getSeid()) . ' and position < ' . prepareDatabaseString($var->getPosition()) . ' order by position desc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new VariableDescriptive("");
+        }
         return new VariableDescriptive($db->getRow($result));
     }
 
     function getNextVariableDescriptive($var) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and seid= ' . prepareDatabaseString($var->getSeid()) . ' and position > ' . prepareDatabaseString($var->getPosition()) . ' order by position asc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new VariableDescriptive("");
+        }
         return new VariableDescriptive($db->getRow($result));
     }
 
     function getVariableDescriptivesOfType($tyd) {
         global $db;
         $variables = array();
-        $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . " and tyd = " . prepareDatabaseString($tyd));
-        while ($row = $db->getRow($result)) {
-            $variables[] = new VariableDescriptive($row);
+        if ($tyd != "") {
+            $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_variables where suid  = ' . prepareDatabaseString($this->getSuid()) . " and tyd = " . prepareDatabaseString($tyd));
+            if ($result && $db->getNumberOfRows($result) > 0) {
+                while ($row = $db->getRow($result)) {
+                    $variables[] = new VariableDescriptive($row);
+                }
+            }
         }
         return $variables;
     }
@@ -161,17 +186,26 @@ class Survey extends Component {
     function getPreviousType($type) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_types where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and tyd < ' . prepareDatabaseString($type->getTyd()) . ' order by tyd desc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Type("");
+        }
         return new Type($db->getRow($result));
     }
 
     function getNextType($type) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_types where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and tyd > ' . prepareDatabaseString($type->getTyd()) . ' order by tyd asc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Type("");
+        }
         return new Type($db->getRow($result));
     }
 
     function getType($tyd) {
         global $db;
+        if ($tyd == "") {
+            return new Type($tyd);
+        }
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_types where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and tyd = ' . prepareDatabaseString($tyd));
         return new Type($db->getRow($result));
     }
@@ -179,6 +213,9 @@ class Survey extends Component {
     function getTypeByName($name) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_types where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and name = "' . prepareDatabaseString($name) . '"');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Type("");
+        }
         return new Type($db->getRow($result));
     }
 
@@ -193,10 +230,12 @@ class Survey extends Component {
         global $db;
         $types = array();
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_types where suid  = ' . prepareDatabaseString($this->getSuid()));
-        while ($row = $db->getRow($result)) {
-            $type = new Type($row);
-            if ($used == false || $type->isUsed()) {
-                $types[] = $type;
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $type = new Type($row);
+                if ($used == false || $type->isUsed()) {
+                    $types[] = $type;
+                }
             }
         }
         return $types;
@@ -205,17 +244,26 @@ class Survey extends Component {
     function getPreviousGroup($group) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_groups where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and gid < ' . prepareDatabaseString($group->getGid()) . ' order by gid desc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Group("");
+        }
         return new Group($db->getRow($result));
     }
 
     function getNextGroup($group) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_groups where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and gid > ' . prepareDatabaseString($group->getGid()) . ' order by gid asc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Group("");
+        }
         return new Group($db->getRow($result));
     }
 
     function getGroup($id) {
         global $db;
+        if ($id == "") {
+            return new Group("");
+        }
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_groups where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and gid = ' . prepareDatabaseString($id));
         return new Group($db->getRow($result));
     }
@@ -223,6 +271,9 @@ class Survey extends Component {
     function getGroupByName($name) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_groups where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and name = "' . prepareDatabaseString($name) . '"');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Group("");
+        }
         return new Group($db->getRow($result));
     }
 
@@ -230,8 +281,10 @@ class Survey extends Component {
         global $db;
         $groups = array();
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_groups where suid  = ' . prepareDatabaseString($this->getSuid()));
-        while ($row = $db->getRow($result)) {
-            $groups[] = new Group($row);
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $groups[] = new Group($row);
+            }
         }
         return $groups;
     }
@@ -240,8 +293,10 @@ class Survey extends Component {
         global $db;
         $groups = array();
         $result = $db->selectQuery('select name from ' . Config::dbSurvey() . '_groups where suid  = ' . prepareDatabaseString($this->getSuid()));
-        while ($row = $db->getRow($result)) {
-            $groups[] = $row["name"];
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $groups[] = $row["name"];
+            }
         }
         return $groups;
     }
@@ -270,8 +325,10 @@ class Survey extends Component {
         }
 
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()) . $order);
-        while ($row = $db->getRow($result)) {
-            $sections[] = new Section($row);
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $sections[] = new Section($row);
+            }
         }
         return $sections;
     }
@@ -290,14 +347,19 @@ class Survey extends Component {
         global $db;
         $ids = array();
         $result = $db->selectQuery('select name from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()));
-        while ($row = $db->getRow($result)) {
-            $ids[] = $row["name"];
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $ids[] = $row["name"];
+            }
         }
         return $ids;
     }
 
     function getSection($seid) {
         global $db;
+        if ($seid == "") {
+            return new Section("");
+        }
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and seid = ' . prepareDatabaseString($seid));
         return new Section($db->getRow($result));
     }
@@ -305,18 +367,27 @@ class Survey extends Component {
     function getSectionByName($name) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and name = "' . prepareDatabaseString($name) . '"');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Section("");
+        }
         return new Section($db->getRow($result));
     }
 
     function getPreviousSection($section) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and position < ' . prepareDatabaseString($section->getPosition()) . ' order by position desc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Section("");
+        }
         return new Section($db->getRow($result));
     }
 
     function getNextSection($section) {
         global $db;
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()) . ' and position > ' . prepareDatabaseString($section->getPosition()) . ' order by position asc');
+        if (!$result || $db->getNumberOfRows($result) == 0) {
+            return new Section("");
+        }
         return new Section($db->getRow($result));
     }
 
@@ -327,7 +398,7 @@ class Survey extends Component {
 
     function addVersion($name, $description) {
         global $db;
-        $db->executeQuery("insert into " . Config::dbSurvey() . "_versions (suid, name, description) values (" . prepareDatabaseString($this->suid) . "," . "'" . $name . "'," . "'" . $description . "')");
+        $db->executeQuery("insert into " . Config::dbSurvey() . "_versions (suid, name, description) values (" . prepareDatabaseString($this->suid) . "," . "'" . prepareDatabaseString($name) . "'," . "'" . prepareDatabaseString($description) . "')");
     }
 
     function getVersion($vnid) {
@@ -359,8 +430,10 @@ class Survey extends Component {
         global $db;
         $versions = array();
         $result = $db->selectQuery('select * from ' . Config::dbSurvey() . '_versions where suid=' . prepareDatabaseString($this->getSuid()));
-        while ($row = $db->getRow($result)) {
-            $versions[] = new Version($row);
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $versions[] = new Version($row);
+            }
         }
         return $versions;
     }
@@ -378,7 +451,7 @@ class Survey extends Component {
         if ($language != "") {
             $query .= " and language=" . prepareDatabaseString($language);
         }
-        
+
         if ($result = $db->selectQuery($query)) {
             if ($db->getNumberOfRows($result) > 0) {
                 $row = $db->getRow($result);
@@ -477,9 +550,8 @@ class Survey extends Component {
         foreach ($types as $type) {
             $old = $type->getTyd();
             $type->copy($this->getSuid(), 1); // no suffix
-            
             // update variables with type!
-            $query = "update " . Config::dbSurvey() . "_variables set tyd=" . $type->getTyd() . " where suid=" . $this->getSuid() . " and tyd=" . $old;
+            $query = "update " . Config::dbSurvey() . "_variables set tyd=" . prepareDatabaseString($type->getTyd()) . " where suid=" . prepareDatabaseString($this->getSuid()) . " and tyd=" . prepareDatabaseString($old);
             $db->executeQuery($query);
         }
 
@@ -817,7 +889,7 @@ class Survey extends Component {
             $back = $this->getSettingDirectly(USCIC_SURVEY, OBJECT_SURVEY, SETTING_BACK_LANGUAGE, getDefaultSurveyMode())->getValue();
         }
         if ($back == "") {
-            return BACK_REENTRY_NO;
+            return LANGUAGE_BACK_NO;
         }
         return $back;
     }
@@ -1210,7 +1282,7 @@ class Survey extends Component {
             SETTING_SLIDER_TEXTBOX => TEXTBOX_YES,
             SETTING_SLIDER_TEXTBOX_LABEL => Language::labelSliderTextBox(),
             SETTING_SLIDER_FORMATER => "return value;",
-            SETTING_SLIDER_PRESELECTION => SLIDER_PRESELECTION_YES,
+            SETTING_SLIDER_PRESELECTION => SLIDER_PRESELECTION_NO,
             SETTING_GROUP_EXACT_REQUIRED => "",
             SETTING_GROUP_MINIMUM_REQUIRED => "",
             SETTING_GROUP_MAXIMUM_REQUIRED => "",
@@ -1228,6 +1300,7 @@ class Survey extends Component {
             SETTING_ENUMERATED_SPLIT => ENUMERATED_NO,
             SETTING_ENUMERATED_ORDER => ORDER_OPTION_FIRST,
             SETTING_ENUMERATED_CUSTOM => "",
+            SETTING_SETOFENUMERATED_RANKING => SETOFENUMERATED_RANKING_NO,
             SETTING_PLACEHOLDER => "",
             SETTING_ENUMERATED_TEXTBOX => TEXTBOX_NO,
             SETTING_ENUMERATED_TEXTBOX_LABEL => Language::labelEnumeratedTextBox(),
@@ -1329,6 +1402,7 @@ class Survey extends Component {
     }
 
     /* output functions */
+
     function getStoreLocation($default = true) {
         if ($this->getSettingValue(SETTING_DATA_STORE_LOCATION) != "") {
             return $this->getSettingValue(SETTING_DATA_STORE_LOCATION, $default);
@@ -1339,7 +1413,7 @@ class Survey extends Component {
     function setStoreLocation($value) {
         $this->setSettingValue(SETTING_DATA_STORE_LOCATION, $value);
     }
-    
+
     function getStoreLocationExternal($default = true) {
         if ($this->getSettingValue(SETTING_DATA_STORE_LOCATION_EXTERNAL) != "") {
             return $this->getSettingValue(SETTING_DATA_STORE_LOCATION_EXTERNAL, $default);
@@ -1350,7 +1424,7 @@ class Survey extends Component {
     function setStoreLocationExternal($value) {
         $this->setSettingValue(SETTING_DATA_STORE_LOCATION_EXTERNAL, $value);
     }
-    
+
     function getOutputValueLabelWidth($default = true) {
         if ($this->getSettingValue(SETTING_OUTPUT_VALUELABEL_WIDTH) != "") {
             return $this->getSettingValue(SETTING_OUTPUT_VALUELABEL_WIDTH, $default);
@@ -1648,7 +1722,7 @@ class Survey extends Component {
     function setAnswerFormatting($value) {
         $this->setSettingValue(SETTING_ANSWER_FORMATTING, $value);
     }
-    
+
     function getFooterDisplay($default = true) {
         if ($this->getSettingValue(SETTING_FOOTER_DISPLAY, $default) != "") {
             return $this->getSettingValue(SETTING_FOOTER_DISPLAY, $default);
@@ -2115,7 +2189,7 @@ class Survey extends Component {
         $this->setSettingValue(SETTING_ERROR_MESSAGE_RANGE, $text);
     }
 
-    function getErrorMessageMaximumCalendar() {
+    function getErrorMessageMaximumCalendar($default = true) {
         if ($this->getSettingValue(SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR, $default) != "") {
             return $this->getSettingValue(SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR, $default);
         }
@@ -2649,7 +2723,17 @@ class Survey extends Component {
     }
 
     /* set of enumerated functions */
+    function getSetOfEnumeratedRanking($default = true) {
+        if ($this->getSettingValue(SETTING_SETOFENUMERATED_RANKING) != "") {
+            return $this->getSettingValue(SETTING_SETOFENUMERATED_RANKING);
+        }
+        return $this->getDefaultValue(SETTING_SETOFENUMERATED_RANKING);
+    }
 
+    function setSetOfEnumeratedRanking($value) {
+        $this->setSettingValue(SETTING_SETOFENUMERATED_RANKING, $value);
+    }
+    
     function getEnumeratedDisplay($default = true) {
         if ($this->getSettingValue(SETTING_ENUMERATED_ORIENTATION) != "") {
             return $this->getSettingValue(SETTING_ENUMERATED_ORIENTATION);
@@ -3099,7 +3183,7 @@ class Survey extends Component {
     function setDateTimeFormat($value) {
         $this->setSettingValue(SETTING_DATETIME_FORMAT, $value);
     }
-    
+
     function getDateDefaultView($default = true) {
 
         /* variable level setting */
@@ -3112,7 +3196,7 @@ class Survey extends Component {
     function setDateDefaultView($value) {
         $this->setSettingValue(SETTING_DATE_DEFAULT_VIEW, $value);
     }
-    
+
     function getDateTimeCollapse($default = true) {
 
         /* variable level setting */
@@ -3125,7 +3209,7 @@ class Survey extends Component {
     function setDateTimeCollapse($value) {
         $this->setSettingValue(SETTING_DATETIME_COLLAPSE, $value);
     }
-    
+
     function getDateTimeSideBySide($default = true) {
 
         /* variable level setting */
@@ -3503,7 +3587,7 @@ class Survey extends Component {
     function setTextboxPostText($value) {
         $this->setSettingValue(SETTING_SLIDER_TEXTBOX_POSTTEXT, $value);
     }
-    
+
     function getSliderPreSelection($default = true) {
         if ($this->getSettingValue(SETTING_SLIDER_PRESELECTION) != "") {
             return $this->getSettingValue(SETTING_SLIDER_PRESELECTION);
@@ -3514,7 +3598,7 @@ class Survey extends Component {
     function setSliderPreSelection($value) {
         $this->setSettingValue(SETTING_SLIDER_PRESELECTION, $value);
     }
-    
+
     function getSliderFormater($default = true) {
         if ($this->getSettingValue(SETTING_SLIDER_FORMATER) != "") {
             return $this->getSettingValue(SETTING_SLIDER_FORMATER);
@@ -3716,7 +3800,7 @@ class Survey extends Component {
 
     function getMultiColumnQuestiontext($default = true) {
         if ($this->getSettingValue(SETTING_MULTICOLUMN_QUESTIONTEXT, $default) != "") {
-            return $this->getSettingValue(SETTING_ACCESS_TYPE, $default);
+            return $this->getSettingValue(SETTING_MULTICOLUMN_QUESTIONTEXT, $default);
         }
         return MULTI_QUESTION_NO;
     }

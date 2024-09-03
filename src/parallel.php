@@ -14,6 +14,8 @@
 
 require_once('constants.php');
 require_once('functions.php');
+require_once("dbConfig.php");
+require_once("config.php");
 
 // define header
 $returnStr = '<html><body>
@@ -54,5 +56,7 @@ $returnStr .= '
 <input type="submit" value="Start">
 </form></center>
 </body></html>';
+
+echo $returnStr;
 
 ?>

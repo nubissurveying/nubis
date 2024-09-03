@@ -36,11 +36,11 @@ class DisplaySearch extends DisplaySysAdmin {
             $returnStr .= $this->displayWarning(Language::messageSearchNoTerm());
         } else {
             global $db, $survey;
-            $query = "select name, object, objecttype from " . Config::dbSurvey() . "_settings where suid=" . $_SESSION['SUID'] . " and CONVERT(value using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' group by objecttype, object, name order by objecttype, object, name";
+            $query = "select name, object, objecttype from " . Config::dbSurvey() . "_settings where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and CONVERT(value using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' group by objecttype, object, name order by objecttype, object, name";
             $res = $db->selectQuery($query);
-            $query1 = "select * from " . Config::dbSurvey() . "_routing where suid=" . $_SESSION['SUID'] . " and CONVERT(rule using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' order by seid asc, rgid asc";
+            $query1 = "select * from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and CONVERT(rule using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' order by seid asc, rgid asc";
             $res1 = $db->selectQuery($query1);
-            $query2 = "select tyd from " . Config::dbSurvey() . "_types where suid=" . $_SESSION['SUID'] . " and CONVERT(name using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' order by tyd asc";
+            $query2 = "select tyd from " . Config::dbSurvey() . "_types where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and CONVERT(name using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' order by tyd asc";
             $res2 = $db->selectQuery($query2);
             if ($res || $res1 || $res2) {
                 if ($db->getNumberOfRows($res) == 0 && $db->getNumberOfRows($res1) == 0 && $db->getNumberOfRows($res2) == 0) {
@@ -151,7 +151,7 @@ class DisplaySearch extends DisplaySysAdmin {
                     if ($db->getNumberOfRows($res2) > 0) {
                         while ($rtw = $db->getRow($res2)) {
 
-                            $querytype = "select vsid as object, variablename as name from " . Config::dbSurvey() . "_variables where suid=" . $_SESSION['SUID'] . " and tyd='" . $rtw["tyd"] . "' order by vsid";
+                            $querytype = "select vsid as object, variablename as name from " . Config::dbSurvey() . "_variables where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and tyd='" . prepareDatabaseString($rtw["tyd"]) . "' order by vsid";
                             $restype = $db->selectQuery($querytype);
                             if ($restype) {
                                 if ($db->getNumberOfRows($restype) > 0) {
@@ -168,7 +168,7 @@ class DisplaySearch extends DisplaySysAdmin {
                                         $var_results[$rtype["name"] . $rtype["object"] . OBJECT_VARIABLEDESCRIPTIVE] = "<tr>
                                             <td><a " . $tagclass . ' onclick="var res = updateCookie(\'uscicvariablecookie\',\'' . $variable->getSuid() . "~" . $variable->getVsid() . '\'); if (res == 1) { $(this).addClass(\'uscic-cookie-tag-active\'); } else { $(this).removeClass(\'uscic-cookie-tag-active\'); } return false;" title="' . Language::linkTagTooltip() . '" href="" role="button"><span class="glyphicon glyphicon-tag"></span></a></td>' .
                                                 "<td><a class='searchlink' href='" . setSessionParams(array("page" => "sysadmin.survey.editvariable", "suid" => $_SESSION['SUID'], "vsid" => $rtype["object"])) . "'>" . $variable->getName() . "</a></td>                                                      
-                                                          </tr>";                                                                                  
+                                                          </tr>";
                                     }
                                 }
                             }
@@ -179,8 +179,14 @@ class DisplaySearch extends DisplaySysAdmin {
                     $type_results = array_unique($type_results);
                     $survey_results = array_unique($survey_results);
                     $group_results = array_unique($group_results);
-                    
-                    $var_header .= '<div id="collapseVariables" class="panel-collapse collapse">
+
+                    $var_footer = "";
+                    $type_footer = "";
+                    $section_footer = "";
+                    $group_footer = "";
+                    $survey_footer = "";
+
+                    $var_header = '<div id="collapseVariables" class="panel-collapse collapse">
                                             <div class="panel-body">';
                     if (sizeof($var_results) > 0) {
                         $var_header .= '<table class="table table-striped table-bordered">
@@ -193,7 +199,7 @@ class DisplaySearch extends DisplaySysAdmin {
                         $var_footer .= "</div></div>";
                     }
 
-                    $type_header .= '<div id="collapseTypes" class="panel-collapse collapse">
+                    $type_header = '<div id="collapseTypes" class="panel-collapse collapse">
                                             <div class="panel-body">';
                     if (sizeof($type_results) > 0) {
                         $type_header .= '<table class="table table-striped table-bordered">
@@ -207,7 +213,7 @@ class DisplaySearch extends DisplaySysAdmin {
                         $type_footer .= "</div></div>";
                     }
 
-                    $survey_header .= '<div id="collapseSurvey" class="panel-collapse collapse">
+                    $survey_header = '<div id="collapseSurvey" class="panel-collapse collapse">
                                             <div class="panel-body">';
                     if (sizeof($survey_results) > 0) {
                         $survey_header .= '<table class="table table-striped table-bordered">
@@ -221,7 +227,7 @@ class DisplaySearch extends DisplaySysAdmin {
                         $survey_footer .= "</div></div>";
                     }
 
-                    $group_header .= '<div id="collapseGroups" class="panel-collapse collapse">
+                    $group_header = '<div id="collapseGroups" class="panel-collapse collapse">
                                             <div class="panel-body">';
                     if (sizeof($group_results) > 0) {
                         $group_header .= '<table class="table table-striped table-bordered">
@@ -235,7 +241,7 @@ class DisplaySearch extends DisplaySysAdmin {
                         $group_footer .= "</div></div>";
                     }
 
-                    $section_header .= '<div id="collapseSections" class="panel-collapse collapse">
+                    $section_header = '<div id="collapseSections" class="panel-collapse collapse">
                                             <div class="panel-body">';
                     if (sizeof($section_results) > 0) {
                         $section_header .= '<table class="table table-striped table-bordered">
@@ -272,7 +278,7 @@ class DisplaySearch extends DisplaySysAdmin {
                     } else {
                         $routing_footer .= "</div></div>";
                     }
-                    
+
                     if (sizeof($var_results) > 0) {
                         $varstring = $var_header . implode("", $var_results) . $var_footer;
                     } else {
@@ -386,7 +392,7 @@ class DisplaySearch extends DisplaySysAdmin {
             $returnStr .= $this->displayWarning(Language::messageSearchNoTerm());
         } else {
             global $db, $survey;
-            $query = "select name, object, objecttype from " . Config::dbSurvey() . "_settings where suid=" . $_SESSION['SUID'] . " and CONVERT(value using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' group by objecttype, object, name order by objecttype, object, name";
+            $query = "select name, object, objecttype from " . Config::dbSurvey() . "_settings where suid=" . prepareDatabaseString($_SESSION['SUID']) . " and CONVERT(value using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' group by objecttype, object, name order by objecttype, object, name";
             $res = $db->selectQuery($query);
             //$query1 = "select * from " . Config::dbSurvey() . "_routing where suid=" . $_SESSION['SUID'] . " and CONVERT(rule using utf8) COLLATE utf8_general_ci like '%" . prepareDatabaseString($searchparameters) . "%' order by seid asc, rgid asc";
             //$res1 = $db->selectQuery($query1);

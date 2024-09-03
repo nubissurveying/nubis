@@ -39,7 +39,7 @@ class Remarks {
 
     function addRemark($primkey, $remark, $urid) {
         global $db;
-        $query = 'replace into ' . Config::dbSurvey() . '_remarks (primkey, remark, urid, ts) values (\'' . prepareDatabaseString($primkey) . '\', aes_encrypt(\'' . prepareDatabaseString($remark) . '\',\'' . Config::smsRemarkKey() . '\'), ' . $urid . ', \'' . date('Y-m-d H:i:s') . '\')';
+        $query = 'replace into ' . Config::dbSurvey() . '_remarks (primkey, remark, urid, ts) values (\'' . prepareDatabaseString($primkey) . '\', aes_encrypt(\'' . prepareDatabaseString($remark) . '\',\'' . Config::smsRemarkKey() . '\'), ' . prepareDatabaseString($urid) . ', \'' . prepareDatabaseString(date('Y-m-d H:i:s')) . '\')';
         $db->executeQuery($query);
         if (isset($this->remarksArray[$primkey])) {
             unset($this->remarksArray[primkey]); //remove from array so getremarks re-reads it.

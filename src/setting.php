@@ -98,7 +98,10 @@ class Setting extends NubisObject {
     }
 
     function getValue() {
-        return $this->setting["value"];
+        if (isset($this->setting["value"])) {
+            return $this->setting["value"];
+        }
+        return "";
     }
 
     function setValue($value) {
@@ -118,7 +121,7 @@ class Setting extends NubisObject {
 
     function remove() {
         global $db;
-        $query = "delete from " . Config::dbSurvey() . "_settings where suid=" . $this->getSuid() . " and object=" . $this->getObject() . " and objecttype='" . $this->getObjectType() . "' and name='" . $this->getName() . "' and mode=" . $this->getMode() . " and language=" . $this->getLanguage();
+        $query = "delete from " . Config::dbSurvey() . "_settings where suid=" . prepareDatabaseString($this->getSuid()) . " and object=" . prepareDatabaseString($this->getObject()) . " and objecttype='" . prepareDatabaseString($this->getObjectType()) . "' and name='" . prepareDatabaseString($this->getName()) . "' and mode=" . prepareDatabaseString($this->getMode()) . " and language=" . prepareDatabaseString($this->getLanguage());
         $db->executeQuery($query);
     }
 

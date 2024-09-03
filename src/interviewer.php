@@ -475,6 +475,11 @@ class Interviewer {
             $respondent = new Respondent($primkey);
             $respondent->setFirstName(loadvar('firstname'));
             $respondent->setLastName(loadvar('lastname'));
+            $respondent->setAddress1(loadvar('address1'));
+            $respondent->setAddress2(loadvar('address2'));
+            $respondent->setZip(loadvar('zip'));
+            $respondent->setCity(loadvar('city'));
+            $respondent->setState(loadvar('stat'));
         } else {
             $respondent = new Household($primkey);
             $respondent->setName(loadvar('name'));
@@ -482,18 +487,12 @@ class Interviewer {
             $respondent->setAddress2(loadvar('address2'));
             $respondent->setZip(loadvar('zip'));
             $respondent->setCity(loadvar('city'));
+            $respondent->setState(loadvar('stat'));
         }
-        if (dbConfig::defaultPanel() == PANEL_RESPONDENT) { //only save for respondent panels
-            $respondent->setAddress1(loadvar('address1'));
-            $respondent->setAddress2(loadvar('address2'));
-            $respondent->setZip(loadvar('zip'));
-            $respondent->setCity(loadvar('city'));
-        }
-
+        
         $respondent->setTelephone1(loadvar('telephone1'));
-        //$respondent->setTelephone2(loadvar('telephone2'));
+        $respondent->setTelephone2(loadvar('telephone2'));        
         $respondent->setEmail(loadvar('email'));
-        //log???
 
         $errorMessage = $respondent->saveChanges();
         $display = new Display();

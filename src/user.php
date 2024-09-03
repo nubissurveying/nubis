@@ -19,7 +19,7 @@ class User {
     private $access;
 
     function __construct($uridorrow, $createnew = false) {
-        global $db;
+        global $db;        
         if ($uridorrow == '' && $createnew == true) { //create new user
             $result = $db->selectQuery('select max(urid) as maxurid from ' . Config::dbSurvey() . '_users');
             $row = $db->getRow($result);
@@ -31,7 +31,7 @@ class User {
         } else {
             $result = $db->selectQuery('select ' . Users::getSelectQuery() . ' from ' . Config::dbSurvey() . '_users where urid = ' . prepareDatabaseString($uridorrow));
             $this->user = $db->getRow($result);
-        }
+        }        
         $this->contacts = new Contacts();
     }
 
@@ -149,24 +149,34 @@ class User {
 
     function getSurveysAccess() {
         $access = unserialize(gzuncompress($this->getAccess()));
+        if (!is_array($access)) {
+            return array();
+        }
         return array_keys($access);
     }
 
     function getLanguages($suid, $mode) {
         $access = unserialize(gzuncompress($this->getAccess()));
+        if (!is_array($access)) {
+            $access = array();
+        }
         if (isset($access[$suid])) {
             $arr = $access[$suid];
+            if (isset($arr[$mode])) {
+                return $arr[$mode];
+            }
+            return "";
         } else {
             return "";
-        }
-        if (isset($arr[$mode])) {
-            return $arr[$mode];
-        }
+        }        
         return "";
     }
 
     function setLanguages($suid, $mode, $ls) {
         $access = unserialize(gzuncompress($this->getAccess()));
+        if (!is_array($access)) {
+            $access = array();
+        }
         if (isset($access[$suid])) {
             $arr = $access[$suid];
             if (!is_array($arr)) {
@@ -182,52 +192,75 @@ class User {
 
     function addLanguage($suid, $mode, $l) {
         $access = unserialize(gzuncompress($this->getAccess()));
-        $arr = $access[$suid];
-        if (isset($arr[$mode])) {
-            $ls = explode("~", $arr[$mode]);
-            if (!inArray($l, $ls)) {
-                $ls[] = $l;
-                $arr[$mode] = implode("~", $ls);
-                $access[$suid] = $arr;
-                $this->setAccess((gzcompress(serialize($access))));
+        if (!is_array($access)) {
+            $access = array();
+        }        
+        if (isset($access[$suid])) {            
+            $arr = $access[$suid];
+            if (isset($arr[$mode])) {
+                $ls = explode("~", $arr[$mode]);
+                if (!inArray($l, $ls)) {
+                    $ls[] = $l;
+                    $arr[$mode] = implode("~", $ls);
+                    $access[$suid] = $arr;
+                    $this->setAccess((gzcompress(serialize($access))));
+                }
             }
         }
     }
 
     function addMode($suid, $mode, $ls) {
         $access = unserialize(gzuncompress($this->getAccess()));
-        $arr = $access[$suid];
-        $arr[$mode] = $ls;
-        $access[$suid] = $arr;
-        $this->setAccess((gzcompress(serialize($access))));
+        if (!is_array($access)) {
+            $access = array();
+        }
+        if (isset($access[$suid])) {
+            $arr = $access[$suid];
+            $arr[$mode] = $ls;
+            $access[$suid] = $arr;
+            $this->setAccess((gzcompress(serialize($access))));
+        }
     }
 
     function removeLanguage($suid, $mode, $l) {
         $access = unserialize(gzuncompress($this->getAccess()));
-        $arr = $access[$suid];
-        if (isset($arr[$mode])) {
-            $ls = explode("~", $arr[$mode]);
-            if (inArray($l, $ls)) {
-                unset($ls[array_search($l, $ls)]);
-                $arr[$mode] = implode("~", $ls);
-                $access[$suid] = $arr;
-            }
+        if (!is_array($access)) {
+            $access = array();
         }
-        $this->setAccess((gzcompress(serialize($access))));
+        if (isset($access[$suid])) {
+            $arr = $access[$suid];
+            if (isset($arr[$mode])) {
+                $ls = explode("~", $arr[$mode]);
+                if (inArray($l, $ls)) {
+                    unset($ls[array_search($l, $ls)]);
+                    $arr[$mode] = implode("~", $ls);
+                    $access[$suid] = $arr;
+                }
+            }
+            $this->setAccess((gzcompress(serialize($access))));
+        }
     }
 
     function removeMode($suid, $mode) {
         $access = unserialize(gzuncompress($this->getAccess()));
-        $arr = $access[$suid];
-        if (isset($arr[$mode])) {
-            unset($arr[$mode]);
-            $access[$suid] = $arr;
+        if (!is_array($access)) {
+            $access = array();
         }
-        $this->setAccess((gzcompress(serialize($access))));
+        if (isset($access[$suid])) {
+            $arr = $access[$suid];
+            if (isset($arr[$mode])) {
+                unset($arr[$mode]);
+                $access[$suid] = $arr;
+            }
+            $this->setAccess((gzcompress(serialize($access))));
+        }
     }
 
     function removeSurvey($suid) {
         $access = unserialize(gzuncompress($this->getAccess()));
+        if (!is_array($access)) {
+            $access = array();
+        }
         if (isset($access[$suid])) {
             unset($access[$suid]);
         }
@@ -236,6 +269,12 @@ class User {
 
     function getModes($suid) {
         $access = unserialize(gzuncompress($this->getAccess()));
+        if (!is_array($access)) {
+            $access = array();
+        }
+        if (!isset($access[$suid])) {
+            return array();
+        }
         $arr = $access[$suid];
         return array_keys($arr);
     }
@@ -275,28 +314,33 @@ class User {
         $query .= 'communication = ? ';
         $query .= 'WHERE urid = ?';
         $bp = new BindParam();
-        $bp->add(MYSQL_BINDING_STRING, $this->getUsername());
-        $bp->add(MYSQL_BINDING_STRING, $this->getName());
-        $bp->add(MYSQL_BINDING_STRING, $this->getSettings());
-        $bp->add(MYSQL_BINDING_STRING, $this->getPassword());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getFilter());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getRegionFilter());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getTestMode());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getStatus());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getSupervisor());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getUserType());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getUserSubType());
-        $bp->add(MYSQL_BINDING_STRING, $this->getAccess());
-        $bp->add(MYSQL_BINDING_STRING, $this->getLastData());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getCommunication());
-        $bp->add(MYSQL_BINDING_INTEGER, $this->getUrid());
+        
+        $params = [$this->getUsername(), $this->getName(), $this->getSettings(), $this->getPassword(), $this->getFilter(), $this->getRegionFilter(),
+            $this->getTestMode(), $this->getStatus(), $this->getSupervisor(), $this->getUserType(), $this->getUserSubType(),
+            $this->getAccess(), $this->getLastData(), $this->getCommunication(), $this->getUrid()];
+
+        $bp->add(MYSQL_BINDING_STRING, $params[0]);
+        $bp->add(MYSQL_BINDING_STRING, $params[1]);
+        $bp->add(MYSQL_BINDING_STRING, $params[2]);
+        $bp->add(MYSQL_BINDING_STRING, $params[3]);        
+        $bp->add(MYSQL_BINDING_INTEGER, $params[4]);
+        $bp->add(MYSQL_BINDING_INTEGER, $params[5]);
+        $bp->add(MYSQL_BINDING_INTEGER, $params[6]);
+        $bp->add(MYSQL_BINDING_INTEGER, $params[7]);
+        $bp->add(MYSQL_BINDING_INTEGER, $params[8]);
+        $bp->add(MYSQL_BINDING_INTEGER, $params[9]);
+        $bp->add(MYSQL_BINDING_INTEGER, $params[10]);
+        $bp->add(MYSQL_BINDING_STRING, $params[11]); 
+        $bp->add(MYSQL_BINDING_STRING, $params[12]); 
+        $bp->add(MYSQL_BINDING_INTEGER, $params[13]);
+        $bp->add(MYSQL_BINDING_INTEGER, $params[14]);        
         return $db->executeBoundQuery($query, $bp->get());
     }
 
     function delete() {
         global $db;
         $query = 'DELETE FROM ' . Config::dbSurvey() . '_users ';
-        $query .= 'WHERE urid = ' . $this->getUrid();
+        $query .= 'WHERE urid = ' . prepareDatabaseString($this->getUrid());
         return $db->executeQuery($query);
     }
 

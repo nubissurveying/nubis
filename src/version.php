@@ -69,7 +69,7 @@ class Version {
         if (!isset($this->version['vnid'])) {
             return;
         }
-        $query = "delete from " . Config::dbVersion() . "_versions where suid = " . $this->getSuid() . " and vnid=" . $this->getVnid();
+        $query = "delete from " . Config::dbVersion() . "_versions where suid = " . prepareDatabaseString($this->getSuid()) . " and vnid=" . prepareDatabaseString($this->getVnid());
         $db->executeQuery($query);
     }
 
@@ -77,19 +77,24 @@ class Version {
         global $db;
 
         if (!isset($this->version['vnid'])) {
+            $query = "select max(vnid) as max from " . Config::dbSurvey() . "_versions";
+            $r = $db->selectQuery($query);
+            $row = $db->getRow($r);
+            $vnid = $row["max"] + 1;
+            $this->setSuid($vnid);
             $query = "replace into " . Config::dbVersion() . "_versions (suid, name, description) values(";
-            $this->setSuid($db->getLastInsertedId());
-        } else {
+        }
+        else {
             $query = "replace into " . Config::dbVersion() . "_versions (suid, vnid, name, description) values(";
         }
 
         $query .= $this->getSuid() . ",";
         if (isset($this->version['vnid'])) {
-            $query .= $this->getVnid() . ",";
+            $query .= prepareDatabaseString($this->getVnid()) . ",";
         }
 
-        $query .= "'" . $this->getName() . "',";
-        $query .= "'" . $this->getDescription() . "'";
+        $query .= "'" . prepareDatabaseString($this->getName()) . "',";
+        $query .= "'" . prepareDatabaseString($this->getDescription()) . "'";
         $query .= ")";
         $db->executeQuery($query);
     }

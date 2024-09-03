@@ -64,8 +64,7 @@ class SMS {
                 $displayLogin = new DisplayLoginSMS();
                 return $displayLogin->showSysadminKey();
             }
-        }
-        
+        }        
         $sysAdmin = new SysAdmin();
         return $sysAdmin->getPage();
     }
@@ -76,7 +75,7 @@ class SMS {
     }
 
     function getTranslatorMain() {
-        $translator = new Translator();
+        $translator = new Translator($this->user);
         return $translator->getPage();
     }
 

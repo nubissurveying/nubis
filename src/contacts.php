@@ -26,6 +26,7 @@ class Contacts {
 
     function addContact($primkey, $contactcode, $contactts, $contactwith, $contactperson, $remark, $event, $urid) {
         global $db;
+
         $errorMessage = array();
         if ($contactcode <= 0) {
             $errorMessage[] = 'Please enter a contact outcome.';
@@ -47,17 +48,19 @@ class Contacts {
                 }
             }
         }
+
         if (sizeof($errorMessage) == 0) {
             $query = 'REPLACE INTO ' . Config::dbSurvey() . '_contacts (primkey, code, contactts, proxy, proxyname, remark, event, urid) VALUES (';
             $query .= '"' . prepareDatabaseString($primkey) . '", ';
-            $query .= $contactcode . ', ';
+            $query .= prepareDatabaseString($contactcode) . ', ';
             $query .= '"' . prepareDatabaseString(date('Y-m-d H:i:s', strtotime($contactts))) . '", ';
-            $query .= $proxy . ', ';
+            $query .= prepareDatabaseString($proxy) . ', ';
             if ($proxyname != '') {
                 $query .= 'aes_encrypt("' . prepareDatabaseString($proxyname) . '", "' . Config::smsContactNameKey() . '"), ';
             } else {
                 $query .= 'NULL, ';
             }
+            
             if ($remark != '') {
                 $query .= 'aes_encrypt("' . prepareDatabaseString($remark) . '", "' . Config::smsContactRemarkKey() . '"), ';
             } else {

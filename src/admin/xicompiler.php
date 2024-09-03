@@ -897,7 +897,7 @@ class XiCompiler {
         $this->messages = array();
         $this->seid = $seid;
         global $db;
-        $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . $this->suid . " and seid=" . $this->seid . " order by rgid asc";
+        $q = "select * from " . Config::dbSurvey() . "_routing where suid=" . prepareDatabaseString($this->suid) . " and seid=" . prepareDatabaseString($this->seid) . " order by rgid asc";
         if ($rules = $db->selectQuery($q)) {
 
             if ($db->getNumberOfRows($rules) > 0) {

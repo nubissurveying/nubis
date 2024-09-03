@@ -60,12 +60,12 @@ class Login {
         //$row = $db->getRow($result);
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
-            $_SESSION['URID'] = $row['urid'];
+            $_SESSION['URID'] = $row['urid'];            
             return true;
         }
 
         $logactions = new LogActions();
-        $logactions->addAction('', '', "loginwrong", USCIC_SMS);
+        $logactions->addAction('', '', "loginwrong", USCIC_SMS, '1', false);
         return false;
     }
 

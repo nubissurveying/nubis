@@ -54,10 +54,11 @@ class DisplayQuestion extends DisplayQuestionBasic {
         $returnStr = '';
         
         if (Config::useAccessible()) {
+            global $survey;
             $returnStr .= '<link href="css/accessible.css" type="text/css" rel="stylesheet">';
             $returnStr .= "<header class='accessible_header' id='surveyheader' role='banner'></header>";
             $returnStr .= '<main class="accessible_main" id="surveymain" role="main">';
-            $returnStr .= "<h1 class='nubis-accessible-hidden'>" . Language::labelAccessibleH1() . "</h1>";
+            $returnStr .= "<h1 class='nubis-accessible-hidden'>" . Language::labelAccessibleH1($survey->getTitle()) . "</h1>";
         }
         
         $returnStr .= '<form id="form" role="form" method=post autocapitalize="off" autocorrect="off" autocomplete="off">';

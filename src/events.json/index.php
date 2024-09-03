@@ -16,21 +16,14 @@
 
  */
 
-
-error_reporting(E_ALL);
-
-ini_set("display_errors", 1);
-
-
 set_include_path(dirname(getcwd()));
-
 require_once("constants.php");
 require_once('users.php');
 require_once('user.php');
 require_once("functions.php");
-require_once('dbConfig.php');
-require_once('config.php');
-
+require_once("dbConfig.php");
+$loaded = dbConfig::load("../conf.php");
+require_once("config.php");
 date_default_timezone_set(Config::timezone());
 
 require_once('database.php');
@@ -40,7 +33,13 @@ require_once('contacts.php');
 require_once('contact.php');
 
 session_start();
+if (decryptC($_SESSION[CONFIGURATION_ENCRYPTION_CALENDAR], Config::smsComponentKey()) != Config::calendarKey()) {
+    exit;
+}
 
+if (!isset($_SESSION['URID'])) {
+    exit;
+}
 $urid = $_SESSION['URID'];
 
 $contacts = new Contacts();
@@ -67,7 +66,7 @@ foreach ($events as $event) {
 
     echo '                    "title": "' . date('H:i', strtotime($event->getEvent())) . ': ' . $event->getPrimkey() . ' - ' . $event->getRemark() . '",';
 
-    echo '                    "url": "' . setSessionParams(array('page' => 'catiinterviewer.info', 'primkey' => $event->getPrimkey())) . '",';
+    echo '                    "url": "' . setSessionParams(array('page' => 'interviewer.info', 'primkey' => $event->getPrimkey())) . '",';
 
     echo '                    "class": "event-' . $eventsColor[mt_rand(0, sizeof($events) - 1)] . '",';
 

@@ -376,7 +376,7 @@ class DisplaySupervisor extends DisplayRespondent {
         $returnStr .= '<div class="row row-offcanvas row-offcanvas-right">';
         $returnStr .= '<div class="col-xs-12 col-sm-9">';
 
-        $returnStr .= '<br/><br/><br/>' . $breadcrumps;
+        $returnStr .= '<br/><br/><br/><br/><br/>' . $breadcrumps;
 //CONTENT
 
         $returnStr .= $content;
@@ -429,16 +429,7 @@ $(document).ready(function () {
     }
 
     function showInterviewerSideBar($interviewer) {
-        /*    $remarksStr = '';
-          $remarks = $respondent->getRemarks();
-          if (sizeof($remarks) > 0){
-          $remarksStr = ' <span class="badge pull-right">' . sizeof($remarks) . '</span>';
-          }
-          $contactsStr = '';
-          $contacts = $respondent->getContacts();
-          if (sizeof($contacts) > 0){
-          $contactsStr = ' <span class="badge pull-right">' . sizeof($contacts) . '</span>';
-          } */
+
         return '
 
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
@@ -493,9 +484,9 @@ $(document).ready(function () {
         $returnStr = $this->displayHeaderForTable(Language::messageSMSTitle(), $message);
         $returnStr .= '<div id="wrap">';
         $returnStr .= $this->showNavBar();
-        $returnStr .= '<div class="container"><p>';
+        $returnStr .= '<div class="container"><p><br/><br/><br/>';
         $returnStr .= '<ol class="breadcrumb">';
-        $returnStr .= '<li class="active">' . Language::labelHome() . '</li>';
+        $returnStr .= '<li class="active">' . Language::labelReports() . '</li>';
         $returnStr .= '</ol>';
 
 //CONTENT
@@ -525,9 +516,10 @@ $(document).ready(function () {
         $returnStr = $this->displayHeaderForTable(Language::messageSMSTitle(), $message);
         $returnStr .= '<div id="wrap">';
         $returnStr .= $this->showNavBar();
-        $returnStr .= '<div class="container"><p>';
+        $returnStr .= '<div class="container"><p><br/><br/><br/>';
         $returnStr .= '<ol class="breadcrumb">';
-        $returnStr .= '<li class="active">' . Language::labelHome() . '</li>';
+        $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'supervisor.reports'), Language::labelReports()) . '</li>';
+        $returnStr .= '<li class="active">' . Language::labelSupervisorContactGraphs() . '</li>';
         $returnStr .= '</ol>';
 
 
@@ -769,10 +761,10 @@ var chart = new Highcharts.Chart({
             if ($i > 0) {
                 $userStr .= ' OR ';
             }
-            $userStr .= ' ' . $prefix . 'urid = ' . $user->getUrid();
+            $userStr .= ' ' . prepareDatabaseString($prefix) . 'urid = ' . prepareDatabaseString($user->getUrid());
             $i++;
         }
-        $userStr .= ') AND ' . $prefix . 'primkey is not null AND ';
+        $userStr .= ') AND ' . prepareDatabaseString($prefix) . 'primkey is not null AND ';
         return $userStr;
     }
 
@@ -785,17 +777,17 @@ var chart = new Highcharts.Chart({
         $userStr = $this->getUridQuery();
 
         if ($rorh == 1) { //houseohld level
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurvey() . '_contacts as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_households as t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $userStr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND  t2.primkey is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_households as t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $userStr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(Config::graphStartDate())) . ' 23:59:99" AND  t2.primkey is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         } else {
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurvey() . '_contacts as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $userStr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND  t2.primkey is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $userStr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(Config::graphStartDate())) . ' 23:59:99" AND  t2.primkey is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         }
 
         $total = 0;
-        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', config::graphStartDate()) . " -1 month")) . "), 0   ],";
+        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', Config::graphStartDate())) . " -1 month") . "), 0   ],";
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
             $key = $row['dateobs'];
@@ -815,17 +807,17 @@ var chart = new Highcharts.Chart({
         $userStr = $this->getUridQuery();
 
         if ($rorh == 1) { //houseohld level
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurveyData() . '_data as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_households t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND suid = ' . $rorh . ' and variablename="' . $fieldname . '" and answer is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_households t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(Config::graphStartDate())) . ' 23:59:99" AND suid = ' . prepareDatabaseString($rorh) . ' and variablename="' . prepareDatabaseString($fieldname) . '" and answer is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         } else {
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurveyData() . '_data as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND suid = ' . $rorh . ' and variablename="' . $fieldname . '" and answer is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(Config::graphStartDate())) . ' 23:59:99" AND suid = ' . prepareDatabaseString($rorh) . ' and variablename="' . prepareDatabaseString($fieldname) . '" and answer is not null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         }
 
         $total = 0;
-        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', config::graphStartDate()) . " -1 months")) . "), 0   ],";
+        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', Config::graphStartDate()) . " -1 months")) . "), 0   ],";
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
             $key = $row['dateobs'];
@@ -845,18 +837,18 @@ var chart = new Highcharts.Chart({
         $userStr = $this->getUridQuery();
 
         if ($rorh == 1) { //houseohld level
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurveyData() . '_data as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_households t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND suid = ' . $rorh . ' and variablename="' . $fieldname . '" and answer is null group by DATE(t1.ts) order by DATE(t1.ts) asc';
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_households t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(Config::graphStartDate())) . ' 23:59:99" AND suid = ' . prepareDatabaseString($rorh) . ' and variablename="' . prepareDatabaseString($fieldname) . '" and answer is null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         } else {
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurveyData() . '_data as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND suid = ' . $rorh . ' and variablename="' . $fieldname . '" and answer is null group by DATE(t1.ts) order by DATE(t1.ts) asc';
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurveyData() . '_data as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $userStr . getTextmodeStr('t1.') . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(Config::graphStartDate())) . ' 23:59:99" AND suid = ' . prepareDatabaseString($rorh) . ' and variablename="' . prepareDatabaseString($fieldname) . '" and answer is null group by DATE(t1.ts) order by DATE(t1.ts) asc';
         }
 
 
         $total = 0;
-        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', config::graphStartDate()) . " -1 months")) . "), 0   ],";
+        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', Config::graphStartDate()) . " -1 months")) . "), 0   ],";
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
             $key = $row['dateobs'];
@@ -966,26 +958,23 @@ var chart = new Highcharts.Chart({
         $actions = array();
         $uridstr = '';
         if ($urid > 0) {
-            $uridstr = ' t1.urid = ' . $urid . ' AND ';
+            $uridstr = ' t1.urid = ' . prepareDatabaseString($urid) . ' AND ';
         } else {
             $uridstr = $this->getUridQuery('t2.');
         }
 
-
         if ($rorh == 1) { //houseohld level
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurvey() . '_contacts as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_households as t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $uridstr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND t2.primkey is not null and t1.code = ' . $code . ' group by DATE(t1.ts) order by DATE(t1.ts) asc';
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_households as t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $uridstr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(Config::graphStartDate())) . ' 23:59:99" AND t2.primkey is not null and t1.code = ' . prepareDatabaseString($code) . ' group by DATE(t1.ts) order by DATE(t1.ts) asc';
         } else {
-            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . dbConfig::dbSurvey() . '_contacts as t1 ';
-            $query .= 'left join ' . dbConfig::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
-            $query .= 'where ' . $uridstr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', config::graphStartDate()) . ' 23:59:99" AND t2.primkey is not null and t1.code = ' . $code . ' group by DATE(t1.ts) order by DATE(t1.ts) asc';
-
-
+            $query = 'select DATE(t1.ts) as dateobs, count(*) as cntobs from ' . Config::dbSurvey() . '_contacts as t1 ';
+            $query .= 'left join ' . Config::dbSurvey() . '_respondents t2 on t2.primkey = t1.primkey ';
+            $query .= 'where ' . $uridstr . getTextmodeStr() . ' t1.ts > "' . date('Y-m-d', prepareDatabaseString(config::graphStartDate())) . ' 23:59:99" AND t2.primkey is not null and t1.code = ' . prepareDatabaseString($code) . ' group by DATE(t1.ts) order by DATE(t1.ts) asc';
         }
 
         $total = 0;
-        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', config::graphStartDate()) . " -1 months")) . "), 0   ],";
+        $dataStr .= "[Date.UTC(" . date('Y,m,d', strtotime(date('Y-m-d', Config::graphStartDate()) . " -1 months")) . "), 0   ],";
         $result = $db->selectQuery($query);
         while ($row = $db->getRow($result)) {
             $key = $row['dateobs'];
@@ -1002,9 +991,10 @@ var chart = new Highcharts.Chart({
         $returnStr = $this->displayHeaderForTable(Language::messageSMSTitle(), $message);
         $returnStr .= '<div id="wrap">'; //<br/><br/><br/>';
         $returnStr .= $this->showNavBar();
-        $returnStr .= '<div class="container"><p>';
+        $returnStr .= '<div class="container"><p><br/><br/><br/>';
         $returnStr .= '<ol class="breadcrumb">';
-        $returnStr .= '<li class="active">' . Language::labelHome() . '</li>';
+        $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'supervisor.reports'), Language::labelReports()) . '</li>';
+        $returnStr .= '<li class="active">' . Language::labelSupervisorSurveyInfo() . '</li>';
         $returnStr .= '</ol>';
 //CONTENT
 
@@ -1054,9 +1044,10 @@ var chart = new Highcharts.Chart({
         $returnStr = $this->displayHeaderForTable(Language::messageSMSTitle(), $message);
         $returnStr .= '<div id="wrap">';
         $returnStr .= $this->showNavBar();
-        $returnStr .= '<div class="container"><p>';
+        $returnStr .= '<div class="container"><p><br/><br/><br/>';
         $returnStr .= '<ol class="breadcrumb">';
-        $returnStr .= '<li class="active">' . Language::labelHome() . '</li>';
+        $returnStr .= '<li>' . setSessionParamsHref(array('page' => 'supervisor.reports'), Language::labelReports()) . '</li>';
+        $returnStr .= '<li class="active">' . Language::labelSupervisorResponse() . '</li>';
         $returnStr .= '</ol>';
 
 
@@ -1192,24 +1183,17 @@ $(document).ready(function () {
         if ($respondentOrHousehold->hasFinalCode() && $respondentOrHousehold->isCompleted()) { //if not completed: can still be assigned to different iwer
             $content = $this->displayInfo(Language::labelSupervisorFinalCodeAssigned());
         } else {
-            if ($respondentOrHousehold instanceof Household) {
-                //          $content .= '<form method="post">';
-                //            $content .= setSessionParamsPost(array('page' => 'supervisor.interviewer.respondent.reassign', 'primkey' => $respondentOrHousehold->getPrimkey()));
-
-                $users = new Users();
-                $users = $users->getUsersBySupervisor($_SESSION['URID']);
-                // $content .= $this->displayUsers($users, $respondentOrHousehold->getUrid());
-                // $content .= '<br/>';
-                // $content .= '<input type="submit" class="btn btn-default" value="Reassign"/>';
-                // $content .= '</form>';   
-
-                $content .= $this->showActionBar(Language::labelSupervisorAssignToInterviewer(), $this->displayUsers($users, $respondentOrHousehold->getUrid(), 'uridsel', false, true), 'Reassign', setSessionParamsPost(array('page' => 'supervisor.interviewer.household.reassign', 'primkey' => $respondentOrHousehold->getPrimkey())), confirmAction('Are you sure you want to reassign this household? Make sure the intervier data for this household has been uploaded, otherwise data wil be lost! Type YES to continue.', 'YES'));
+            $users = new Users();
+            $users = $users->getUsersBySupervisor($_SESSION['URID']);
+            if ($respondentOrHousehold instanceof Household) {                
+                $content .= $this->showActionBar(Language::labelSupervisorAssignToInterviewer(), $this->displayUsers($users, $respondentOrHousehold->getUrid(), 'uridsel', false, $respondentOrHousehold->getUrid()), Language::buttonReassign(), setSessionParamsPost(array('page' => 'supervisor.interviewer.household.reassign', 'primkey' => $respondentOrHousehold->getPrimkey())), confirmAction(Language::messageSMSAssignConfirm(Language::labelHousehold()), Language::messageConfirmation()));
                 if (!$respondentOrHousehold->hasFinalCode()) {
-                    $content .= $this->showActionBar(Language::labelSupervisorAssignFinalStatus(), $this->displayFinalStatusCodesSelect($respondentOrHousehold->getUrid()), 'Set status', setSessionParamsPost(array('page' => 'supervisor.interviewer.household.contact.setstatus', 'primkey' => $respondentOrHousehold->getPrimkey())), confirmAction('Are you sure you want to reassign this household? Type YES to continue.', 'YES'));
+                    $content .= $this->showActionBar(Language::labelSupervisorAssignFinalStatus(), $this->displayFinalStatusCodesSelect($respondentOrHousehold->getUrid()), Language::buttonSetStatus(), setSessionParamsPost(array('page' => 'supervisor.interviewer.household.contact.setstatus', 'primkey' => $respondentOrHousehold->getPrimkey())), confirmAction(Language::messageSMSSetStatusConfirm(Language::labelHousehold()), Language::messageConfirmation()));
                 }
             } else {
+                $content .= $this->showActionBar(Language::labelSupervisorAssignToInterviewer(), $this->displayUsers($users, $respondentOrHousehold->getUrid(), 'uridsel', false, $respondentOrHousehold->getUrid()), Language::buttonReassign(), setSessionParamsPost(array('page' => 'supervisor.interviewer.household.reassign', 'primkey' => $respondentOrHousehold->getPrimkey())), confirmAction(Language::messageSMSAssignConfirm(Language::labelHousehold()), Language::messageConfirmation()));
                 if (!$respondentOrHousehold->hasFinalCode()) {
-                    $content .= $this->showActionBar(Language::labelSupervisorAssignFinalStatus(), $this->displayFinalStatusCodesSelect($users, $respondentOrHousehold->getUrid()), 'Set status', setSessionParamsPost(array('page' => 'supervisor.interviewer.household.respondent.contact.setstatus', 'primkey' => $respondentOrHousehold->getPrimkey())), confirmAction('Are you sure you want to assign a final status code to this respondent? Type YES to continue.', 'YES'));
+                    $content .= $this->showActionBar(Language::labelSupervisorAssignFinalStatus(), $this->displayFinalStatusCodesSelect($users, $respondentOrHousehold->getUrid()), Language::buttonSetStatus(), setSessionParamsPost(array('page' => 'supervisor.interviewer.household.respondent.contact.setstatus', 'primkey' => $respondentOrHousehold->getPrimkey())), confirmAction(Language::messageSMSSetStatusConfirm(Language::labelRespondent()), Language::messageConfirmation()));
                 } else {
                     $content = $this->displayInfo(Language::labelSupervisorFinalCodeAssigned());
                 }
@@ -1226,7 +1210,7 @@ $(document).ready(function () {
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">' . Language::labelClose() . '</span></button>
         <h4 class="modal-title" id="myModalLabel">' . Language::labelSupervisorCheckRespondentAnswers() . '</h4>
       </div>
       <div class="modal-body">
@@ -1264,20 +1248,20 @@ $(document).ready(function () {
         return '';    //nothing for supervisor mode
     }
 
-    function showPreferences($user) {
+    function showPreferences($user, $message = "") {
 
         $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
 
         $returnStr .= '<div id="wrap"><br/><br/><br/>';
 
         $returnStr .= $this->showNavBar();
-
+        
         $returnStr .= '<div class="container"><p>';
 
 //CONTENT
 
 
-
+        $returnStr .= $message;
         $returnStr .= '<h4>' . Language::linkPreferences() . '</h4>';
 
 
@@ -1531,7 +1515,7 @@ if ($(\'#testmode\').val() == "1"){
         return $returnStr;
     }
 
-    function showSendReceive($message) {
+    function showSendReceive($message = "") {
         $returnStr = $this->showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet"><link href="css/uscicadmin.css" rel="stylesheet">');
         $returnStr .= '<div id="wrap"><br/><br/><br/>';
         $returnStr .= $this->showNavBar();
@@ -1576,6 +1560,9 @@ if ($(\'#testmode\').val() == "1"){
         $returnStr .= $this->showNavBar();
         $returnStr .= '<div class="container"><p>';
 //CONTENT
+        $returnStr .= '<ol class="breadcrumb">';
+        $returnStr .= '<li class="active">' . Language::linkUnassignedSample() . '</li>';
+        $returnStr .= '</ol>';
         if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
             $returnStr .= '<h4>' . Language::labelSupervisorUnassignedHouseholds() . '</h4>';
         }

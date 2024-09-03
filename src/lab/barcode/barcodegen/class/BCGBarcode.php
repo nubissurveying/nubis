@@ -152,6 +152,7 @@ abstract class BCGBarcode {
         }
 
         if (isset($labels[BCGLabel::POSITION_RIGHT])) {
+            
             $dimension = $labels[BCGLabel::POSITION_RIGHT]->getDimension();
             $pixelsAround[1] += $dimension[0];
         }

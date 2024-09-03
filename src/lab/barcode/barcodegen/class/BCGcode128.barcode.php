@@ -271,7 +271,8 @@ class BCGcode128 extends BCGBarcode1D {
         } else {
             // This loop checks for UnknownText AND raises an exception if a character is not allowed in a table
             reset($text);
-            while (list($key1, $val1) = each($text)) {     // We take each value
+            //while (list($key1, $val1) = each($text)) {     // We take each value OLD EXISTING CODE
+            foreach ($text as $key1 => $val1) { // changed to not use each
                 if (!is_array($val1)) {                    // This is not a table
                     if (is_string($val1)) {                // If it's a string, parse as unknown
                         $seq .= $this->getSequence($val1, $currentMode);
@@ -279,7 +280,8 @@ class BCGcode128 extends BCGBarcode1D {
                     } else {
                         // it's the case of "array(ENCODING, 'text')"
                         // We got ENCODING in $val1, calling 'each' again will get 'text' in $val2
-                        list($key2, $val2) = each($text);
+                        //list($key2, $val2) = each($text); // OLD EXISTING CODE
+                        $val2 = next($text); // changed to not use each
                         $seq .= $this->{'setParse' . $this->METHOD[$val1]}($val2, $currentMode);
                         $this->text .= $val2;
                     }

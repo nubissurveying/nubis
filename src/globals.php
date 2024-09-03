@@ -154,15 +154,15 @@ require('customanswertypes.php');
 
 /* SMS extensions */
 if (Config::smsUsage()) {
-    require('display/displayloginsms.php');
-    require('display/displaysysadmin.php');
+    require('display/displayloginsms.php');    
+    require('display/displaysysadmin.php');   
     require('display/displayoutput.php');
     require('display/displayusers.php');
     require('display/displaysupervisor.php');
     require('display/displaytranslator.php');
     require('display/displaysearch.php');
     require('display/displaysms.php');
-    //require('display/displaynurse.php');
+    require('display/displaynurse.php');
     require('display/displayresearcher.php');    
     require("data.php");
     require('dataexport.php');

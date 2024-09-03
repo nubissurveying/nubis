@@ -24,7 +24,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
             $this->editable = true;
         }
         else if($user->getUserType() == USER_TRANSLATOR) {
-            $modes = $user->getModes();            
+            $modes = $user->getModes(getSurvey());            
             if (inArray(getSurveyMode(), $modes)) {                
                 $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
                 if (inArray(getSurveyLanguage(), $langs)) {  
@@ -35,7 +35,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
         }                
     }
 
-    function showSurveyHeader($title, $style = '') {
+    function showSurveyHeader($title, $style = '', $extra = '') {
         $returnStr = parent::showSurveyHeader(Language::messageSMSTitle(), $style);
         $returnStr .= $this->showNavBar();
         $user = $_SESSION['URID'];
@@ -92,7 +92,7 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
         // begin language
         global $survey;
         $user = new User($_SESSION['URID']);
-        $allowedmodes = $user->getModes();
+        $allowedmodes = $user->getModes(getSurvey());
         $allowedlanguages = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         $default = $survey->getDefaultLanguage(getSurveyMode());
         $ut = "sysadmin";
@@ -153,10 +153,10 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
 										<li class="dropdown-header">' . $this->engine->getPrimaryKey() . '</li>
                                                                                 <li class="dropdown-header">' . $variablenamesfull . '</li>';
         
-        $windowopen = 'window.open(\'tester/' . setSessionParams(array('reporturid' => $_SESSION['URID'], 'testpage' => 'report', 'reportsuid' => $this->engine->getSuid(), 'reportseid' => $this->engine->getSeid(), 'reportmainseid' => $this->engine->getMainSeid(), 'reportrgid' => $rgid, 'reportdisplayed' => $variablenames, 'reportlanguage' => getSurveyLanguage(), 'reportmode' => getSurveyMode(), 'reportversion' => getSurveyVersion(), 'reportprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=770,height=500,scrollbars=yes,top=100,left=100\'); return false;';
+        $windowopen = 'window.open(\'tester/' . setSessionParams(array('k' => encryptC(Config::testerKey(), Config::smsComponentKey()), 'reporturid' => $_SESSION['URID'], 'testpage' => 'report', 'reportsuid' => $this->engine->getSuid(), 'reportseid' => $this->engine->getSeid(), 'reportmainseid' => $this->engine->getMainSeid(), 'reportrgid' => $rgid, 'reportdisplayed' => $variablenames, 'reportlanguage' => getSurveyLanguage(), 'reportmode' => getSurveyMode(), 'reportversion' => getSurveyVersion(), 'reportprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=770,height=500,scrollbars=yes,top=100,left=100\'); return false;';
         $javascript = ' onclick="' . $windowopen . '"';
         $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-remove-sign"></span> ' . Language::linkReportProblem() . '</a></li>';
-        $windowopen = 'window.open(\'tester/' . setSessionParams(array('testpage' => 'watch', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=770,height=650,scrollbars=yes,top=100,left=100\'); return false;';
+        $windowopen = 'window.open(\'tester/' . setSessionParams(array('k' => encryptC(Config::testerKey(), Config::smsComponentKey()), 'testpage' => 'watch', 'watchurid' => $_SESSION['URID'], 'watchsuid' => $this->engine->getSuid(), 'watchseid' => $this->engine->getSeid(), 'watchmainseid' => $this->engine->getMainSeid(), 'watchrgid' => $rgid, 'watchdisplayed' => $variablenames, 'watchlanguage' => getSurveyLanguage(), 'watchmode' => getSurveyMode(), 'watchversion' => getSurveyVersion(), 'watchprimkey' => $this->engine->getPrimarykey())) . '\', \'popupWindow\', \'width=770,height=650,scrollbars=yes,top=100,left=100\'); return false;';
         $javascript = ' onclick="' . $windowopen . '"';
         $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-zoom-in"></span> ' . Language::linkWatch() . '</a></li>';
         $first = $this->engine->isFirstState();   
@@ -168,10 +168,11 @@ class DisplayQuestionTest extends DisplayQuestionBasic {
             else {
                 $stateid = $this->engine->getStateId();
             }            
-            $windowopen = 'window.open(\'tester/' . setSessionParams(array('testpage' => 'jumpback', 'jumpurid' => $_SESSION['URID'], 'jumpsuid' => $this->engine->getSuid(), 'jumpstateid' => $stateid, 'jumpprimkey' => $this->engine->getPrimaryKey())) . '\', \'popupWindow\', \'width=770,height=300,scrollbars=yes,top=100,left=100\'); return false;';
+            $windowopen = 'window.open(\'tester/' . setSessionParams(array('k' => encryptC(Config::testerKey(), Config::smsComponentKey()),'testpage' => 'jumpback', 'jumpurid' => $_SESSION['URID'], 'jumpsuid' => $this->engine->getSuid(), 'jumpstateid' => $stateid, 'jumpprimkey' => $this->engine->getPrimaryKey())) . '\', \'popupWindow\', \'width=770,height=300,scrollbars=yes,top=100,left=100\'); return false;';
             $javascript = ' onclick="' . $windowopen . '"';
             $returnStr .= '<li><a style="cursor: pointer;" ' . $javascript . '><span class="glyphicon glyphicon-arrow-left"></span> ' . Language::linkJumpBack() . '</a></li>';
         }
+
         $returnStr .= '<li><a href="' . setSessionParams(array('page' => $ut . '.tools.test', 'suid' => $this->engine->getSuid())) . '&se=' . addslashes(USCIC_SMS) . '"><span class="glyphicon glyphicon-home"></span> ' . Language::linkBackToNubis() . '</a></li>                   
                     <li class="divider"></li>
                    <li><a href="index.php?rs=1&se=2"><span class="glyphicon glyphicon-log-out"></span> ' . Language::linkLogout() . '</a></li>

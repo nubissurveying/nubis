@@ -14,8 +14,21 @@
 
 class DisplayQuestionNurse extends DisplayQuestionBasic {
 
-    function showHeader($title, $style = '') {
+    function showHeader($title, $style = '', $extra = '') {
         $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
+        $returnStr .= $this->showNavBar();
+
+//        $returnStr .= $this->engine->getDisplayed();
+        $this->padding = true;
+//      $returnStr .= 'SMS balk hier!'; 
+//      $returnStr .= parent::showLanguage(); 
+
+        return $returnStr;
+    }
+    
+    function showSurveyHeader($title, $style = '', $extra = '') {
+        $returnStr = parent::showHeader(Language::messageSMSTitle(), '<link href="css/uscic.css" rel="stylesheet">
+                  <link href="bootstrap/css/sticky-footer-navbar.min.css" rel="stylesheet">');
         $returnStr .= $this->showNavBar();
 
 //        $returnStr .= $this->engine->getDisplayed();
@@ -66,7 +79,7 @@ class DisplayQuestionNurse extends DisplayQuestionBasic {
         $returnStr .= '<li class="dropdown">
               <a href="#" class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown">' . $user->getName() . ' <b class="caret"></b></a>
                  <ul class="dropdown-menu">
-										<li class="dropdown-header">' . $this->engine->primkey . '</li>
+										<li class="dropdown-header">' . $this->engine->getPrimaryKey() . '</li>
                                                                                 <li class="dropdown-header">' . $variablenames . '</li>';
 
 
@@ -75,7 +88,7 @@ class DisplayQuestionNurse extends DisplayQuestionBasic {
 
         $returnStr .= '<li><a href="#" data-toggle="modal" data-target="#calculator"><span class="glyphicon glyphicon-th"></span> Calculator</a></li>';
 
-        $returnStr .= '<li><a href="' . setSessionParams(array('page' => 'nurse.backfromsms', 'primkey' => $this->engine->primkey, 'suid' => $this->engine->getSuid())) . '&se=' . addslashes(USCIC_SMS) . '"><span class="glyphicon glyphicon-home"></span> ' . Language::linkBackToSMS() . '</a></li>                   
+        $returnStr .= '<li><a href="' . setSessionParams(array('page' => 'nurse.backfromsms', 'primkey' => $this->engine->getPrimaryKey(), 'suid' => $this->engine->getSuid())) . '&se=' . addslashes(USCIC_SMS) . '"><span class="glyphicon glyphicon-home"></span> ' . Language::linkBackToSMS() . '</a></li>                   
                     <li class="divider"></li>
                    <li><a href="index.php?rs=1&se=2"><span class="glyphicon glyphicon-log-out"></span> ' . Language::linkLogout() . '</a></li>
                  </ul>

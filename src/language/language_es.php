@@ -15,11 +15,11 @@
 class Language extends LanguageBase {
 
     static function defaultDisplayOverviewAddressColumns() {
-        return array('address1_dec' => 'Room', 'city_dec' => 'Location');
+        return array('address1_dec' => 'Address1', 'city_dec' => 'City');
     }
 
     static function defaultDisplayInfoAddressColumns() {
-        return array('address1_dec' => 'Room', 'city_dec' => 'Location');
+        return array('address1_dec' => 'Address1', 'city_dec' => 'City');
     }
 
     static function defaultDisplayInfo2AddressColumns() {
@@ -501,7 +501,7 @@ class Language extends LanguageBase {
         return 'Variable ' . $name . ' is not an array';
     }
     
-    static function errorInvalidExpression($name) {
+    static function errorInvalidExpression() {
         return 'Invalid expression';
     }
 
@@ -729,6 +729,10 @@ class Language extends LanguageBase {
 
     static function labelAppointment() {
         return 'Appointment:';
+    }
+    
+    static function labelContactWhen() {
+        return 'Date/time:';
     }
 
     static function labelRemark() {
@@ -1302,28 +1306,46 @@ class Language extends LanguageBase {
 
     static function messageSelectRespondent() {
         if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) { //show household level
-            return 'Please select a respondent or household to start an interview.';
+            return 'Please select a household or a respondent to start an interview.';
         }
         return 'Please select a respondent to start an interview.';
     }
+    
+    static function messageRespondentsFoundSupervisor() {
+        if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD){ //show household level
+          return 'respondent(s) found.';
+        }
+        return 'respondent(s) found.';
+    }
+    
+    static function labelReports() {
+        return 'Reports';
+    }
 
+    static function messageNoRespondentsSearchResSupervisor() {
+        if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD){ //show household level
+          return 'No respondents found. Please <b>check your filter settings</b>.';
+        }
+        return 'No respondents found. Please check your filter settings.';
+    } 
+    
     static function messageRespondentsAssignedSupervisor($name) {
         if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) { //show household level
-            return 'Household(s)/Respondent(s) assigned to interviewer `' . $name . '`.';
+            return 'Household(s) assigned to interviewer `' . $name . '`.';
         }
         return 'Respondent(s) assigned to interviewer `' . $name . '`.';
     }
 
     static function messageNoRespondentsAssigned() {
         if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) { //show household level
-            return 'No households or respondents assigned to you. Please contact your supervisor or <b>check your filter settings</b>.';
+            return 'No households assigned to you. Please contact your supervisor or <b>check your filter settings</b>.';
         }
         return 'No respondents assigned to you. Please contact your supervisor or check your filter settings.';
     }
 
     static function messageNoRespondentsAssignedSupervisor() {
         if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) { //show household level
-            return 'No respondents or households assigned to this interviewer.';
+            return 'No households assigned to this interviewer.';
         }
         return 'No respondents assigned to this interviewer.';
     }
@@ -2240,6 +2262,10 @@ class Language extends LanguageBase {
 
     static function labelTypeEditLayoutTextBox() {
         return 'Text box';
+    }
+    
+    static function labelTypeSetOfEnumeratedRanking() {
+        return 'Show set of enumerated ranking';
     }
     
     static function labelTypeEditLayoutClickLabel() {
@@ -4009,6 +4035,14 @@ class Language extends LanguageBase {
     static function optionsClickLabelNo() {
         return 'No';
     }
+    
+    static function optionsSetOfEnumeratedRankingYes() {
+        return 'Yes';
+    }
+
+    static function optionsSetOfEnumeratedRankingNo() {
+        return 'No';
+    }
 
     static function optionsEnumeratedTextboxYes() {
         return 'Yes';
@@ -4275,8 +4309,17 @@ class Language extends LanguageBase {
     static function completedInterviewCode() {
         return 500;
     }
+    
+    static function optionsDispositionContactCodeLabels() {
+        $arr = array_values(Language::optionsDispositionContactCode());
+        $out = array();
+        foreach ($arr as $a) {
+            $out[] = $a[1];
+        }
+        return $out;
+    }
 
-    static function optionsDispositionContactCode($respondent) {
+    static function optionsDispositionContactCode($respondent = null) {
         if ($respondent instanceof Respondent) {
             //code, proxy, name, explanation, resist, nonsample, display in dropdown 
             return array(
@@ -4304,7 +4347,7 @@ class Language extends LanguageBase {
         }
     }
 
-    static function optionsFinalDispositionContactCode($respondent) {
+    static function optionsFinalDispositionContactCode($respondent = null) {
         if ($respondent instanceof Respondent) {
             //code, proxy, name, explanation, resist, nonsample 
             return array(
@@ -5077,9 +5120,37 @@ class Language extends LanguageBase {
     static function labelVillage() {
         return 'Village';
     }
+    
+    static function labelAdress1() {
+        return 'Address1';
+    }
+    
+    static function labelAdress2() {
+        return 'Address2';
+    }
+
+    static function labelCity() {
+        return 'City';
+    }
+    
+    static function labelZip() {
+        return 'Zip';
+    }
+    
+    static function labelState() {
+        return 'State';
+    }
 
     static function labelTelephone() {
         return 'Telephone';
+    }
+    
+    static function labelTelephone2() {
+        return 'Telephone2';
+    }
+    
+    static function labelEmail() {
+        return 'Email';
     }
 
     static function labelTestRespondents() {
@@ -5684,11 +5755,11 @@ class Language extends LanguageBase {
     }
 
     static function labelNurseTakePicture() {
-        return 'Field barcode:';
+        return 'Picture:';
     }
 
     static function labelNurseDrivers() {
-        return array(1 => 'Peter', 2 => 'Peace', 3 => 'Ories', 4 => 'Solly', 5 => 'Sharron');
+        return array(1 => 'Example Consenter');
     }
 
     static function labelNurseDBSTToLab() {
@@ -5798,6 +5869,10 @@ class Language extends LanguageBase {
     static function labelNurseAssignNurseHomeVisit() {
         return 'Assign this respondent for a home visit to nurse: ';
     }
+    
+    static function labelNoFieldNurses() {
+        return 'No field nurses found';
+    }
 
     static function labelNurseRespondentID() {
         return 'Respondent id';
@@ -5897,6 +5972,10 @@ class Language extends LanguageBase {
 
     static function labelInterviewerInternetUpdate() {
         return 'Update available on server.';
+    }
+    
+    static function labelInterviewerUSBCommunication() {
+        return 'USB communication';
     }
 
     static function labelInterviewerInternetReceive() {
@@ -6062,6 +6141,14 @@ class Language extends LanguageBase {
     static function labelSMSSample() {
         return 'Sample';
     }
+    
+    static function labelSMSUnassignedSample() {
+        return 'Unassigned sample';
+    }
+    
+    static function labelSMSSurveyAssignment() {
+        return 'Survey assignment';
+    }
 
     static function labelSMSCommunicationTable() {
         return 'Communication table';
@@ -6115,20 +6202,32 @@ class Language extends LanguageBase {
         return 'Assign';
     }
 
-    static function labelSMSWarningNoUnassignedHouseholds() {
-        return 'No unassigned households';
-    }
-
-    static function labelSMSWarningNoUnassignedRespondents() {
-        return 'No unassigned respondents';
-    }
-
     static function labelSMSDownloadCSV() {
         return 'Download (csv)';
     }
 
     static function labelSMSDownloadGPS() {
         return 'Download GPS coordinates(csv)';
+    }
+    
+    static function labelSMSImportSample() {
+        return 'Import sample';
+    }
+    
+    static function labelSMSButtonImportSample() {
+        return 'Import sample';
+    }
+    
+    static function messageNoSampleFileSelected() {
+        return 'Please select a file';
+    }
+    
+    static function messageEmptySampleFileSelected() {
+        return 'Selected file appears to be empty';
+    }
+    
+    static function messageSampleFileImported() {
+        return 'Sample file has been imported';
     }
 
     static function labelSMSInsertSample() {
@@ -6192,11 +6291,16 @@ class Language extends LanguageBase {
     }
 
     static function labelResponseDataContactsSub() {
-        return 'appointment/answering machine/max rings/language barriers/refusal/disconnect';
+        $arr = Language::optionsDispositionContactCodeLabels();
+        return implode("/", $arr);
     }
 
     static function labelResponseDataContacts() {
-        return array('Appointment', 'Answering machine', 'Max rings', 'Refusal', 'Disconnected');
+        return Language::optionsDispositionContactCodeLabels();
+    }
+    
+    static function labelResponseDataContactCodes() {
+        return array_keys(Language::optionsDispositionContactCode());
     }
 
     static function labelRespondentGPS() {
@@ -6247,7 +6351,7 @@ class Language extends LanguageBase {
         return '(M)';
     }
 
-    static function labelRespondentSexFemale() {
+    static function labelRespondentSexFemale() {        
         return '(F)';
     }
 
@@ -6620,7 +6724,7 @@ class Language extends LanguageBase {
     }
 
     static function labelNurseStartSurvey() {
-        return 'Start the survey';
+        return 'Start lab survey';
     }
 
     static function labelNurseShipToLab() {
@@ -6669,6 +6773,14 @@ class Language extends LanguageBase {
 
     static function labelSMSWarningNoSample() {
         return 'No sample information found';
+    }
+    
+    static function labelSMSWarningNoUnassignedHouseholds() {
+        return 'No unassigned households found';
+    }
+    
+    static function labelSMSWarningNoUnassignedRespondents() {
+        return 'No unassigned respondents found';
     }
 
     static function labelTypeEditGeneralArrayInstance() {
@@ -6936,6 +7048,14 @@ class Language extends LanguageBase {
     static function installCommunicationNo() {
         return 'No';
     }
+    
+    static function installUploadYes() {
+        return 'Yes';
+    }
+
+    static function installUploadNo() {
+        return 'No';
+    }
 
     static function installLabelYes() {
         return 'Yes';
@@ -6977,8 +7097,36 @@ class Language extends LanguageBase {
         return 'Remarks';
     }
     
-    static function installLabelEncryptionCommunication() {
-        return 'Communication';
+    static function installLabelEncryptionCommunicationContent() {
+        return 'Communication content';
+    }
+    
+    static function installLabelEncryptionCommunicationComponent() {
+        return 'Component access';
+    }
+    
+    static function installLabelEncryptionCommunicationAccess() {
+        return 'Communication access';
+    }
+    
+    static function installLabelEncryptionUploadAccess() {
+        return 'Upload access';
+    }
+    
+    static function installLabelEncryptionAjaxAccess() {
+        return 'Ajax access';
+    }
+    
+    static function installLabelEncryptionTester() {
+        return 'Tester';
+    }
+    
+    static function installLabelEncryptionCalendar() {
+        return 'Calendar';
+    }
+    
+    static function installLabelEncryptionPicture() {
+        return 'Picture';
     }
 
     static function installLabelEncryptionContactRemark() {
@@ -7091,6 +7239,10 @@ class Language extends LanguageBase {
     
     static function installLabelAllowSampleCommunication() {
         return 'Allow communication';
+    }
+    
+    static function installLabelAllowUpload() {
+        return 'Allow upload';
     }
 
     static function installLabelSampleCommunication() {
@@ -7540,7 +7692,7 @@ class Language extends LanguageBase {
     }
     
     static function optionsParadataError() {
-        return 'Erroneous answers';
+        return 'Erroneous answers (CSV only)';
     }
 
     static function labelOutputDataTypeParadata() {
@@ -7700,19 +7852,7 @@ class Language extends LanguageBase {
     
     static function textAssignmentError($name, $value) {
         return 'Invalid value assigned to variable ' . $name . ": " . $value . "";
-    }
-    
-    static function labelAccessibleH1() {
-        return 'Survey';
-    }
-    
-    static function labelAccessibleOptions() {
-        return 'Options';
-    }
-    
-    static function labelAccessibleInput() {
-        return 'Answer';
-    }
+    }    
     
     static function optionsDataCollapseYes() {
         return 'Yes';
@@ -7749,6 +7889,273 @@ class Language extends LanguageBase {
     
     static function labelSysadminKey() {
         return 'Key';
+    }
+    
+    static function labelMovedOutStatus(){
+        return array(0 => '', 2 => 'Deceased', 1 => 'Moved out');
+    }
+    
+    static function labelMode() {
+        return 'Mode';
+    }
+    
+    static function labelSurvey() {
+        return 'Survey';
+    }
+    
+    static function messageNurseNoVisionSurvey() {
+        return 'No vision survey available';
+    }
+    
+    static function messageNurseNoMainSurvey() {
+        return 'No lab survey available';
+    }
+    
+    static function messageNurseNoAntropometricsSurvey() {
+        return 'No antropometrics survey available';
+    }
+    
+    static function messageNurseNoFollowUpSurvey() {
+        return 'No follow up survey available';
+    }
+    
+    static function messageNurseNoDataSheetSurvey() {
+        return 'No data sheet available';
+    }
+    
+    static function labelNurseLabSurvey() {
+        return 'Nurse lab';
+    }
+    
+    static function labelNurseAntropometricsSurvey() {
+        return 'Nurse antropometrics';
+    }
+    
+    static function labelNurseFollowUpSurvey() {
+        return 'Nurse follow up';
+    }
+    
+    static function labelNurseVisionSurvey() {
+        return 'Nurse vision';
+    }
+    
+    static function labelNurseDataSheetSurvey() {
+        return 'Nurse data sheet';
+    }
+    
+    static function messageSurveyAssignmentUpdated() {
+        return 'Survey assignment updated';
+    }
+    
+    static function errorCalendarMaximumDates($maximum) {
+        return 'You can only select a maximum of ' . $maximum . ' days.';
+    }
+    
+    static function messageSMSAssignHouseholds() {
+        return 'Household(s) assigned.';
+    }
+    
+    static function messageSMSAssignHouseholdsNone() {
+        return 'No household(s) assigned. Please select one or more household(s) and a supervisor to assign sample.';
+    }
+    
+    static function messageSMSAssignRespondents() {
+        return 'Respondent(s) assigned.';
+    }
+    
+    static function messageSMSAssignRespondentsNone() {
+        return 'No respondent(s) assigned. Please select one or more respondent(s) and a supervisor to assign sample.';
+    }
+    
+    static function labelHouseholds() {
+        return 'Households';
+    }
+    
+    static function labelHousehold() {
+        return 'Household';
+    }
+    
+    static function labelRespondents() {
+        return 'Respondents';
+    }
+    
+    static function labelRespondent() {
+        return 'Respondent';
+    }
+    
+    static function labelHouseholdIdentifier() {
+        return 'Household id';
+    }
+    
+    static function labelHouseholdName() {
+        return 'Name';
+    }
+    
+    static function labelHouseholdLastContact() {
+        return 'Last contact';
+    }
+    
+    static function labelHouseholdStatus() {
+        return 'Status';
+    }
+    
+    static function labelHouseholdRefusal() {
+        return 'Refusal';
+    }
+    
+    static function labelHouseholdInterviewer() {
+        return 'Assigned to';
+    }
+    
+    static function labelUnassigned() {
+        return 'Unassigned';
+    }
+    
+    static function labelRespondentIdentifier() {
+        return 'Respondent id';
+    }
+    
+    static function labelRespondentLastContact() {
+        return 'Last contact';
+    }
+    
+    static function labelHRespondentStatus() {
+        return 'Status';
+    }
+    
+    static function labelRespondentRefusal() {
+        return 'Refusal';
+    }
+    
+    static function labelClose() {
+        return 'Close';
+    }
+    
+    static function messageSMSAssignConfirm($rext = 'household') {
+        return 'Are you sure you want to reassign this ' . $rext . '? Make sure the interviewer data for this ' . $rext . ' has been uploaded, otherwise data wil be lost! Type ' . Language::messageConfirmation() . ' to continue.';
+    }
+    
+    static function messageSMSSetStatusConfirm($rext = 'household'){
+        return 'Are you sure you want to assign a final status code to this ' . $rext . '? Type ' . Language::messageConfirmation() . ' to continue.';
+    }
+    
+    static function messageConfirmation() {
+        return 'YES';
+    }
+    
+    static function buttonReassign() {
+        return 'Reassign';
+    }
+    
+    static function buttonSetStatus() {
+        return 'Set status';
+    }
+    
+    static function labelAccessibleH1($title = "") {
+        if ($title == "") {
+            return 'Survey';
+        }
+        return $title;
+    }
+    
+    static function labelAccessibleOptions() {
+        return 'Options';
+    }
+    
+    static function labelAccessibleInput() {
+        return 'Answer';
+    }
+    
+    static function labelAccessibleQuestion() {
+        return 'Question text';
+    }
+    
+    static function labelAccessibleAnswer() {
+        return 'Answer section';
+    }
+    
+    static function labelAccessibleString() {
+        return "Enter free text response in the text box.";
+    }
+    
+    static function labelAccessibleEnumerated() {
+        return "Choose one of the provided options.";
+    }
+    
+    static function labelAccessibleSetOfEnumerated() {
+        return "Select all that apply of the provided options.";
+    }
+    
+    static function labelAccessibleDropdown() {
+        return "Choose one of the provided options in the dropdown.";
+    }
+    
+    static function labelAccessibleMultiDropdown() {
+        return "Select all that apply of the provided options in the dropdown.";
+    }
+    
+    static function labelAccessibleInteger() {
+        return "Enter a whole number without any leading zeroes or decimal points in the text box.";
+    }
+    
+    static function labelAccessibleDouble() {
+        return "Enter a number without any leading zeroes in the text box.";
+    }
+    
+    static function labelAccessibleRange() {
+        return "Enter a whole number without any leading zeroes or decimal points";
+    }
+    
+    static function labelAccessibleRangeMin($minimum) {
+        return " greater than or equal to " . $minimum;  
+    }
+    
+    static function labelAccessibleRangeAnd() {
+        return " and"; 
+    }
+    
+    static function labelAccessibleRangeMax($maximum) {
+        return " less than or equal to " . $maximum;
+    }
+    
+    static function labelAccessibleRangeEnd() {
+        return " in the text box.";
+    }
+    
+    static function labelAccessibleSlider() {
+        return "Select a number on the slider";
+    }
+    
+    static function labelAccessibleSliderMin($minimum) {
+        return " greater than or equal to " . $minimum;
+    }
+    
+    static function labelAccessibleSliderAnd() {
+        return " and"; 
+    }
+    
+    static function labelAccessibleSliderMax($maximum) {
+        return " less than or equal to " . $maximum;
+    }
+    
+    static function labelAccessibleSliderEnd() {
+        return " or enter a number in the text box.";
+    }
+    
+    static function labelAccessibleDate() {
+        return "Select a date.";
+    }
+    
+    static function labelAccessibleTime() {
+        return "Select a time.";
+    }
+    
+    static function labelAccessibleDateTime() {
+        return "Select a date and time.";
+    }
+    
+    static function labelAccessibleOpen() {
+        return "Enter free text response in the text area.";
     }
 }
 

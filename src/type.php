@@ -33,7 +33,10 @@ class Type extends Component {
     }
 
     function getTyd() {
-        return $this->type["tyd"];
+        if (isset($this->type['tyd'])) {
+            return $this->type['tyd'];
+        }
+        return "";
     }
 
     function setTyd($tyd) {
@@ -41,7 +44,11 @@ class Type extends Component {
     }
 
     function getName() {
-        return $this->type["name"];
+        if (isset($this->type["name"])) {
+	        return $this->type["name"];
+	 }
+	 return "";
+
     }
 
     function setName($name) {
@@ -1197,7 +1204,7 @@ class Type extends Component {
     function getErrorMessageMaximumWords($default = true) {
 
         /* type level setting */
-        $val = $this->getSettingValue(SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH, $default);
+        $val = $this->getSettingValue(SETTING_ERROR_MESSAGE_MAXIMUM_WORDSs, $default);
         if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
             return $val;
         }
@@ -1614,6 +1621,25 @@ class Type extends Component {
 
     /* options functions */
 
+    function getSetOfEnumeratedRanking($default = true) {
+
+        /* type level setting */
+        $val = $this->getSettingValue(SETTING_SETOFENUMERATED_RANKING, $default);
+        if (!inArray($val, array("", SETTING_FOLLOW_GENERIC))) {
+            return $val;
+        }
+
+        /* survey level setting */ if ($_SESSION['PARAMETER_RETRIEVAL'] == PARAMETER_ADMIN_RETRIEVAL) {
+            return SETTING_FOLLOW_GENERIC;
+        }
+        global $survey;
+        return $survey->getSetOfEnumeratedRanking($default);
+    }
+
+    function setSetOfEnumeratedRanking($value) {
+        $this->setSettingValue(SETTING_SETOFENUMERATED_RANKING, $value);
+    }
+    
     function getEnumeratedDisplay($default = true) {
 
         /* type level setting */

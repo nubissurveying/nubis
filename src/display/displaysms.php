@@ -23,7 +23,8 @@ class DisplaySms extends DisplaySysAdmin {
         $returnStr .= $message;
 
         $returnStr .= '<div class="list-group">';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.sample')) . '" class="list-group-item">' . Language::labelSMSSample() . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.sample')) . '" class="list-group-item">' . Language::labelSMSUnassignedSample() . '</a>';
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.surveyassignment')) . '" class="list-group-item">' . Language::labelSMSSurveyAssignment() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.communication')) . '" class="list-group-item">' . Language::labelSMSCommunicationTable() . '</a>';
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.update')) . '" class="list-group-item">' . Language::labelSMSLaptopUpdate() . '</a>';
 
@@ -162,8 +163,6 @@ class DisplaySms extends DisplaySysAdmin {
         }
         if (sizeof($unassignedRespondentOrHouseholds) > 0) {
 
-
-
             $returnStr .= '<form method="post">';
             $returnStr .= setSessionParamsPost(array('page' => $refpage . '.assign'));
             $returnStr .= '<input type=hidden name=puid value="' . $puid . '">';
@@ -172,7 +171,7 @@ class DisplaySms extends DisplaySysAdmin {
 	    <thead>
 	      <tr>
 		<th><label><input type="checkbox" id="checkAll"/> &nbsp;&nbsp;id</label></th>
-		<th>Name</th>';
+		<th>' . Language::labelHouseholdName() . '</th>';
 
             $columns = $this->defaultDisplayOverviewAddressColumns();
             foreach ($columns as $column) {
@@ -198,6 +197,7 @@ $("#checkAll").change(function () {
 });
 
 </script>';
+
             $returnStr .= '<nav class="navbar navbar-default" role="navigation">';
             $returnStr .= '<div class="container-fluid"><div class="navbar-header">';
             $returnStr .= '<table><tr><td valign=top><img src="images/arrow_ltr.png"></td><td><a class="navbar-brand">assign selected to:</a></td></tr></table>';
@@ -205,16 +205,21 @@ $("#checkAll").change(function () {
             $returnStr .= '<div class="navbar-form navbar-left">';
             $returnStr .= '<div class="form-group">';
             if ($currentUser->getUserType() == USER_SUPERVISOR) {
-                $returnStr .= $this->displayInterviewerSelect(0, true);
+                $returnStr .= $this->displayInterviewerSelect(0);
             } else {
                 $returnStr .= $this->displaySupervisorSelect();
             }
+
             $returnStr .= '</div>';
             $returnStr .= '<button type="submit" class="btn btn-default">' . Language::labelSMSButtonAssign() . '</button>';
             $returnStr .= '</div></form></div></div></nav>';
         } else {
             if ($refpage == 'sysadmin.sms.sample') {
-                $returnStr .= $this->displayWarning(Language::labelSMSWarningNoSample());
+                if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
+                    $returnStr .= $this->displayWarning(Language::labelSMSWarningNoUnassignedHouseholds());
+                } else {
+                    $returnStr .= $this->displayWarning(Language::labelSMSWarningNoUnassignedRespondents());
+                }
             } else {
                 if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
                     $returnStr .= $this->displayWarning(Language::labelSMSWarningNoUnassignedHouseholds());
@@ -228,22 +233,16 @@ $("#checkAll").change(function () {
 
     function showSample($message = '') {
         $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.sms'), Language::linkSms()), 'label' => Language::linkSms());
-        $headers[] = array('link' => '', 'label' => Language::labelSMSSample());
+        $headers[] = array('link' => '', 'label' => Language::labelSMSUnassignedSample());
 
         $returnStr = $this->showSmsHeader($headers);
         //CONTENT
 
         $returnStr .= $message;
-
         $returnStr .= $this->showAvailableUnassignedHouseholds();
-
         $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.sample.download')) . '&puid= ' . loadvar('puid', 0) . '">' . Language::labelSMSDownloadCSV() . '</a>';
         $returnStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.sample.download.gps')) . '&puid= ' . loadvar('puid', 0) . '">' . Language::labelSMSDownloadGPS() . '</a>';
-        $returnStr .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
-        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.sample.insert')) . '">' . Language::labelSMSInsertSample() . '</a>';
-
-
+        $returnStr .= '<a href="index.php?r=' . setSessionsParamString(array('page' => 'sysadmin.sms.sample.import')) . '">' . Language::labelSMSImportSample() . '</a>';
 
         //END CONTENT
         $returnStr .= '</p></div>    </div>'; //container and wrap
@@ -252,30 +251,33 @@ $("#checkAll").change(function () {
         return $returnStr;
     }
 
-    function showInsertSample() {
+    function showImportSample($message = "") {
         $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.sms'), Language::linkSms()), 'label' => Language::linkSms());
-        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.sms.sample'), Language::labelSMSSample()), 'label' => Language::labelSMSSample());
-        $headers[] = array('link' => '', 'label' => Language::labelSMSInsertSample());
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.sms.sample'), Language::labelSMSUnassignedSample()), 'label' => Language::labelSMSSample());
+        $headers[] = array('link' => '', 'label' => Language::labelSMSImportSample());
 
         $returnStr = $this->showSmsHeader($headers);
         //CONTENT
+        $returnStr .= $message;
 
-        $returnStr .= '<form method="post" enctype="multipart/form-data">';
-        $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.sms.sample.insert.res'));
+        $returnStr .= '<form method="post">';
+        $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.sms.sample.import.res'));
         $returnStr .= '<table>';
-        $returnStr .= '<tr><td>Sample type</td><td>';
 
+        if (dbConfig::defaultPanel() == PANEL_HOUSEHOLD) {
+            $returnStr .= '<tr><td>Sample type</td><td>';
+            $paneltype = loadvar('paneltype', 1);
+            $returnStr .= $this->displayPanelTypeFilter($paneltype);
+        } else {
+            $returnStr .= '<input type="hidden" name="paneltype" id="paneltype" value="' . PANEL_RESPONDENT . '">';
+        }
 
-        $paneltype = loadvar('paneltype', 1);
-
-        $returnStr .= $this->displayPanelTypeFilter($paneltype);
         $returnStr .= '<tr><td>Upload file</td><td>';
         $returnStr .= '<input type="file" name="file" size="50" class="form-control" />';
         $returnStr .= '</td></tr>';
         $returnStr .= '</table>';
-
-        $returnStr .= '<button type="submit" class="btn btn-default">' . Language::labelSMSButtonInsertSample() . '</button>';
-
+        $returnStr .= '<br/><br/>';
+        $returnStr .= '<button type="submit" class="btn btn-default">' . Language::labelSMSButtonImportSample() . '</button>';
         $returnStr .= '</form>';
 
         //END CONTENT
@@ -291,7 +293,6 @@ $("#checkAll").change(function () {
 
         $returnStr = $this->showSmsHeader($headers);
         //CONTENT
-
         $returnStr .= $message;
 
         $urid = loadvar('selurid', 0);
@@ -334,6 +335,44 @@ $("#checkAll").change(function () {
 //        $returnStr .= '</form>';
 
         $returnStr .= '</form>';
+        //END CONTENT
+        $returnStr .= '</p></div>    </div>'; //container and wrap
+        $returnStr .= $this->showBottomBar();
+        $returnStr .= $this->showFooter(false);
+        return $returnStr;
+    }
+
+    function showSurveyAssignment($message = "") {
+        $headers[] = array('link' => setSessionParamsHref(array('page' => 'sysadmin.sms'), Language::linkSms()), 'label' => Language::linkSms());
+        $headers[] = array('link' => '', 'label' => Language::labelSMSSurveyAssignment());
+
+        $returnStr = $this->showSmsHeader($headers);
+        //CONTENT
+
+        $returnStr .= $message;
+
+        $returnStr .= '<form method="post">';
+
+        $returnStr .= '<div class="well">';
+        $returnStr .= setSessionParamsPost(array('page' => 'sysadmin.sms.surveyassignment.res'));
+        $returnStr .= '<table width=100%>';
+        $returnStr .= $this->displayComboBox();
+
+        $surveys = new Surveys();
+        if ($surveys->getNumberOfSurveys() > 0) {
+            $returnStr .= '<tr><td>' . Language::labelNurseLabSurvey() . '</td><td>' . $this->displaySurveysNoSelect("nurselab", "nurselab", $surveys->getNurseLabSurvey()) . '</tr>';
+            $returnStr .= '<tr><td>' . Language::labelNurseFollowUpSurvey() . '</td><td>' . $this->displaySurveysNoSelect("nursefollowup", "nursefollowup", $surveys->getNurseFollowUpSurvey()) . '</tr>';
+            $returnStr .= '<tr><td>' . Language::labelNurseVisionSurvey() . '</td><td>' . $this->displaySurveysNoSelect("nursevision", "nursevision", $surveys->getNurseVisionSurvey()) . '</tr>';
+            $returnStr .= '<tr><td>' . Language::labelNurseAntropometricsSurvey() . '</td><td>' . $this->displaySurveysNoSelect("nurseantropometrics", "nurseantropometrics", $surveys->getNurseAntropometricsSurvey()) . '</tr>';
+            $returnStr .= '<tr><td>' . Language::labelNurseDataSheetSurvey() . '</td><td>' . $this->displaySurveysNoSelect("nursedatasheet", "nursedatasheet", $surveys->getNurseDataSheetSurvey()) . '</tr>';
+        }
+        $returnStr .= '</table>';
+        $returnStr .= '</div>';
+
+
+        $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonSave() . '"/>';
+        $returnStr .= '</form>';
+
         //END CONTENT
         $returnStr .= '</p></div>    </div>'; //container and wrap
         $returnStr .= $this->showBottomBar();

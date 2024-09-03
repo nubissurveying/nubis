@@ -40,7 +40,7 @@ class Watcher {
         require_once('display.php');       
         
         $data = new Data();
-        $values = $data->getRespondentData(getFromSessionParams('watchsuid'), getFromSessionParams('watchprimkey'));
+        $values = $data->getRespondentData(prepareDatabaseString(getFromSessionParams('watchsuid')), prepareDatabaseString(getFromSessionParams('watchprimkey')));
 
         $returnStr .= '</div>
     <div role="panel" class="panel">';

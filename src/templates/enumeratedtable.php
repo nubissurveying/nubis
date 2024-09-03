@@ -18,6 +18,7 @@ class EnumeratedTableTemplate extends TableTemplate {
     private $dkrfna;
     private $role;
     private $returnStrAdd;
+    private $cellwidth;
 
     function __construct($engine, $group) {
 
@@ -25,9 +26,7 @@ class EnumeratedTableTemplate extends TableTemplate {
     }
     
     function show($variables, $realvariables, $language) {
-
         $this->variables = $variables;
-
         $this->realvariables = $realvariables;
         $this->returnStrAdd = "";
         $this->language = $language;
@@ -74,7 +73,7 @@ class EnumeratedTableTemplate extends TableTemplate {
         
         //$id = "example";
         if ($pt != $current) {
-            $nolabels = "data-tablesaw-postappend";
+            $nolabels = "data-tablesaw-postappend";            
             if ($this->group->isTableMobileLabels() == false) {
                 $nolabels = "data-tablesaw-no-labels";
             }
@@ -266,7 +265,7 @@ class EnumeratedTableTemplate extends TableTemplate {
         $this->cellwidth = "style='width: " . round(($this->engine->replaceFills($this->group->getTableWidth()) - $this->engine->replaceFills($this->group->getQuestionColumnWidth())) / $noofcolumns) . "%;'";
 
         foreach ($orderedoptions as $option) {
-            if (trim($option["label"] == "")) {
+            if (!is_array($option) || trim($option["label"] == "")) {
                 continue;
             }
             $returnStr .= "<th class='uscic-table-row-cell-header-enumerated'><div class='" . $qa . "'><span id='vsid_option" . $var->getVsid() . $option["code"] . "' uscic-target='vsid_" . $var->getVsid() . "' uscic-answercode='" . $option["code"] . "' uscic-texttype='" . SETTING_OPTIONS . "' class='" . $this->displayobject->inlineeditable . "'>" . $this->displayobject->applyFormatting($option["label"], $this->group->getHeaderFormatting()) . "</span></div></th>";
@@ -488,9 +487,11 @@ class EnumeratedTableTemplate extends TableTemplate {
                                                                             $("#' . $id . '_' . $option["code"] . '").prop("checked", true);
                                                                           }      
                                                                           $("#' . $id . '_' . $option["code"] . '").change();
-                                                                          if ($("#' . $id . '_' . $option["code"] . '")[0]) {    
-                                                                            $("#' . $id . '_' . $option["code"] . '")[0].onclick(); // trigger any onclick event handler    
-                                                                          }      
+                                                                              
+                                                                          // not needed  
+                                                                          //if ($("#' . $id . '_' . $option["code"] . '")[0]) {    
+                                                                          //  $("#' . $id . '_' . $option["code"] . '")[0].onclick(); // trigger any onclick event handler    
+                                                                          //}      
                                                                           e.stopPropagation();  
 
                                                                           });

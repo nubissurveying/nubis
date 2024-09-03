@@ -41,6 +41,7 @@ define('SURVEY_COMPONENT_SETTING', 4);
 define('SURVEY_COMPONENT_FILL', 5);
 define('SURVEY_COMPONENT_INLINEFIELDS', 6);
 define('SURVEY_COMPONENT_ROUTING', 7);
+define('SURVEY_COMPONENT_GROUP', 8);
 
 /* basic engine*/
 define('ACTION_ENTRY', 1);
@@ -75,6 +76,7 @@ define('POST_PARAM_STATEID', 'stateid');
 define('POST_PARAM_PARADATA', 'para');
 define('POST_PARAM_DISPLAYED', 'displayed');
 define('POST_PARAM_LANGUAGE', 'language');
+define('POST_PARAM_GROUP', 'groupname');
 define('POST_PARAM_TEMPLATE', 'template');
 define('POST_PARAM_DEFAULT_LANGUAGE', 'defaultlanguage');
 define('POST_PARAM_DEFAULT_MODE', 'defaultmode');
@@ -104,6 +106,7 @@ define('POST_PARAM_WINDOW_SWITCH', 'ws');
 define('POST_PARAM_ERROR_SHOWN', 'errorshown');
 define('POST_PARAM_ERROR_TYPE_SHOWN', 'es');
 define('POST_PARAM_EXECUTION_MODE', 'executionmode');
+define('POST_PARAM_SYSTEM_KEY', 'sk');
 
 define('SESSION_PARAM_VARIABLES', "variables");
 define('SESSION_PARAM_GROUP', 'group');
@@ -606,6 +609,9 @@ define('SETTING_ENUMERATED_LABEL', 'enumeratedlabel');
 define('SETTING_ENUMERATED_CLICK_LABEL', 'enumeratedclicklabel');
 define('SETTING_ENUMERATED_RANDOMIZER', 'enumeratedrandomizer');
 define('SETTING_ENUMERATED_COLUMNS', 'enumeratedcolumns');
+define('SETTING_SETOFENUMERATED_RANKING', 'setofenumeratedranking');
+define('SETOFENUMERATED_RANKING_YES', 1);
+define('SETOFENUMERATED_RANKING_NO', 2);
 define('ENUMERATED_LABEL_LABEL_ONLY', 1);
 define('ENUMERATED_LABEL_LABEL_CODE', 2);
 define('ENUMERATED_LABEL_LABEL_CODE_VALUELABEL', 3);
@@ -957,6 +963,7 @@ define('PLACEHOLDER_INLINE_MAXIMUM_REQUIRED', '$maximumrequired$');
 define('PLACEHOLDER_INLINE_EXACT_REQUIRED', '$exactrequired$');
 define('PLACEHOLDER_ENUMERATED_OPTION', '$option');
 define('PLACEHOLDER_ENUMERATED_TEXT', '$text');
+define('PLACEHOLDER_ENUMERATED_CODE', '$code');
 define('PLACEHOLDER_ERROR_ANSWER', '#answer');
 define('PLACEHOLDER_ERROR_ANSWER_VALUE', '#answer_value');
 
@@ -1303,12 +1310,14 @@ define('RANK_COLUMN_ONE', 1);
 define('RANK_COLUMN_TWO', 2);
 define('SLIDER_PRESELECTION_YES', 1);
 define('SLIDER_PRESELECTION_NO', 2);
+define('MULTI_QUESTION_YES', 1);
+define('MULTI_QUESTION_NO', 2);
 
 
 define('ERROR_PLACEMENT_WITH_QUESTION', 1);
 define('ERROR_PLACEMENT_AT_TOP', 2);
 define('ERROR_PLACEMENT_AT_BOTTOM', 3);
-
+define('ERROR_PLACEMENT_WITH_QUESTION_TOOLTIP', 4);
 
 /* translation */
 
@@ -1362,7 +1371,8 @@ define('STATA_DATAFORMAT_DOUBLE', 255);
 /* survey interview type */
 define('PANEL_HOUSEHOLD', 1);
 define('PANEL_RESPONDENT', 2);
-
+define('PANEL_TRACKING_YES', 1);
+define('PANEL_TRACKING_NO', 2);
 
 /* user types */
 define('USER_INTERVIEWER', 0);
@@ -1436,7 +1446,14 @@ define('CONFIGURATION_ENCRYPTION_REMARK', "remark");
 define('CONFIGURATION_ENCRYPTION_SYSADMIN', "sysadmin");
 define('CONFIGURATION_ENCRYPTION_CONTACTREMARK', "contactremark");
 define('CONFIGURATION_ENCRYPTION_CONTACTNAME', "contactname");
-define('CONFIGURATION_ENCRYPTION_COMMUNICATION', "communication");
+define('CONFIGURATION_ENCRYPTION_COMMUNICATION_CONTENT', "communicationcontent");
+define('CONFIGURATION_ENCRYPTION_COMMUNICATION_COMPONENT', "communicationcomponent");
+define('CONFIGURATION_ENCRYPTION_COMMUNICATION_ACCESS', "communicationaccess");
+define('CONFIGURATION_ENCRYPTION_COMMUNICATION_UPLOAD', "communicationupload");
+define('CONFIGURATION_ENCRYPTION_COMMUNICATION_AJAX', "communicationajax");
+define('CONFIGURATION_ENCRYPTION_TESTER', "tester");
+define('CONFIGURATION_ENCRYPTION_CALENDAR', "calendar");
+define('CONFIGURATION_ENCRYPTION_PICTURE', "picture");
 define('CONFIGURATION_ENCRYPTION_ACTION_PARAMS', "actionparams");
 define('CONFIGURATION_ENCRYPTION_DIRECT', "direct");
 define('CONFIGURATION_ENCRYPTION_LAB', "lab");
@@ -1457,10 +1474,10 @@ define('CONFIGURATION_SAMPLE_PANEL', "panel");
 define('CONFIGURATION_SAMPLE_TRACKING', "tracking");
 define('CONFIGURATION_SAMPLE_PROXYCODE', "proxycode");
 define('CONFIGURATION_SAMPLE_PROXYCONTACT', "proxycontact");
-define('CONFIGURATION_SAMPLE_INTERVIEWADDRESS', "interviewaddress");
 define('CONFIGURATION_SAMPLE_COMMUNICATION', "communication");
 define('CONFIGURATION_SAMPLE_FILELOCATION', 'filelocation');
 define('CONFIGURATION_SAMPLE_ALLOW_COMMUNICATION', 'allowcommunication');
+define('CONFIGURATION_SAMPLE_ALLOW_UPLOAD', 'allowupload');
 
 define('CONFIGURATION_SESSION', 'session');
 define('CONFIGURATION_SESSION_WARN', 'sessionwarn');

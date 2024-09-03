@@ -491,7 +491,11 @@ class ReverseEnumeratedTableTemplate extends TableTemplate {
                                                                             $("#' . $id . '_' . $option["code"] . '").prop("checked", true);
                                                                           }      
                                                                           $("#' . $id . '_' . $option["code"] . '").change();
-                                                                          $("#' . $id . '_' . $option["code"] . '")[0].onclick(); // trigger any onclick event handler    
+                                                                              
+                                                                          // not needed
+                                                                          //if ($("#' . $id . '_' . $option["code"] . '")[0]) { 
+                                                                          //  $("#' . $id . '_' . $option["code"] . '")[0].onclick(); // trigger any onclick event handler    
+                                                                          //}      
                                                                           e.stopPropagation();  
 
                                                                           });

@@ -1,5 +1,22 @@
 <?php
 
+require_once("../../../constants.php");
+require_once("../../../functions.php");
+require_once("../../../dbConfig.php");
+
+$_SESSION['SYSTEM_ENTRY'] = USCIC_SMS;
+$loaded = dbConfig::load("../../../conf.php");
+require_once("../../../config.php");
+require_once("../../../globals.php");
+
+if (Config::allowUpload() == false) {
+    exit;
+}
+
+if (decryptC($_SESSION[CONFIGURATION_ENCRYPTION_COMMUNICATION_UPLOAD], Config::smsComponentKey()) != Config::uploadAccessKey()) {
+    exit;
+}
+
 function getFiles($labbarcode) {
     global $db;
     $files = array();
@@ -14,7 +31,7 @@ function getFiles($labbarcode) {
 }
 
 function uploadFile($urid, $labbarcode) {
-
+    
     $filesPresent = '';
     $files = getFiles($labbarcode);
     if (sizeof($files) > 0) {
@@ -87,7 +104,7 @@ function uploadFile($urid, $labbarcode) {
     $returnStr .= $filesPresent;
     $returnStr .= '
     <!-- The file upload form used as target for the file upload widget -->
-    <form id="fileupload" action="lab/upload/server/php/index.php?urid=' . $urid . '&labbarcode=' . $labbarcode . '" method="POST" enctype="multipart/form-data">
+    <form id="fileupload" action="lab/upload/server/php/index.php?k=' . $_SESSION[CONFIGURATION_ENCRYPTION_COMMUNICATION_UPLOAD] . '&urid=' . $urid . '&labbarcode=' . $labbarcode . '" method="POST" enctype="multipart/form-data">
         <!-- Redirect browsers with JavaScript disabled to the origin page -->
         
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->

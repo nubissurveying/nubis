@@ -42,6 +42,8 @@ class State extends NubisObject {
     private $language;
     private $mode;
     private $version;
+    private $prefix;
+    private $variables;
 
     function __construct($prim, $suid) {
         $this->primkey = $prim;
@@ -56,6 +58,7 @@ class State extends NubisObject {
         $this->leftoff = 0;
         $this->whileleftoff = 0;
         $this->inlinefields = array();
+        $this->variables = array();
     }
 
     function getLoopString() {
@@ -561,8 +564,7 @@ class State extends NubisObject {
             $variable->setDirty($clean);
 
             /* check for EMPTY */
-
-            if ((!is_array($answer) && strtoupper($answer) == VARIABLE_VALUE_EMPTY) || (is_array($answer) && sizeof($answer) == 0) || (!is_array($answer) && trim($answer) == "" && $answer !== 0)) {
+            if ($answer !== null && ((!is_array($answer) && strtoupper($answer) == VARIABLE_VALUE_EMPTY) || (is_array($answer) && sizeof($answer) == 0) || (!is_array($answer) && trim($answer) == "" && $answer !== 0))) {
                 $answer = null;
             }
 
@@ -593,7 +595,10 @@ class State extends NubisObject {
                 // set of enum/multi-dropdown and answer is for whole set of enum (so not something like q1_1_ := response), then update in-memory option selections
                 else if (($var->getAnswerType() == ANSWER_TYPE_SETOFENUMERATED || $var->getAnswerType() == ANSWER_TYPE_MULTIDROPDOWN) && !contains($variablename, "_")) {
                     $options = $var->getOptions();
-                    $values = explode(SEPARATOR_SETOFENUMERATED, $answer);
+                    $values = array();
+                    if ($answer != "") {
+                        $values = explode(SEPARATOR_SETOFENUMERATED, $answer);
+                    }
                     foreach ($options as $o) {
                         $code = $o["code"];
                         if (isset($this->data[strtoupper($variablename . "_" . $code . "_")])) {
@@ -677,13 +682,12 @@ class State extends NubisObject {
          */
 
         $unique = array();
-
+        $originalname = array();
         foreach ($this->assignments as $as) {
-
             // this ensures we only keep the oldest one
             if (!isset($unique[strtoupper($as["variable"])])) {
-
                 $unique[strtoupper($as["variable"])] = $as["value"];
+                $originalname[strtoupper($as["variable"])] = $as["variable"];
             }
         }
 
@@ -691,13 +695,13 @@ class State extends NubisObject {
 
         /* undo assignments */
         foreach ($unique as $variable => $value) {
-
             if (inArray($variable, $cleanvariables)) {
                 $dirty = DATA_CLEAN;
             } else {
                 $dirty = DATA_DIRTY;
             }
-            $this->setData(strtolower($variable), $value, $dirty);
+            $original = $originalname[$variable];
+            $this->setData($original, $value, $dirty);
         }
 
         return;

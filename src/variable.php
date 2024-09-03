@@ -19,6 +19,7 @@ class Variable {
     private $variabledescriptive;
     private $enumerated;
     private $suid;
+    private $primkey;
     private $language;
     private $mode;
     private $version;
@@ -490,7 +491,7 @@ class Variable {
             } else {
                 $answer = '"' . prepareDatabaseString($ans, $striptags) . '"';
                 if ($key != "") {
-                    $answer = "aes_encrypt('" . prepareDatabaseString($ans, $striptags) . "', '" . $key . "')";
+                    $answer = "aes_encrypt('" . prepareDatabaseString($ans, $striptags) . "', '" . prepareDatabaseString($key) . "')";
                 }
             }
             $queryparams = 'suid, primkey, variablename, answer, dirty, version, language, mode';

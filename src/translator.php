@@ -129,6 +129,10 @@ class Translator {
                     break;
                 case "translator.output.documentation.translation": return $this->showOutputTranslation();
                     break;
+                case "translator.output.documentation.translation.fills": return $this->showOutputTranslationFills();
+                    break;
+                case "translator.output.documentation.translation.assistance": return $this->showOutputTranslationAssistance();
+                    break;
                 case "translator.tools": return $this->showTools();
                     break;
                 case "translator.tools.test": return $this->showTest();
@@ -287,6 +291,16 @@ class Translator {
         $_SESSION['LASTPAGE'] = substr($_SESSION['LASTPAGE'], 0, strripos($_SESSION['LASTPAGE'], "res"));
 
         return $displayTranslator->showTranslateSettingsLayout($content);
+    }
+    
+    function showOutputTranslationFills() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputTranslationFills();
+    }
+
+    function showOutputTranslationAssistance() {
+        $displayOutput = new DisplayOutput();
+        return $displayOutput->showOutputTranslationAssistance();
     }
 
     /* VARIABLE FUNCTIONS */

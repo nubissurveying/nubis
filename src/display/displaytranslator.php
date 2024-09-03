@@ -904,7 +904,6 @@ class DisplayTranslator extends Display {
         $survey = new Survey($_SESSION['SUID']);
         $returnStr = $this->showSettingsHeader($survey, Language::headerTranslateSettingsLayout());
         $returnStr .= $this->getSurveyTopTab($_SESSION['VRFILTERMODE_SURVEY']);
-        $returnStr .= $message;
         $returnStr .= '<form id="editform" method="post">';
         $returnStr .= setSessionParamsPost(array('page' => 'translator.survey.translatesettingslayoutres'));
 

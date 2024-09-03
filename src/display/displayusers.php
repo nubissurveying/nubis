@@ -107,6 +107,7 @@ class DisplayUsers extends DisplaySysAdmin {
     }
 
     function showEditUser($urid, $message = "") {
+        
         $user = new User($urid);
         $returnStr = $this->showSysAdminHeader(Language::messageSMSTitle());
         $returnStr .= '<div id="wrap">';
@@ -145,12 +146,20 @@ class DisplayUsers extends DisplaySysAdmin {
 
         $returnStr .= "<script type='text/javascript'>";
         $returnStr .= '$( document ).ready(function() {
-                                                $("#usertype").change(function (e) {
-                                                    if (this.value == ' . USER_NURSE . ') {
+                            $("#usertype").change(function (e) {
+                                handleType(this.value);
+                            });
+                            
+                            handleType($("#usertype").val());    
+                        });
+                                                
+function handleType(value) {
+
+                                                    if (value == ' . USER_NURSE . ') {
                                                         $("#subtype").show(); 
                                                         $("#subtype2").hide();                                                         
                                                     }   
-                                                    else if (this.value == ' . USER_SYSADMIN . ') {
+                                                    else if (value == ' . USER_SYSADMIN . ') {
                                                         $("#subtype2").show(); 
                                                         $("#subtype").hide(); 
                                                     }
@@ -159,7 +168,7 @@ class DisplayUsers extends DisplaySysAdmin {
                                                         $("#subtype2").hide();
                                                     }
                                                     
-                                                    if (this.value == ' . USER_INTERVIEWER . ' || this.value == ' . USER_CATIINTERVIEWER . ' || this.value == ' . USER_NURSE . ' || this.value == ' . USER_SUPERVISOR . ') {
+                                                    if (value == ' . USER_INTERVIEWER . ' || value == ' . USER_CATIINTERVIEWER . ' || value == ' . USER_NURSE . ' || value == ' . USER_SUPERVISOR . ') {
                                                         $("#super").show();
                                                         $("#accessdiv").hide();
                                                         $("#surveyaccess").hide();
@@ -169,13 +178,17 @@ class DisplayUsers extends DisplaySysAdmin {
                                                         $("#accessdiv").show();
                                                         $("#surveyaccess").show();
                                                     }
-                                                });
-                                                })';
+                                                }  
+                                                          
+
+                        
+                                                
+                        ';
         $returnStr .= "</script>";
 
         if (inArray($user->getUserType(), array(USER_NURSE))) {
             $returnStr .= '<tr id=subtype><td align=top>' . Language::labelUserUserSubType() . '</td><td>';
-            $returnStr .= $this->showDropDown(array(USER_NURSE_MAIN => Language::labelNurseMain(), USER_NURSE_LAB => Language::labelNurseLab(), USER_NURSE_FIELD => Language::labelNurseField(), USER_NURSE_VISION => Language::labelNurseVision()), $user->getUserSubType(), 'usersubtype');
+            $returnStr .= $this->showDropDown(array(USER_NURSE_MAIN => Language::labelNurseMain(), USER_NURSE_LAB => Language::labelNurseLab(), USER_NURSE_FIELD => Language::labelNurseField(), USER_NURSE_VISION => Language::labelNurseVision()), $user->getUserSubType(), 'usersubtypenurse');
             $returnStr .= '</td></tr>';
         } else if (inArray($user->getUserType(), array(USER_SYSADMIN))) {
             $returnStr .= '<tr id=subtype2><td align=top>' . Language::labelUserUserSubType() . '</td><td>';
@@ -183,7 +196,7 @@ class DisplayUsers extends DisplaySysAdmin {
             $returnStr .= '</td></tr>';
         } else {
             $returnStr .= '<tr id=subtype style="display: none;"><td align=top>' . Language::labelUserUserSubType() . '</td><td>';
-            $returnStr .= $this->showDropDown(array(USER_NURSE_MAIN => Language::labelNurseMain(), USER_NURSE_LAB => Language::labelNurseLab(), USER_NURSE_FIELD => Language::labelNurseField(), USER_NURSE_VISION => Language::labelNurseVision()), $user->getUserSubType(), 'usersubtype');
+            $returnStr .= $this->showDropDown(array(USER_NURSE_MAIN => Language::labelNurseMain(), USER_NURSE_LAB => Language::labelNurseLab(), USER_NURSE_FIELD => Language::labelNurseField(), USER_NURSE_VISION => Language::labelNurseVision()), $user->getUserSubType(), 'usersubtypenurse');
             $returnStr .= '</td></tr>';
             $returnStr .= '<tr id=subtype2 style="display: none;"><td align=top>' . Language::labelUserUserSubType() . '</td><td>';
             $returnStr .= $this->showDropDown(array(USER_SYSADMIN_MAIN => Language::labelSysadminMain(), USER_SYSADMIN => Language::labelSysadminAdmin()), $user->getUserSubType(), 'usersubtype');
@@ -192,10 +205,13 @@ class DisplayUsers extends DisplaySysAdmin {
 
         if (inArray($user->getUserType(), array(USER_INTERVIEWER, USER_CATIINTERVIEWER, USER_NURSE, USER_SUPERVISOR))) {
             $returnStr .= '<tr id=super><td>' . Language::labelUserSupervisor() . '</td><td>';
-
             $users = new Users();
             $users = $users->getUsersByType(USER_SUPERVISOR);
-            $returnStr .= $this->displayUsers($users, $user->getSupervisor(), 'uridsel', true);
+            $exclude = "";
+            if ($user->getUserType() == USER_SUPERVISOR) {
+                $exclude = $user->getUrid();
+            }
+            $returnStr .= $this->displayUsers($users, $user->getSupervisor(), 'uridsel', true, $exclude);
             $returnStr .= '</td></tr>';
         }
         $extra = '';
@@ -262,7 +278,7 @@ class DisplayUsers extends DisplaySysAdmin {
             /* available modes */
             $modes = Common::surveyModes();
             $allowedmodes = explode("~", $survey->getAllowedModes());
-            $usermodes = $user->getModes($suid);
+            $usermodes = $user->getModes($suid); 
             foreach ($allowedmodes as $mode) {
                 $returnStr .= "<tr class='modesrow'><td>" . $modes[$mode] . "</td><td>";
                 $returnStr .= $this->displayUserMode(SETTING_USER_MODE . $mode, inArray($mode, $usermodes));
@@ -288,8 +304,10 @@ class DisplayUsers extends DisplaySysAdmin {
         $returnStr = "<select class='selectpicker show-tick' name=" . $name . ">";
         if ($selected) {
             $selected[USER_MODE_YES] = "SELECTED";
+            $selected[USER_MODE_NO] = "";
         } else {
             $selected[USER_MODE_NO] = "SELECTED";
+            $selected[USER_MODE_YES] = "";
         }
         $returnStr .= "<option " . $selected[USER_MODE_YES] . " value=" . USER_MODE_YES . ">" . Language::optionsUserModeYes() . "</option>";
         $returnStr .= "<option " . $selected[USER_MODE_NO] . " value=" . USER_MODE_NO . ">" . Language::optionsUserModeNo() . "</option>";
