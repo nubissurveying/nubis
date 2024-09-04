@@ -456,8 +456,8 @@ class Install {
         <td>' . Language::installLabelPerformanceUseMinify() . '</td>
         <td>
             <select class="selectpicker show-tick" name="performanceminify" />
-            <option selected value="1">' . Language::installLabelYes() . '</option>
-            <option value="2">' . Language::installLabelNo() . '</option>            
+            <option value="1">' . Language::installLabelYes() . '</option>
+            <option selected value="2">' . Language::installLabelNo() . '</option>            
             </td>
         </tr>
         <tr>
