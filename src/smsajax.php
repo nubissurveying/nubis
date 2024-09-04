@@ -239,40 +239,6 @@ class SmsAjax {
         $returnStr .= $displaySysAdmin->showTypes($types);
         return $returnStr;
     }
-
-    function testLog() {
-        $my_file = '/tmp/smsajax.html';
-
-
-        $handle = fopen($my_file, 'w') or die('Cannot open file:  ' . $my_file);
-        $data = 'TO calendar.php!!!' . date('H:i:s') . '<br/>';
-        $data .= var_export($_POST, true);
-        $data .= '<hr>';
-        $data .= var_export($_GET, true);
-        $data .= '<hr>';
-        fwrite($handle, $data);
-
-        /*
-          $data .= loadvar('id');
-          $data .= '<hr>';
-          $data .= loadvar('year');
-          $data .= '<hr>';
-
-          $data .= '<hr>';
-         */
-
-
-        /*
-          ob_start () ;
-          phpinfo () ;
-          $data .= ob_get_contents () ;
-          ob_end_clean () ;
-         */
-
-
-        //fwrite($handle, $data);
-    }
-
 }
 
 ?>
