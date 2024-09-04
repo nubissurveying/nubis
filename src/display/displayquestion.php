@@ -978,7 +978,7 @@ class DisplayQuestionBasic extends Display {
                                     $.ajax({
                                         type: 'POST',
                                         url: 'ajax/index.php',
-                                        data: {k: '" . encryptC(Config::ajaxAccessKey(), Config::smsComponentKey()) . "', p: 'storeremark', ajaxr: '" . $r . "', " . POST_PARAM_REMARK . ": encodeURIComponent(val)},
+                                        data: {p: 'storeremark', ajaxr: '" . $r . "', " . POST_PARAM_REMARK . ": encodeURIComponent(val)},
                                         async: true
                                       });
                                 }
