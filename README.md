@@ -12,9 +12,13 @@ NubiS is a complete data collection tool that has been developed by the team beh
 
 NubiS runs on any server, pc, laptop or netbook as well as on android tablets or smartphones. The NubiS system includes all the traditional modes of data collection like self-administered, face-to-face, and telephone interviewing. NubiS can also collect continuous information from smartphones, tablets or other external devices like accelerometers, GPS devices, blood pressure meters and other biomedical devices. This information can be combined with survey data and for example used to prompt or ask questions to respondents.
 
-NubiS has been extensively used in a wide variety of data collection projects both within and outside of the US. It is the software of choice for the Understanding America Study and has been employed in several large scale longitudinal surveys as well as a variety of other projects (a sample listing can be found <a target="_blank" href="https://cesr.usc.edu/nubis/content/previous-work">here</a>). To see NubiS in action please just click <a target="_blank" href="http://96.127.53.23/demo/survey.html">here</a> to open the demo.
+NubiS has been extensively used in a wide variety of data collection projects both within and outside of the US. It is the software of choice for the Understanding America Study and has been employed in several large scale longitudinal surveys as well as a variety of other projects (a sample listing can be found <a target="_blank" href="https://dornsife.usc.edu/cesr/nubis/#chapter=chapter2">here</a>).
 
-Lastly, please note that NubiS comes bundled with third party software. None of them impose any restrictions on usage EXCEPT FOR Highcharts, which is free to use for academic/non-profit usage only. The following third party software is bundled:
+If you used Nubis in a written analysis, then please include the following acknowledgement in your written work: "This analysis uses data or information collected using the NubiS Survey Software System developed by the Center for Economic and Social Research at the University of Southern California. For more information, please refer to <a target="_blank" href="https://dornsife.usc.edu/cesr/nubis/">https://dornsife.usc.edu/cesr/nubis/</a>.
+
+<hr>
+
+Note that NubiS comes bundled with third party software. None of them impose any restrictions on usage EXCEPT FOR Highcharts, which is free to use for academic/non-profit usage only. The following third party software is bundled:
 <br/><br/>
 <table style="width: 70%; max-width: 70%" class="table table-bordered table-striped">
 <thead><tr><th><b>Name</b></th><th><b>Location</b></th><th><b>License</b></th><th><b>Version</b></th></tr></thead>
@@ -268,7 +272,7 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 <td>MobileDetect</td>
 <td><a target="_blank" href="https://github.com/serbanghita/Mobile-Detect">https://github.com/serbanghita/Mobile-Detect</a></td>
 <td>MIT License (custom)</td>
-<td>2.8.37</td>
+<td>2.8.41</td>
 </tr>
 
 <tr>
@@ -325,6 +329,13 @@ Lastly, please note that NubiS comes bundled with third party software. None of 
 <td><a target="_blank" href="https://github.com/jashkenas/underscore">https://github.com/jashkenas/underscore</a></td>
 <td>Custom, no restrictions (https://github.com/jashkenas/underscore/blob/master/LICENSE)</td>
 <td>Not provided</td>
+</tr>
+
+<tr>
+<td>Wolfcast Browser Detection</td>
+<td><a target="_blank" href="https://github.com/Wolfcast/BrowserDetection">https://github.com/Wolfcast/BrowserDetection</a></td>
+<td>MIT License</td>
+<td>2.9.7</td>
 </tr>
 
 </tbody>
