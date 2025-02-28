@@ -159,6 +159,9 @@ class DataExport {
 
     function getProperty($property) {
         if (isset($this->properties[$property])) {
+            if (is_array($this->properties[$property])) {
+                return $this->properties[$property];
+            }
             return prepareDatabaseString($this->properties[$property]);
         }
     }
