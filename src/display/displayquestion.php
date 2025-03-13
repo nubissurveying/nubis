@@ -1178,7 +1178,7 @@ class DisplayQuestionBasic extends Display {
 
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            sort($arr);
+            //sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -1459,7 +1459,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            sort($arr);
+            //sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -1809,7 +1809,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            sort($arr);
+            //sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -2029,7 +2029,7 @@ class DisplayQuestionBasic extends Display {
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
             if (is_array($arr) && sizeof($arr) > 0) {
-                sort($arr);
+                //sort($arr);
                 $orderedoptions = array();
                 foreach ($arr as $a) {
                     foreach ($options as $option) {
@@ -2271,7 +2271,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            sort($arr);
+            //sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
@@ -2678,7 +2678,7 @@ class DisplayQuestionBasic extends Display {
         $order = $this->engine->getFill($variable, $var, SETTING_ENUMERATED_RANDOMIZER);
         if ($order != "") {
             $arr = $this->engine->getAnswer($order);
-            sort($arr);
+            //sort($arr);
             if (is_array($arr) && sizeof($arr) > 0) {
                 $orderedoptions = array();
                 foreach ($arr as $a) {
