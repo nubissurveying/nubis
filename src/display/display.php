@@ -2891,9 +2891,9 @@ class Display {
         return $returnStr;
     }
 
-    function displaySurveys($name, $id, $current, $ignore = "", $multiple = "", $onchange = "") {
+    function displaySurveys($name, $id, $current, $ignore = "", $multiple = "", $onchange = "", $all = false) {
         $surveys = new Surveys();
-        $surveys = $surveys->getSurveys(false);
+        $surveys = $surveys->getSurveys($all);
         $returnStr = "<select $onchange $multiple class='selectpicker show-tick' name=$name id=$id>";
         $current = explode("~", $current);
         foreach ($surveys as $survey) {
@@ -4178,11 +4178,11 @@ class Display {
                         }
                         else {                            
                             // log keystroke
-                            logParadata("KE:"+event.keyCode+":"+name);
+                            logParadata("KE:"+event.key+":"+name);
                         }
                     }    
                     else {
-                        logParadata("KE:"+event.keyCode+":"+name);
+                        logParadata("KE:"+event.key+":"+name);
                     }        
                 });
                 
@@ -4233,7 +4233,7 @@ class Display {
                     
                     // new value is shorter than old value, assume backspace
                     if (newvalue.length < beforevalue.length) {
-                        var keycode = 8; // backspace
+                        var keycode = "backspace"; // backspace
                         var removed = beforevalue.length - newvalue.length;
                         
                         // log backspace events equal to number of deletions
@@ -4246,13 +4246,13 @@ class Display {
                         
                         // one character added
                         if (diff.length == 1) {
-                            var keycode = diff.charCodeAt(0);
-                            logParadata("KE:"+keycode+":"+name);
+                            var keycode = diff.charAt(0);
+                            logParadata("KE:"+diff+":"+name);
                         }    
                         // multiple characters added (paste)
                         else if (diff.length > 1) {
                             for (cnt = 0; cnt < diff.length; cnt++) {
-                                var keycode = diff.charCodeAt(cnt);
+                                var keycode = diff.charAt(cnt);
                                 logParadata("KE:"+keycode+":"+name);
                             }        
                         }
@@ -5456,6 +5456,8 @@ function inputmaskCallbackError() {
 
         // editor
         // inline survey editing
+        $save = '';
+        $contextmenu = '';
         if ($inline > 1) {
             $returnStr .= '
                 tinymce.init({
@@ -5466,8 +5468,7 @@ function inputmaskCallbackError() {
             if ($inline == 2) {
                 $returnStr .= '
                     valid_elements : "*[*]",';
-            }
-            $save = '';
+            }            
             $contextmenu = 'contextmenu';
             $save = 'save';
             $contextmenu = '';

@@ -218,7 +218,13 @@ function handleType(value) {
         if (inArray($user->getUserType(), array(USER_NURSE, USER_INTERVIEWER, USER_SUPERVISOR, USER_CATIINTERVIEWER))) {
             $extra = "style='display: none;'";
         }
-        $returnStr .= '<tr id="surveyaccess"' . $extra . '><td>' . Language::labelUserSurveyAllowed() . '</td><td>' . $this->displaySurveys(SETTING_USER_SURVEYS . "[]", SETTING_USER_SURVEYS, implode("~", $user->getSurveysAccess()), '', "multiple") . '</td></tr>';
+        
+        // show all surveys to manage which allowed access to if sysadmin and managing other users
+        $all = false;
+        if ($user->getUserType() == USER_SYSADMIN && $user->getUserSubType() == 1) {
+            $all = true;
+        }                
+        $returnStr .= '<tr id="surveyaccess"' . $extra . '><td>' . Language::labelUserSurveyAllowed() . '</td><td>' . $this->displaySurveys(SETTING_USER_SURVEYS . "[]", SETTING_USER_SURVEYS, implode("~", $user->getSurveysAccess()), '', "multiple", "", $all) . '</td></tr>';
 
         $returnStr .= '</table></div>';
         $returnStr .= '<div class="col-md-6">';
