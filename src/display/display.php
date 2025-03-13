@@ -1215,7 +1215,7 @@ class Display {
                        </script>';
         
         // if no value, do this on window load, so the slider is there
-        // bart this is to center tooltip if always showing and no initial value
+        // this is to center tooltip if always showing and no initial value
         //if ($value == "") {
         //    $str .= '$( window ).load(function() {';
         //    $str .= '$(".tooltip").css("left", "50%");';
@@ -1403,7 +1403,7 @@ class Display {
                     $getvalue = 'Math.round(parseFloat($(this).val())/' . $step . ') * ' . $step;
                 }
 
-                // BART: this is to hide handle if not showing value on no selection
+                // this is to hide handle if not showing value on no selection
                 if ($var->getSliderPreSelection() == SLIDER_PRESELECTION_YES) {
                     $extrahide = "";
                 }
@@ -1416,12 +1416,12 @@ class Display {
                                         x.slider(\'setValue\', ' . $getvalue . ');                                        
                                         if ($(this).val() == "") {
                                             $("#' . $id . '").val(""); document.getElementById("' . $id . '").value="";
-                                            //$(".tooltip").css("left", "50%"); // BART: this is to center tooltip if always chosen
+                                            //$(".tooltip").css("left", "50%"); // this is to center tooltip if always chosen
                                             ' . $extrahide . '
                                         }
-                                        //else { // BART: this is to hide handle if not showing initial value
-                                            //$(".min-slider-handle").removeClass(\'hide\'); // BART: this is to hide handle if not showing initial value
-                                        //} // BART: this is to hide handle if not showing initial value
+                                        //else { // this is to hide handle if not showing initial value
+                                            //$(".min-slider-handle").removeClass(\'hide\'); // this is to hide handle if not showing initial value
+                                        //} // this is to hide handle if not showing initial value
                                         $("#' . $id . '_textbox").trigger("slideStopCustom");
                                     });
                                     
