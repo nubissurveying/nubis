@@ -130,17 +130,17 @@ class DisplayTranslator extends Display {
             </ul>
 ';
         $returnStr .= $this->showSearch();
-        
+
         $returnStr .= '
           </div><!--/.nav-collapse -->
         </div>
       </div>
 ';
-        
+
         $returnStr .= "<div id='content'>";
         return $returnStr;
     }
-    
+
     function showSearch() {
         $returnStr = '<form id="searchform" class="navbar-form navbar-right" role="search">
                         <div class="input-group" style="width:250px">'
@@ -222,7 +222,7 @@ class DisplayTranslator extends Display {
             if ($show) {
                 $returnStr .= '<tr><th></th><th width=15px>' . Language::labelTypeEditGeneralStatus() . '</th><th>' . Language::labelTypeEditGeneralName() . '</th><th>' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             } else {
-                $returnStr .= '<tr><th></th><th>' . Language::labelTypeEditGeneralName(). '</th><th>' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
+                $returnStr .= '<tr><th></th><th>' . Language::labelTypeEditGeneralName() . '</th><th>' . Language::labelTypeEditGeneralDescription() . '</th></tr>';
             }
 
             foreach ($surveys as $survey) {
@@ -851,39 +851,44 @@ class DisplayTranslator extends Display {
         $returnStr .= "</div>";
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
+        
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
 
         $returnStr .= "<table width='100%'>";
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceEmptyMessage() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_EMPTY_MESSAGE . '">' . convertHTLMEntities($survey->getEmptyMessage(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageDouble() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_DOUBLE . '">' . convertHTLMEntities($survey->getErrorMessageDouble(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInteger() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INTEGER . '">' . convertHTLMEntities($survey->getErrorMessageInteger(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessagePattern() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_PATTERN . '">' . convertHTLMEntities($survey->getErrorMessagePattern(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinLength() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_LENGTH . '">' . convertHTLMEntities($survey->getErrorMessageMinimumLength(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxLength() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH . '">' . convertHTLMEntities($survey->getErrorMessageMaximumLength(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinWords() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_WORDS . '">' . convertHTLMEntities($survey->getErrorMessageMinimumWords(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxWords() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_WORDS . '">' . convertHTLMEntities($survey->getErrorMessageMaximumWords(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageMinSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectMinimum(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectMaximum(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageExactSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXACT_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectExact(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectInvalidSubset(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INVALID_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectInvalidSet(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageRange() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_RANGE . '">' . convertHTLMEntities($survey->getErrorMessageRange(), ENT_QUOTES) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageMaxCalendar() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR . '">' . convertHTLMEntities($survey->getErrorMessageMaximumCalendar(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceEmptyMessage() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_EMPTY_MESSAGE . '">' . convertHTLMEntities($survey->getEmptyMessage(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageDouble() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_DOUBLE . '">' . convertHTLMEntities($survey->getErrorMessageDouble(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInteger() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INTEGER . '">' . convertHTLMEntities($survey->getErrorMessageInteger(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessagePattern() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_PATTERN . '">' . convertHTLMEntities($survey->getErrorMessagePattern(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinLength() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_LENGTH . '">' . convertHTLMEntities($survey->getErrorMessageMinimumLength(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxLength() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH . '">' . convertHTLMEntities($survey->getErrorMessageMaximumLength(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinWords() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_WORDS . '">' . convertHTLMEntities($survey->getErrorMessageMinimumWords(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxWords() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_WORDS . '">' . convertHTLMEntities($survey->getErrorMessageMaximumWords(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageMinSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectMinimum(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectMaximum(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageExactSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_EXACT_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectExact(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectInvalidSubset(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INVALID_SELECT . '">' . convertHTLMEntities($survey->getErrorMessageSelectInvalidSet(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageRange() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_RANGE . '">' . convertHTLMEntities($survey->getErrorMessageRange(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageMaxCalendar() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR . '">' . convertHTLMEntities($survey->getErrorMessageMaximumCalendar(), ENT_QUOTES) . '</textarea></td></tr>';
 
         /* inline */
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
 
         /* group */
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageExclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceInclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMinimumRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageMinimumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMaximumRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageMaximumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExactRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageExactRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceUniqueRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageUniqueRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageExclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceInclusive() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageInclusive(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMinimumRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageMinimumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMaximumRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageMaximumRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExactRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageExactRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceUniqueRequired() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($survey->getErrorMessageUniqueRequired(), ENT_QUOTES)) . '</textarea></td></tr>';
 
         $returnStr .= '</table></div></div></div></div></div>';
 
@@ -891,8 +896,7 @@ class DisplayTranslator extends Display {
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= '</form>';
@@ -945,25 +949,29 @@ class DisplayTranslator extends Display {
         $returnStr .= "</div>";
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
+        
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
 
         $returnStr .= "<table width='100%'>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $survey->getLabelBackButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $survey->getLabelNextButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $survey->getLabelDKButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $survey->getLabelRFButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $survey->getLabelNAButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $survey->getLabelUpdateButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $survey->getLabelRemarkButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $survey->getLabelRemarkSaveButton()) . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $survey->getLabelCloseButton()) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $survey->getLabelBackButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $survey->getLabelNextButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $survey->getLabelDKButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $survey->getLabelRFButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $survey->getLabelNAButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $survey->getLabelUpdateButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $survey->getLabelRemarkButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $survey->getLabelRemarkSaveButton(), $readonly) . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $survey->getLabelCloseButton(), $readonly) . "</td></tr>";
         $returnStr .= '</table></div></div></div></div></div>';
 
         $user = new User($_SESSION['URID']);
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= "</form>";
@@ -1071,7 +1079,7 @@ class DisplayTranslator extends Display {
                 if ($type->isUsed() == false) {
                     continue;
                 }
-                
+
                 $span = "";
                 if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
                     $status = "glyphicon glyphicon-remove";
@@ -1356,6 +1364,10 @@ class DisplayTranslator extends Display {
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
 
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
         $returnStr .= setSessionParamsPost(array('page' => 'translator.survey.translatetypegeneralres', 'tyd' => $type->getTyd()));
         $returnStr .= '<table width=100%>';
         $returnStr .= '<tr><td>' . Language::labelTypeEditGeneralName() . '</td><td><input disabled type="text" class="form-control" value="' . convertHTLMEntities($type->getName(), ENT_QUOTES) . '"></td></tr>';
@@ -1364,15 +1376,14 @@ class DisplayTranslator extends Display {
         $answertype = $type->getAnswerType();
         $array = array(ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN);
         if (inArray($answertype, $array)) {
-            $returnStr .= '<tr id="categories"><td align=top>' . Language::labelTypeEditGeneralCategories() . '</td><td><textarea style="min-width: 600px; height: 120px;" class="form-control" name="' . SETTING_OPTIONS . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getOptionsText(), ENT_QUOTES)) . '</textarea></td></tr>';
+            $returnStr .= '<tr id="categories"><td align=top>' . Language::labelTypeEditGeneralCategories() . '</td><td><textarea style="min-width: 600px; height: 120px;" class="form-control"' . $readonly . ' name="' . SETTING_OPTIONS . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getOptionsText(), ENT_QUOTES)) . '</textarea></td></tr>';
         }
         $returnStr .= '</table></div></div></div></div></div>';
         $user = new User($_SESSION['URID']);
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= '</form>';
@@ -1428,16 +1439,21 @@ class DisplayTranslator extends Display {
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
 
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
+        
         $returnStr .= "<table width='100%'>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $type->getLabelBackButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $type->getLabelNextButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $type->getLabelDKButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $type->getLabelRFButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $type->getLabelNAButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $type->getLabelUpdateButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $type->getLabelRemarkButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $type->getLabelRemarkSaveButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $type->getLabelCloseButton()) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $type->getLabelBackButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $type->getLabelNextButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $type->getLabelDKButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $type->getLabelRFButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $type->getLabelNAButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $type->getLabelUpdateButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $type->getLabelRemarkButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $type->getLabelRemarkSaveButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $type->getLabelCloseButton(), $readonly) . $helpend . "</td></tr>";
         $returnStr .= '</table></div></div></div></div></div>';
 
         $survey = new Survey($_SESSION['SUID']);
@@ -1445,8 +1461,7 @@ class DisplayTranslator extends Display {
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= "</form>";
@@ -1530,7 +1545,7 @@ class DisplayTranslator extends Display {
                 case ANSWER_TYPE_RANGE:
                 /* fall through */
                 case ANSWER_TYPE_KNOB:
-                /* fall through */    
+                /* fall through */
                 case ANSWER_TYPE_SLIDER:
                     $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageRange() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" readonly rows=2 class="form-control">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageRange(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                     break;
@@ -1549,60 +1564,65 @@ class DisplayTranslator extends Display {
         $returnStr .= "</div>";
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
+        
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
         $returnStr .= '<table width=100%>';
 
         if (inArray($type->getAnswerType(), array(ANSWER_TYPE_STRING, ANSWER_TYPE_INTEGER, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE))) {
-            $returnStr .= '<tr><td style="width: 15%;">' . Language::labelTypeEditAssistancePreText() . '</td><td><input type="text" class="form-control" name="' . SETTING_PRETEXT . '" value="' . convertHTLMEntities($type->getPreText(), ENT_QUOTES) . '"></td></tr>';
-            $returnStr .= '<tr><td style="width: 15%;">' . Language::labelTypeEditAssistancePostText() . '</td><td><input type="text" class="form-control" name="' . SETTING_POSTTEXT . '" value="' . convertHTLMEntities($type->getPostText(), ENT_QUOTES) . '"></td></tr>';
+            $returnStr .= '<tr><td style="width: 15%;">' . Language::labelTypeEditAssistancePreText() . '</td><td><input type="text" class="form-control"' . $readonly . ' name="' . SETTING_PRETEXT . '" value="' . convertHTLMEntities($type->getPreText(), ENT_QUOTES) . '"></td></tr>';
+            $returnStr .= '<tr><td style="width: 15%;">' . Language::labelTypeEditAssistancePostText() . '</td><td><input type="text" class="form-control"' . $readonly . ' name="' . SETTING_POSTTEXT . '" value="' . convertHTLMEntities($type->getPostText(), ENT_QUOTES) . '"></td></tr>';
         }
-        $returnStr .= '<tr><td style="width: 15%;">' . Language::labelTypeEditAssistanceHoverText() . '</td><td><input type="text" class="form-control" name="' . SETTING_HOVERTEXT . '" value="' . convertHTLMEntities($type->getHoverText(), ENT_QUOTES) . '"></td></tr>';
+        $returnStr .= '<tr><td style="width: 15%;">' . Language::labelTypeEditAssistanceHoverText() . '</td><td><input type="text" class="form-control"' . $readonly . ' name="' . SETTING_HOVERTEXT . '" value="' . convertHTLMEntities($type->getHoverText(), ENT_QUOTES) . '"></td></tr>';
 
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceEmptyMessage() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_EMPTY_MESSAGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getEmptyMessage(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceEmptyMessage() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_EMPTY_MESSAGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getEmptyMessage(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
 
         $at = $type->getAnswerType();
         switch ($at) {
             case ANSWER_TYPE_DOUBLE:
-                $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageDouble() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_DOUBLE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageDouble(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageDouble() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_DOUBLE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageDouble(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_INTEGER:
-                $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInteger() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INTEGER . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInteger(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceErrorMessageInteger() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INTEGER . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInteger(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_STRING:
             /* fall through */
             case ANSWER_TYPE_OPEN:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessagePattern() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_PATTERN . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessagePattern(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMinimumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMaximumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMinimumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMaximumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessagePattern() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_PATTERN . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessagePattern(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMinimumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMaximumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMinimumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageMaximumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_ENUMERATED:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_SETOFENUMERATED:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
             /* fall through */
             case ANSWER_TYPE_MULTIDROPDOWN:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectMinimum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectMaximum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageExactSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXACT_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectExact(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectInvalidSubset(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INVALID_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectInvalidSet(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectMinimum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectMaximum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageExactSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_EXACT_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectExact(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectInvalidSubset(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INVALID_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageSelectInvalidSet(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_RANGE:
             /* fall through */
             case ANSWER_TYPE_KNOB:
-                /* fall through */    
+            /* fall through */
             case ANSWER_TYPE_SLIDER:
                 $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageRange() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_RANGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($type->getErrorMessageRange(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
@@ -1616,8 +1636,7 @@ class DisplayTranslator extends Display {
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= '</form>';
@@ -1927,6 +1946,7 @@ class DisplayTranslator extends Display {
         $l = $survey->getDefaultLanguage(getSurveyMode());
         $arr = Language::getLanguagesArray();
         $helpend = '<span class="input-group-addon"><i>' . $message . '</i></span></div>';
+
         if ($l != $language) {
             switchSurveyLanguageTranslator($l);
             $langlabel = $arr[str_replace("_", "", getSurveyLanguagePostFix($l))]['name'];
@@ -1964,9 +1984,14 @@ class DisplayTranslator extends Display {
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
 
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
+
         $returnStr .= '<table width=100%>';
         $returnStr .= '<tr><td width=15%>' . Language::labelTypeEditGeneralVariableName() . '</td><td colspan=2><input disabled type="text" class="form-control" name="' . SETTING_NAME . '" value="' . convertHTLMEntities($var->getName(), ENT_QUOTES) . '"></td></tr>';
-        $returnStr .= '<tr><td align=top>' . Language::labelTypeEditGeneralQuestion() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control" name="' . SETTING_QUESTION . '">' . convertHTLMEntities($var->getQuestion(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td align=top>' . Language::labelTypeEditGeneralQuestion() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control"' . $readonly . ' name="' . SETTING_QUESTION . '">' . convertHTLMEntities($var->getQuestion(), ENT_QUOTES) . '</textarea></td></tr>';
 
         /* categories needed */
         $array = array(ANSWER_TYPE_ENUMERATED, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN);
@@ -1978,7 +2003,7 @@ class DisplayTranslator extends Display {
         }
 
         if (inArray($answertype, $array)) {
-            $returnStr .= '<tr id="categories"><td align=top>' . Language::labelTypeEditGeneralCategories() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control uscic-form-control-admin" name="' . SETTING_OPTIONS . '">' . $this->displayTextSettingValue(convertHTLMEntities($var->getOptionsText(), ENT_QUOTES)) . '</textarea></td></tr>';
+            $returnStr .= '<tr id="categories"><td align=top>' . Language::labelTypeEditGeneralCategories() . '</td><td colspan=2><textarea style="height: 120px;" class="form-control uscic-form-control-admin"' . $readonly . ' name="' . SETTING_OPTIONS . '">' . $this->displayTextSettingValue(convertHTLMEntities($var->getOptionsText(), ENT_QUOTES)) . '</textarea></td></tr>';
         }
 
         $returnStr .= '</table></div></div></div></div></div>';
@@ -1988,8 +2013,7 @@ class DisplayTranslator extends Display {
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= '</form>';
@@ -2045,15 +2069,19 @@ class DisplayTranslator extends Display {
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
 
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
+
         $returnStr .= "<table width='100%'>";
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditFillText() . '</td><td><textarea id="filltext" style="width: 100%;" rows=8 class="form-control" name="' . SETTING_FILLTEXT . '">' . convertHTLMEntities($variable->getFillText(), ENT_QUOTES) . '</textarea></td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditFillText() . '</td><td><textarea id="filltext" style="width: 100%;" rows=8 class="form-control"' . $readonly . ' name="' . SETTING_FILLTEXT . '">' . convertHTLMEntities($variable->getFillText(), ENT_QUOTES) . '</textarea></td></tr>';
         $returnStr .= '</table></div></div></div></div></div>';
         $user = new User($_SESSION['URID']);
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= '</form>';
@@ -2126,16 +2154,21 @@ class DisplayTranslator extends Display {
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
 
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
+
         $returnStr .= "<table width='100%'>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $variable->getLabelBackButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $variable->getLabelNextButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $variable->getLabelDKButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $variable->getLabelRFButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $variable->getLabelNAButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $variable->getLabelUpdateButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $variable->getLabelRemarkButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $variable->getLabelRemarkSaveButton()) . $helpend . "</td></tr>";
-        $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $variable->getLabelCloseButton()) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $variable->getLabelBackButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $variable->getLabelNextButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $variable->getLabelDKButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $variable->getLabelRFButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $variable->getLabelNAButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $variable->getLabelUpdateButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $variable->getLabelRemarkButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $variable->getLabelRemarkSaveButton(), $readonly) . $helpend . "</td></tr>";
+        $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $variable->getLabelCloseButton(), $readonly) . $helpend . "</td></tr>";
         $returnStr .= '</table></div></div></div></div></div>';
 
         $survey = new Survey($_SESSION['SUID']);
@@ -2143,8 +2176,7 @@ class DisplayTranslator extends Display {
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= "</form>";
@@ -2244,7 +2276,7 @@ class DisplayTranslator extends Display {
                 case ANSWER_TYPE_RANGE:
                 /* fall through */
                 case ANSWER_TYPE_KNOB:
-                /* fall through */    
+                /* fall through */
                 case ANSWER_TYPE_SLIDER:
                     $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageRange() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" readonly rows=2 class="form-control">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageRange(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                     break;
@@ -2264,63 +2296,68 @@ class DisplayTranslator extends Display {
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
 
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
+
         $returnStr .= '<table width=100%>';
 
         if (inArray($answertype, array(ANSWER_TYPE_STRING, ANSWER_TYPE_INTEGER, ANSWER_TYPE_RANGE, ANSWER_TYPE_DOUBLE, ANSWER_TYPE_DROPDOWN, ANSWER_TYPE_MULTIDROPDOWN))) {
-            $returnStr .= '<tr><td>' . Language::labelTypeEditAssistancePreText() . '</td><td>' . $helpstart2 . '<input type="text" class="form-control" name="' . SETTING_PRETEXT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getPreText(), ENT_QUOTES)) . '">' . $helpend2 . '</td></tr>';
-            $returnStr .= '<tr><td>' . Language::labelTypeEditAssistancePostText() . '</td><td>' . $helpstart2 . '<input type="text" class="form-control" name="' . SETTING_POSTTEXT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getPostText(), ENT_QUOTES)) . '">' . $helpend2 . '</td></tr>';
+            $returnStr .= '<tr><td>' . Language::labelTypeEditAssistancePreText() . '</td><td>' . $helpstart2 . '<input type="text" class="form-control"' . $readonly . ' name="' . SETTING_PRETEXT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getPreText(), ENT_QUOTES)) . '">' . $helpend2 . '</td></tr>';
+            $returnStr .= '<tr><td>' . Language::labelTypeEditAssistancePostText() . '</td><td>' . $helpstart2 . '<input type="text" class="form-control"' . $readonly . ' name="' . SETTING_POSTTEXT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getPostText(), ENT_QUOTES)) . '">' . $helpend2 . '</td></tr>';
         }
-        $returnStr .= '<tr><td>' . Language::labelTypeEditAssistanceHoverText() . '</td><td>' . $helpstart2 . '<input type="text" class="form-control" name="' . SETTING_HOVERTEXT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getHoverText(), ENT_QUOTES)) . '">' . $helpend2 . '</td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceEmptyMessage() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_EMPTY_MESSAGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getEmptyMessage()), ENT_QUOTES) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td>' . Language::labelTypeEditAssistanceHoverText() . '</td><td>' . $helpstart2 . '<input type="text" class="form-control"' . $readonly . ' name="' . SETTING_HOVERTEXT . '" value="' . $this->displayTextSettingValue(convertHTLMEntities($variable->getHoverText(), ENT_QUOTES)) . '">' . $helpend2 . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelTypeEditAssistanceEmptyMessage() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_EMPTY_MESSAGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getEmptyMessage()), ENT_QUOTES) . '</textarea>' . $helpend . '</td></tr>';
 
         switch ($answertype) {
             case ANSWER_TYPE_DOUBLE:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageDouble() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_DOUBLE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageDouble(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageDouble() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_DOUBLE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageDouble(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_INTEGER:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInteger() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INTEGER . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInteger(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInteger() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INTEGER . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInteger(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_STRING:
             /* fall through */
             case ANSWER_TYPE_OPEN:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessagePattern() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_PATTERN . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessagePattern(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMinimumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMaximumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMinimumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMaximumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessagePattern() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_PATTERN . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessagePattern(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMinimumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxLength() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_LENGTH . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMaximumLength(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMinimumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxWords() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_WORDS . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageMaximumWords(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_ENUMERATED:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_SETOFENUMERATED:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineAnswered() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_ANSWERED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineAnswered(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMinRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineMaxRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInlineExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INLINE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageInlineExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
             /* fall through */
             case ANSWER_TYPE_MULTIDROPDOWN:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectMinimum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectMaximum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageExactSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXACT_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectExact(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectInvalidSubset(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INVALID_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectInvalidSet(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMinSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MINIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectMinimum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectMaximum(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageExactSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_EXACT_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectExact(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSubSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INVALID_SUB_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectInvalidSubset(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageInvalidSelect() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_INVALID_SELECT . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageSelectInvalidSet(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_RANGE:
             /* fall through */
             case ANSWER_TYPE_KNOB:
-                /* fall through */    
+            /* fall through */
             case ANSWER_TYPE_SLIDER:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageRange() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_RANGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageRange(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageRange() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_RANGE . '">' . $this->displayTextSettingValue(convertHTLMEntities($variable->getErrorMessageRange(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
                 break;
             case ANSWER_TYPE_CALENDAR:
-                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxCalendar() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR . '">' . convertHTLMEntities($variable->getErrorMessageMaximumCalendar(), ENT_QUOTES) . '</textarea></td></tr>';
+                $returnStr .= '<tr><td valign=top style="width: 20%;">' . Language::labelTypeEditAssistanceErrorMessageMaxCalendar() . '</td><td><textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_MAXIMUM_CALENDAR . '">' . convertHTLMEntities($variable->getErrorMessageMaximumCalendar(), ENT_QUOTES) . '</textarea></td></tr>';
                 break;
         }
         $returnStr .= '</table></div></div></div></div></div>';
@@ -2604,16 +2641,20 @@ class DisplayTranslator extends Display {
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
         if ($group->getType() != GROUP_SUB) {
+            $readonly = " readonly ";
+            if (inArray(getSurveyLanguage(), $langs)) {
+                $readonly = "";
+            }
             $returnStr .= '<table width=100%>';
-            $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $group->getLabelBackButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $group->getLabelNextButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $group->getLabelDKButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $group->getLabelRFButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $group->getLabelNAButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $group->getLabelUpdateButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $group->getLabelRemarkButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $group->getLabelRemarkSaveButton()) . $helpend . "</td></tr>";
-            $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $group->getLabelCloseButton()) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditBackButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_BACK_BUTTON_LABEL, $group->getLabelBackButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditNextButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NEXT_BUTTON_LABEL, $group->getLabelNextButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditDKButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_DK_BUTTON_LABEL, $group->getLabelDKButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditRFButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_RF_BUTTON_LABEL, $group->getLabelRFButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditNAButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_NA_BUTTON_LABEL, $group->getLabelNAButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditUpdateButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_UPDATE_BUTTON_LABEL, $group->getLabelUpdateButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_BUTTON_LABEL, $group->getLabelRemarkButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditRemarkSaveButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_REMARK_SAVE_BUTTON_LABEL, $group->getLabelRemarkSaveButton(), $readonly) . $helpend . "</td></tr>";
+            $returnStr .= "<tr><td>" . Language::labelTypeEditCloseButton() . "</td><td>" . $helpstart . $this->displayButtonLabel(SETTING_CLOSE_BUTTON_LABEL, $group->getLabelCloseButton(), $readonly) . $helpend . "</td></tr>";
             $returnStr .= '</table></div></div></div></div></div>';
         }
 
@@ -2622,8 +2663,7 @@ class DisplayTranslator extends Display {
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= "</form>";
@@ -2671,13 +2711,18 @@ class DisplayTranslator extends Display {
         $returnStr .= "</div>";
         $returnStr .= '<div class="panel-collapse collapse in" id="collapseTwo" role="tabpanel" labelledby="headingTwo">';
         $returnStr .= "<div class='panel-body'>";
+
+        $readonly = " readonly ";
+        if (inArray(getSurveyLanguage(), $langs)) {
+            $readonly = "";
+        }
         $returnStr .= '<table width=100%>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMinimumRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMaximumRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
-        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceUniqueRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control" name="' . SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageUniqueRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . ' name="' . SETTING_ERROR_MESSAGE_EXCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageExclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceInclusive() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . '  name="' . SETTING_ERROR_MESSAGE_INCLUSIVE . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageInclusive(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMinimumRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . '  name="' . SETTING_ERROR_MESSAGE_MINIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageMinimumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceMaximumRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . '  name="' . SETTING_ERROR_MESSAGE_MAXIMUM_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageMaximumRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceExactRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . '  name="' . SETTING_ERROR_MESSAGE_EXACT_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageExactRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
+        $returnStr .= '<tr><td valign=top style="width: 15%;">' . Language::labelGroupEditAssistanceUniqueRequired() . '</td><td>' . $helpstart . '<textarea style="width: 100%;" rows=2 class="form-control"' . $readonly . '  name="' . SETTING_ERROR_MESSAGE_UNIQUE_REQUIRED . '">' . $this->displayTextSettingValue(convertHTLMEntities($group->getErrorMessageUniqueRequired(), ENT_QUOTES)) . '</textarea>' . $helpend . '</td></tr>';
         $returnStr .= '</table></div></div></div></div></div>';
 
         $survey = new Survey($_SESSION['SUID']);
@@ -2685,8 +2730,7 @@ class DisplayTranslator extends Display {
         $langs = explode("~", $user->getLanguages(getSurvey(), getSurveyMode()));
         if (getSurveyLanguage() != $survey->getDefaultLanguage(getSurveyMode())) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonTranslate() . '"/>';
-        }
-        else if (inArray(getSurveyLanguage(), $langs)) {
+        } else if (inArray(getSurveyLanguage(), $langs)) {
             $returnStr .= '<input type="submit" class="btn btn-default" value="' . Language::buttonEdit() . '"/>';
         }
         $returnStr .= '</form>';

@@ -66,9 +66,9 @@ class BasicEngine extends NubisObject {
     private $stop;
     var $firstform;
     private $externalonly;
-    private $reset;
+    private $reset; 
     var $reloadscreen;
-    var $parentrgid;
+    var $parentrgid; 
 
     function __construct($suid, $primkey, $phpid, $version, $seid, $doState = true, $doContext = true) {
 
@@ -305,7 +305,7 @@ class BasicEngine extends NubisObject {
         return $this->state->getInlineFields();
     }
 
-    function replaceInlineFields($text, $enumid = "", $enumtype = "", $enumvalue = "") {
+    function replaceInlineFields($text, $enumid = "", $enumtype = "", $enumvalue = "", $customtemplate = false) {
         $displaynumbers = $this->getDisplayNumbers();
         $temp = $this->getTemplate();
 
@@ -395,12 +395,15 @@ class BasicEngine extends NubisObject {
                             if (trim($id) == "") {
                                 $id = $varname;
                             }
+                            $cm = $this->display->getCustomTemplateMode();
+                            $this->display->setCustomTemplate($customtemplate);                                
                             if (trim($enumid) != "") {
-                                $legend = "legend_" . str_replace("]", "", str_replace("[", "", $enumid));
-                                $replacetext = $this->display->showAnswer($cnt, $realfield, $variable, $previousdata, true, $enumid . "_" . $enumvalue, $legend);
+                                $legend = "legend_" . str_replace("]", "", str_replace("[", "", $enumid));                                
+                                $replacetext = $this->display->showAnswer($cnt, $realfield, $variable, $previousdata, true, $enumid . "_" . $enumvalue, $legend);                                
                             } else {
                                 $replacetext = $this->display->showAnswer($cnt, $realfield, $variable, $previousdata, true);
                             }
+                            $this->display->setCustomTemplate($cm);
 
                             if (inArray($variable->getAnswerType(), array(ANSWER_TYPE_SETOFENUMERATED, ANSWER_TYPE_MULTIDROPDOWN))) {
                                 $varname .= "[]";
@@ -619,7 +622,7 @@ class BasicEngine extends NubisObject {
 
     function setFillValue($variable) {
         $variable = trim($variable);
-        if ($this->setfillclasses && isset($this->setfillclasses[strtoupper($variable) . getSurveyLanguage() . getSurveyMode()])) {
+        if ($this->setfillclasses && isset($this->setfillclasses[strtoupper($variable) . getSurveyLanguage() . getSurveyMode()])) {// PHP 8 ISSUE
             $setfillclass = $this->loadSetFillClass(CLASS_SETFILL . "_" . $variable, $this->setfillclasses[strtoupper($variable) . getSurveyLanguage() . getSurveyMode()]);
             if ($setfillclass) {
                 // execute fill code
@@ -879,7 +882,17 @@ class BasicEngine extends NubisObject {
 
     function loadPreviousSectionEntryState() {
         global $db;
-        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . prepareDatabaseString($this->getMainSeid()) . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($this->prefix) . '" and displayed="" order by stateid desc limit 0,1');
+        $parentprefix = $this->parentprefix;
+        $prefix = $this->prefix;
+        if ($prefix == "") {
+            $parentprefix = "";
+        }
+        else {            
+            if ($parentprefix != "") {
+                $parentprefix .= ".";
+            }
+        }
+        $result = $db->selectQuery('select stateid, mainseid, seid, prefix from ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString($this->getSuid()) . ' and primkey = "' . prepareDatabaseString($this->primkey) . '" and mainseid=' . prepareDatabaseString($this->getMainSeid()) . ' and seid=' . prepareDatabaseString($this->seid) . ' and prefix="' . prepareDatabaseString($prefix) . '" and parentprefix="' . prepareDatabaseString($parentprefix) . '" and displayed="" order by stateid desc limit 0,1');
         if ($db->getNumberOfRows($result) > 0) {
             $row = $db->getRow($result);
             $state = new State($this->primkey, $this->survey->getSuid());
@@ -997,7 +1010,7 @@ class BasicEngine extends NubisObject {
     }
 
     function setParentPrefix($prefix) {
-        $this->parentprefix = $prefix;
+        $this->parentprefix = $prefix; 
         $this->state->setParentPrefix($prefix);
     }
 
@@ -5184,7 +5197,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString(
                 } else {
                     $fillref = $fill;
 
-                    $tt = $this->getFillValue(INDICATOR_FILL_NOVALUE . $fill);
+                    $tt = $this->getFillValue(INDICATOR_FILL_NOVALUE . $fill); 
                     if ($tt === null) {
                         $tt = "";
                     }
@@ -5219,7 +5232,7 @@ FROM ' . Config::dbSurveyData() . '_states where suid=' . prepareDatabaseString(
                     $filltext = DUMMY_INDICATOR_FILL;
                 } else {
                     $fillref = $fill;
-                    $tt = $this->getDisplayValue($fill, $this->getFillValue($fill));
+                    $tt = $this->getDisplayValue($fill, $this->getFillValue($fill)); 
                     if ($tt === null) {
                         $tt = "";
                     }

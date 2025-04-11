@@ -337,8 +337,10 @@ class Survey extends Component {
         global $db;
         $ids = array();
         $result = $db->selectQuery('select seid from ' . Config::dbSurvey() . '_sections where suid  = ' . prepareDatabaseString($this->getSuid()));
-        while ($row = $db->getRow($result)) {
-            $ids[] = $row["seid"];
+        if ($result && $db->getNumberOfRows($result) > 0) {
+            while ($row = $db->getRow($result)) {
+                $ids[] = $row["seid"];
+            }
         }
         return $ids;
     }

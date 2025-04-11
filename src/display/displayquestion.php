@@ -16,7 +16,7 @@ class DisplayQuestionBasic extends Display {
 
     protected $primkey; // tracks data identifier
     protected $state;
-    protected $errorchecks; // tracks error checks to be used
+    protected $errorchecks; // tracks error checks to be used 
     protected $errormessages; // tracks error messages to be used
     protected $errorcheckmessages; // tracks error messages to be used
     protected $engine;
@@ -38,6 +38,7 @@ class DisplayQuestionBasic extends Display {
     private $ifempty;
     private $extrascripts; // tracks any extra scripts to be added in the footer
     private $externalonly; // tracks variables stored externally only
+    private $customtemplate; // tracks if going to insert answer into a custom template
     var $inlineeditable;
     var $inlineediticon;
     var $progressbarwidth;
@@ -57,6 +58,7 @@ class DisplayQuestionBasic extends Display {
         $this->slidercode = '';
         $this->extrascripts = '';
         $this->assignmentwarnings = array();
+        $this->customtemplate = false;
     }
 
     function getEngine() {
@@ -2967,7 +2969,7 @@ class DisplayQuestionBasic extends Display {
             $extra = "updateNumbers();";
         }
 
-        if ($previousdata != "") {
+        if ($previousdata != "") {// PHP 8 ISSUE
             $previousdata = addslashes($previousdata);
         }
 
@@ -3613,6 +3615,18 @@ $(window).resize(function() {
         /* return result */
         return $returnStr;
     }
+        
+    function getCustomTemplateMode() {
+        return $this->customtemplate;
+    }
+    
+    function isCustomTemplateMode() {
+        return ($this-> getCustomTemplateMode() == true);
+    }    
+    
+    function setCustomTemplate($value) {
+        $this->customtemplate = $value;
+    }
 
     function showAnswer($number, $variable, $var, $previousdata, $inline = false, $enumid = "", $enumlegend = "") {
 
@@ -3740,7 +3754,11 @@ $(window).resize(function() {
 
         if ($inline) {
             $inlineclass = "-inline";
-            $returnStr = "";
+            
+            // keep uscic-answer div if in custom template show answer mode to support error message display
+            if (!$this->isCustomTemplateMode()) {
+                $returnStr = "";
+            }
         }
 
         $language = getSurveyLanguage();
@@ -4402,7 +4420,9 @@ $(window).resize(function() {
                     }
                 }
         }
-        if (!$inline) {
+        
+        // close uscic-answer div if not inline OR (inline and in custom template show answer mode)
+        if (!$inline || ($inline && $this->isCustomTemplateMode())) {
             $returnStr .= "</div>";
         }
         return $returnStr;
@@ -4434,7 +4454,7 @@ $(window).resize(function() {
                 }
             }
 
-            $unmask = "";
+            $unmask = ""; 
             if ($var->isDataInputMask() == false) {
                 $unmask = "data-inputmask-unmask='true'";
             }

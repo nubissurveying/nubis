@@ -1281,7 +1281,7 @@ function isSurveySection($seid) {
 /* string functions */
 
 function convertHTLMEntities($str, $quotes = ENT_QUOTES, $encoding = "UTF-8") {
-    if ($str === null) {
+    if ($str === null) { 
         return null;
     }
     return htmlentities($str, $quotes, $encoding);
@@ -1320,10 +1320,10 @@ function compareLength($a, $b) {
     // the comparison function must return an integer less than, equal to, or greater than zero 
     // if the first argument is considered to be respectively less than, equal to, or greater than the second. 
     if (strlen($a) > strlen($b)) {
-        return 1;
+        return 1; // 
     }
 
-    return -1;
+    return -1; 
 }
 
 // http://stackoverflow.com/questions/834303/php-startswith-and-endswith-functions
@@ -1728,6 +1728,11 @@ function stringSort($str1, $str2, $case = 1) {
 
 function inArray($str, $array, $casesensitive = 1) {
 
+    // no array
+    if ($array === null) {
+        return false;
+    }
+    
     // if searchedfor is null, check in case sensitive version (preg_quote does not like null as search input)
     if ($str === null) {
 	return in_array($str, $array);
@@ -2158,6 +2163,7 @@ function encryptC($text, $salt) {
 }
 
 function decryptC($text, $salt) {
+    //echo '---'.trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
     return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
 }
 */

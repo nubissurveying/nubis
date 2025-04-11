@@ -1121,7 +1121,7 @@ class Display {
             $str .= 'function scrollToError() {
                             var up = 10;
                             var firsterror = $(\'.uscic-help-block\').first();
-                            if (!firsterror) {
+                            if (!firsterror || !firsterror.offset()) {
                                 return;
                             }
                             var scroll = -1;

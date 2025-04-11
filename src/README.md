@@ -14,7 +14,11 @@ NubiS runs on any server, pc, laptop or netbook as well as on android tablets or
 
 NubiS has been extensively used in a wide variety of data collection projects both within and outside of the US. It is the software of choice for the Understanding America Study and has been employed in several large scale longitudinal surveys as well as a variety of other projects (a sample listing can be found <a target="_blank" href="https://dornsife.usc.edu/cesr/nubis/#chapter=chapter2">here</a>).
 
-Lastly, please note that NubiS comes bundled with third party software. None of them impose any restrictions on usage EXCEPT FOR Highcharts, which is free to use for academic/non-profit usage only. The following third party software is bundled:
+If you used Nubis in a written analysis, then please include the following acknowledgement in your written work: "This analysis uses data or information collected using the NubiS Survey Software System developed by the Center for Economic and Social Research at the University of Southern California. For more information, please refer to <a target="_blank" href="https://dornsife.usc.edu/cesr/nubis/">https://dornsife.usc.edu/cesr/nubis/</a>.
+
+<hr>
+
+Note that NubiS comes bundled with third party software. None of them impose any restrictions on usage EXCEPT FOR Highcharts, which is free to use for academic/non-profit usage only. The following third party software is bundled:
 <br/><br/>
 <table style="width: 70%; max-width: 70%" class="table table-bordered table-striped">
 <thead><tr><th><b>Name</b></th><th><b>Location</b></th><th><b>License</b></th><th><b>Version</b></th></tr></thead>

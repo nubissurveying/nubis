@@ -78,6 +78,12 @@ class MultiColumnTableTemplate extends TableTemplate {
             if ($varhead != "") {
                 $vardesc = $this->engine->getVariableDescriptive($varhead);
                 $this->headers = $vardesc->getOptions();
+                
+                // add empty one if not showing question text
+                if ($this->group->isMultiColumnQuestiontext() == false) {
+                    $returnStr .= "<th class='uscic-table-row-cell-header-multi-column uscic-column-hide'></th>";
+                }
+                
                 foreach ($this->headers as $h) {
                     $returnStr .= "<th class='uscic-table-row-cell-header-multi-column'><div class='" . $qa . "'>" . $this->displayobject->applyFormatting($h["label"], $this->group->getHeaderFormatting()) . "</div></th>";
                 }
@@ -121,7 +127,7 @@ class MultiColumnTableTemplate extends TableTemplate {
                         if ($this->group->isMultiColumnQuestiontext() == true) {
                             $returnStr .= "<tr><td id='" . $id . "_questioncolumn_" . $varid . "' class='uscic-table-row-cell-question-multicolumn' " . $cellwidth . ">" . $this->displayobject->showQuestionText($variable, $var, "uscic-question-table-row") . "</td>";
                         } else {
-                            $returnStr .= "<tr>";
+                            $returnStr .= "<tr><td id='" . $id . "_questioncolumn_" . $varid . "' class='uscic-table-row-cell-question-multicolumn uscic-column-hide' " . $cellwidth . ">" . $this->displayobject->showQuestionText($variable, $var, "uscic-question-table-row uscic-column-text-hide") . "</td>";
                         }
                     }
                     $counter++;

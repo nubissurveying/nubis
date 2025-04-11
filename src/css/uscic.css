@@ -1392,6 +1392,13 @@ th.uscic-table-row-cell-header-enumerated {
 }
 
 /* table saw */
+.tablesaw thead tr:first-child th.uscic-column-hide {
+    display: none;
+}
+
+.tablesaw tbody tr td.uscic-column-hide {
+    display: none;
+}
 
 @media (max-width: 39.9375em) {
 
@@ -1428,6 +1435,10 @@ th.uscic-table-row-cell-header-enumerated {
         margin-bottom: 7px;
         margin-top: 7px;
         margin-left: 0%;
+    }
+        
+    .tablesaw tbody tr td.uscic-column-hide {
+        display: table-cell;
     }
 }
 
