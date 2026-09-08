@@ -12,15 +12,10 @@
   ------------------------------------------------------------------------
  */
 require_once("instruction.php");
-
 require_once("phpparser_bootstrap.php");
 
-
 ini_set('memory_limit', Config::compilerMemoryLimit());
-
 ini_set('xdebug.max_nesting_level', 4000);
-
-ini_set("error_reporting", "ALL");
 
 class Compiler {
 
@@ -69,6 +64,9 @@ class Compiler {
     private $ifrgidafter;
     private $sectionname;
     private $extranode;
+    private $realgroups;
+    private $currentfillvariable;
+
 
     function __construct($suid, $version) {
         $this->suid = prepareDatabaseString($suid);
@@ -219,7 +217,7 @@ class Compiler {
                 }
             }
             // last while action, then link back to beginning of while
-            else if ($this->lastwhileaction[end($this->whiles)] == $rgid) {
+            else if (isset($this->lastwhileactions[end($this->whiles)]) && $this->lastwhileactions[end($this->whiles)] == $rgid) {
 
                 // not a group, then link to beginning of while!
                 if (sizeof($this->groups) == 0) {
@@ -333,12 +331,14 @@ class Compiler {
 
                     /* preset trackers */
                     
+                    // BART PHP 8 ISSUE BEGIN
                     $this->looptimes = 1;
                     $this->lasttimesloop = array();
                     $this->lastloopactions = array();
                     $this->loopactions = array();
                     $this->loops = array();
                     $this->groups = array();
+                    $this->realgroups = array();
                     $this->groupsend = array();
                     $this->groupactions = array();
                     $this->instructions = array();
@@ -350,6 +350,7 @@ class Compiler {
                     $this->whilenextrgids = array();
                     $this->doaction_cases = array();
                     $this->actions = array();
+                    // BART PHP 8 ISSUE END
                     
                     $stmts = array();
 
@@ -1359,6 +1360,7 @@ class Compiler {
 
                 /* add rules */
                 
+                // BART PHP 8 ISSUE BEGIN
                 $this->looptimes = 1;
                 $this->lasttimesloop = array();
                 $this->lastloopactions = array();
@@ -1371,10 +1373,12 @@ class Compiler {
                 $this->whilenextrgids = array();
                 $this->lastwhileactions = array();
                 $this->groups = array();
+                $this->realgroups = array();
                 $this->groupsend = array();
                 $this->groupactions = array();
                 $this->messages = array();
-                
+                // BART PHP 8 ISSUE END
+
                 while ($row = $db->getRow($rules)) {
                     $this->instructions[$row["rgid"]] = new RoutingInstruction($this->suid, $this->seid, $row["rgid"], $row["rule"]);
                 }
@@ -1526,6 +1530,7 @@ class Compiler {
 
                     $this->loops = array();
                     $this->groups = array();
+                    $this->realgroups = array();
                     $this->groupsend = array();
                     $this->groupactions = array();
                     $this->instructions = array();
@@ -2919,11 +2924,11 @@ class Compiler {
         }
 
         // last loop action
-        if ($this->lastloopactions[end($this->loops)] == $nextrgid) {
+        if (is_array($this->lastloopactions) && isset($this->lastloopactions[end($this->loops)]) && $this->lastloopactions[end($this->loops)] == $nextrgid) {
             $argsfalse[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($this->loops[sizeof($this->loops) - 1]));
         }
         // last while action
-        else if ($this->lastwhileactions[end($this->whiles)] == $nextrgid) {
+        else if (is_array($this->lastwhileactions) && isset($this->lastwhileactions[end($this->whiles)]) && $this->lastwhileactions[end($this->whiles)] == $nextrgid) {
             $argsfalse[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($this->whiles[sizeof($this->whiles) - 1]));
         }
         // link to next action
@@ -2943,6 +2948,7 @@ class Compiler {
             if ($this->fillclass) {
 
                 // don't link back for fill class or next statement that is itself a loop statement
+                // BART PHP 8 ISSUE BEGIN
                 if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextrgid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextrgid, end($this->loopactions)))) {
                     $nextrgid = 0;
                 }
@@ -2950,6 +2956,7 @@ class Compiler {
                 else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextrgid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextrgid, end($this->whileactions)))) {
                     $nextrgid = 0;
                 }
+                // BART PHP 8 ISSUE END
 
                 if ($nextrgid > 0) {
                     $stmtsfalse[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsfalse));
@@ -2960,6 +2967,7 @@ class Compiler {
             // group!
             else {
                 // don't link back for group to loop begin OR next statement that is itself a loop statement OR next statement that itself is a while statement
+                // BART PHP 8 ISSUE BEGIN
                 if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextrgid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextrgid, end($this->loopactions)))) {
                     $nextrgid = 0;
                 } else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextrgid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextrgid, end($this->whileactions)))) {
@@ -2972,6 +2980,7 @@ class Compiler {
                 } else {
                     $stmtsfalse[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Scalar_String(""));
                 }
+                // BART PHP 8 ISSUE END
             }
         }
 
@@ -2999,7 +3008,7 @@ class Compiler {
         return preg_replace($lookup, $new, $string, $limit);
     }
 
-    function analyzeIf($rule, $print = false) {
+    function analyzeIf($rule, $print = false, $rgid = "") {
         /* multi-line if */
         if (endsWith(strtoupper($rule), ROUTING_THEN) == false) {
             $found = false;
@@ -3403,11 +3412,13 @@ class Compiler {
             if ($this->fillclass) {
 
                 // don't link back for fill class or next statement that is itself a loop statement
+                // BART PHP 8 ISSUE BEGIN
                 if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextfalsergid, end($this->loopactions)))) {
                     $nextfalsergid = 0;
                 } else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextfalsergid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextfalsergid, end($this->whileactions)))) {
                     $nextfalsergid = 0;
                 }
+                // BART PHP 8 ISSUE END
 
                 if ($nextfalsergid > 0) {
                     $stmtsfalse[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array(FUNCTION_DO_ACTION)), $argsfalse));
@@ -3417,6 +3428,7 @@ class Compiler {
             } else {
                 // don't link back for group to loop begin OR next statement that is itself a loop statement OR next statement that is itself a while statement
                 //if ((sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || inArray($nextfalsergid, end($this->groupactions))) { // OLD ONE
+                // BART PHP 8 ISSUE BEGIN
                 if ((is_array($this->loops) && sizeof($this->loops) > 0 && $nextfalsergid == end($this->loops)) || (is_array(end($this->loopactions)) && inArray($nextfalsergid, end($this->loopactions)))) {
                     $nextfalsergid = 0;
                 } else if ((is_array($this->whiles) && sizeof($this->whiles) > 0 && $nextfalsergid == end($this->whiles)) || (is_array(end($this->whileactions)) && inArray($nextfalsergid, end($this->whileactions)))) {
@@ -3429,6 +3441,7 @@ class Compiler {
                 } else {
                     $stmtsfalse[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Scalar_String(""));
                 }
+                // BART PHP 8 ISSUE END
             }
         }
 
@@ -3895,6 +3908,7 @@ class Compiler {
             /* if this is a loop action, then loop statement will link to the next action, so no need to specify anything */
             $args[] = new PHPParser_Node_Arg(new PHPParser_Node_Scalar_LNumber($rgid));
             
+            // BART PHP 8 ISSUE BEGIN
             $whilearr = array();
             if (isset($this->whileactions[end($this->whiles)])) {
                 $whilearr = $this->whileactions[end($this->whiles)];
@@ -3934,6 +3948,7 @@ class Compiler {
             } else {
                 $stmts[] = new PHPParser_Node_Stmt_Return(new PHPParser_Node_Expr_MethodCall(new PHPParser_Node_Expr_Variable(VARIABLE_THIS), new PHPParser_Node_Name(array($function)), array()));
             }
+            // BART PHP 8 ISSUE END
 
             $this->doaction_cases[] = new PHPParser_Node_Stmt_Case(new PHPParser_Node_Scalar_LNumber($rgid), $stmts);
         }
@@ -4196,7 +4211,8 @@ class Compiler {
                 $nextrgid = $this->findNextStatementAfterQuestionInGroup($rgid, $groupendrgid);
 
                 /* we have an action that is not itself a group action */
-   
+
+                // BART PHP 8 ISSUE BEGIN    
                 $grouparr = array();
                 if (isset($this->groupactions[end($this->groups)])) {
                     $grouparr = $this->groupactions[end($this->groups)];
@@ -4228,6 +4244,7 @@ class Compiler {
                 } else {
                     $stmts[] = new PHPParser_Node_Stmt_Return($args[0]);
                 }
+                // BART PHP 8 ISSUE END
                 
             } else {
                 $stmts[] = new PHPParser_Node_Stmt_Return($args[0]);
@@ -4743,7 +4760,7 @@ class Compiler {
         }
 
         $this->whileactions[$rgid] = $whileactions;
-        $this->lastwhileaction[end($this->whiles)] = end($whileactions);
+        $this->lastwhileactions[end($this->whiles)] = end($whileactions);
 
         return $whileactions;
     }
@@ -6864,11 +6881,11 @@ class Compiler {
 
                         // add the action right after end of loop
                         // next one is a question screen
-                        if ($row2["section"] == -1 && $row2["outerlooptimes"] == -1 && $row2["dummy"] == 0) {
+                        if (is_array($row2) && $row2["section"] == -1 && $row2["outerlooptimes"] == -1 && $row2["dummy"] == 0) {
                             $progressbar->addEntry($sectionseid, $sectionrgid, $toadd, $loopstring, $row2["ifrgid"]);
                         }
                         // next one is in a loop itself
-                        else if ($row2["outerlooptimes"] != -1) {
+                        else if (is_array($row2) && $row2["outerlooptimes"] != -1) {
                             $actions = array(); // TODO: WILL THIS WORK WITH NESTED LOOPS???
                             $actions[] = array("ifrgid" => $row2["ifrgid"], "rgid" => $row2["rgid"], "looptimes" => $row2["looptimes"], "outerlooptimes" => $row2["outerlooptimes"], "section" => $row2["section"], "dummy" => $row2["dummy"]);
 
@@ -6882,7 +6899,7 @@ class Compiler {
                             }
 
                             //$this->generateProgressBarLoop($progressbar, $sectionseid, $sectionrgid, $row2["rgid"], $row2["looptimes"], $row2["looptimes"], $row2["outerlooptimes"], $actions, $loopstring);
-                        } else if ($row2["section"] > -1 && $row2["dummy"] == 0) {
+                        } else if (is_array($row2) && $row2["section"] > -1 && $row2["dummy"] == 0) {
                             $this->generateProgressbarSection($progressbar, $sectionseid, $row2["section"], $row2["rgid"], $outerlooptimes, $loopstring);
                         }
                     }
