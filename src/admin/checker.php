@@ -107,7 +107,7 @@ class Checker {
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_SURVEY_RETRIEVAL;
         $t = $var->getAnswerType();
         $_SESSION['PARAMETER_RETRIEVAL'] = PARAMETER_ADMIN_RETRIEVAL;
-        $text = array();// BART PHP 8 ISSUE
+        $text = array();
         
         if (!isset($_SESSION['VRFILTERMODE_VARIABLE'])) {
             $_SESSION['VRFILTERMODE_VARIABLE'] = 0;
@@ -391,7 +391,7 @@ class Checker {
         }
         
         // general   
-        $text = array();// BART PHP 8 ISSUE
+        $text = array();
         if ($_SESSION['VRFILTERMODE_TYPE'] == 0 || $all == true) {
             switch ($t) {
                 case ANSWER_TYPE_ENUMERATED:
@@ -619,7 +619,7 @@ class Checker {
     function checkGroup($group, $all = false) {
 
         // general  
-        $text = array();// BART PHP 8 ISSUE
+        $text = array();
         if (!isset($_SESSION['VRFILTERMODE_GROUP'])) {
             $_SESSION['VRFILTERMODE_GROUP'] = 0;
         }
@@ -713,7 +713,7 @@ class Checker {
 
     function checkSurvey() {
         $survey = new Survey($this->suid);
-        $text = array();// BART PHP 8 ISSUE
+        $text = array();
         $text[] = $var->getPageHeader();
     }
 
